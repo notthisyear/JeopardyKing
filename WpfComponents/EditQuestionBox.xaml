@@ -1,0 +1,364 @@
+﻿<UserControl x:Class="JeopardyKing.WpfComponents.EditQuestionBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+             xmlns:game="clr-namespace:JeopardyKing.GameComponents"
+             xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <Border x:Name="editQuestionBox"
+            DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=.}"
+            Background="{StaticResource BackgroundColorDarkerShade}"
+            Opacity="{Binding Path=EditQuestionOpacityValue}"
+            Width="400"
+            Height="500"
+            Margin="10" 
+            CornerRadius="5">
+        <Border.RenderTransform>
+            <TranslateTransform X="{Binding Path=EditQuestionBoxXValue}" />
+        </Border.RenderTransform>
+
+        <Grid>
+            <Grid.Resources>
+                <ObjectDataProvider x:Key="questionTypeSource"
+                                    MethodName="GetValues"
+                                    ObjectType="{x:Type sys:Enum}">
+                    <ObjectDataProvider.MethodParameters>
+                        <x:Type TypeName="game:QuestionType"/>
+                    </ObjectDataProvider.MethodParameters>
+                </ObjectDataProvider>
+                <Storyboard x:Key="animateOpacityToZeroPointEight"
+                            PresentationOptions:Freeze="True">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                        <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="0.8" />
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+                <Storyboard x:Key="animateOpacityToZero"
+                            PresentationOptions:Freeze="True">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                        <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="0" />
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="35" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="75" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Top row -->
+            <StackPanel x:Name="topRowStackPanel"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Center"
+                        Margin="0,20,0,10">
+                
+                <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                        Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.CategoryName}"
+                        HorizontalAlignment="Center"
+                        FontSize="12"/>
+
+                <Grid x:Name="valueDisplay"
+                      HorizontalAlignment="Center">
+                    <Grid.Style>
+                        <Style TargetType="{x:Type Grid}">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=ValueIsBeingEdited}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <TextBlock FontSize="54"
+                               HorizontalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=valueDisplay, Path=IsMouseOver}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource MainTextDisabledColor}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource valueDisplayConverter}">
+                                <Binding Path="ModeManager.CurrentlySelectedQuestion.Value" />
+                                <Binding Path="ModeManager.CurrentlySelectedQuestion.Currency" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <Button Width="{Binding ElementName=valueDisplay, Path=ActualWidth}"
+                            Background="{StaticResource BackgroundColorDarkerShadeWithOpacity}"
+                            Click="EditValueButtonClicked">
+                        <Button.Content>
+                            <TextBlock Text="&#xE70F;"
+                                       HorizontalAlignment="Center"
+                                       ToolTip="Click to edit question value">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource SymbolButtonStyle}">
+                                        <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
+                                        <Setter Property="FontSize" Value="40" />
+                                        <Setter Property="FontWeight" Value="Regular" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource MainMouseOverColor}" />
+                                                <Setter Property="FontSize" Value="44" />
+                                                <Setter Property="FontWeight" Value="ExtraBold" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button.Content>
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource EmptyButton}">
+                                <Setter Property="Opacity" Value="0" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=valueDisplay, Path=IsMouseOver}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard Storyboard="{StaticResource animateOpacityToZeroPointEight}" />
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <BeginStoryboard Storyboard="{StaticResource animateOpacityToZero}" />
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+                
+                <!-- Edit value box-->
+                <StackPanel Orientation="Vertical">
+                    <TextBox x:Name="editValueBox"
+                            Margin="20,10,20,10"
+                            VerticalContentAlignment="Center"
+                            PreviewKeyDown="KeyPressedEditBox"
+                             FontSize="54"
+                             Width="200">
+                        <TextBox.Text>
+                            <Binding Path="ModeManager.CurrentlySelectedQuestion.Value"
+                                    Mode="TwoWay"
+                                    UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <validation:QuestionValueValidationRule Min="0.0"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                        <TextBox.Style>
+                            <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MainTextBoxStyleBase}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Setter Property="ToolTip" Value="Enter new question value" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=ValueIsBeingEdited}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <Trigger Property="Validation.HasError" Value="true">
+                                        <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)/ErrorContent}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+
+                    </TextBox>
+                    <ComboBox ItemsSource="{Binding Path=CurrencyNames}"
+                                SelectedItem="{Binding Path=SelectedCurrency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ToolTip="Choose question value currency">
+                        <ComboBox.Style>
+                            <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource ComboBoxStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=ValueIsBeingEdited}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
+                </StackPanel>
+            </StackPanel>
+
+            <Separator Grid.Row="1"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2"
+                       Margin="10,0,10,0"/>
+           
+            <!-- Question type box bonus check mark -->
+            <StackPanel Orientation="Horizontal"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Margin="0,10,5,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top">
+
+                <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                           Text="Question type:"
+                           FontStyle="Italic"
+                           Margin="0,3,10,0"/>
+                
+                <ComboBox Style="{StaticResource ComboBoxStyle}"
+                          MinWidth="60"
+                          ItemsSource="{Binding Source={StaticResource questionTypeSource}}"
+                          SelectedItem="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ToolTip="Select question type"/>
+            </StackPanel>
+
+            <!-- Bonus check mark -->
+            <StackPanel Orientation="Horizontal"
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Margin="5,10,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top">
+
+                <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                            Text="Bonus question:"
+                            FontStyle="Italic"
+                            Margin="0,2,10,0"/>
+
+                <CheckBox IsChecked="{Binding ModeManager.CurrentlySelectedQuestion.IsBonus, Mode=TwoWay}"
+                          ToolTip="Check to make this question be a bonus question. A bonus question is worth twice its advertised value."/>
+            </StackPanel>
+
+            <!-- Text type question -->
+            <Grid Margin="10"
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <TextBlock Grid.Row="0"
+                            Style="{StaticResource MainTextBlockStyle}"
+                            Text="Question"
+                            Margin="0,0,0,5"/>
+                <TextBox x:Name="textContentInputBox"
+                         Grid.Row="1"
+                        Style="{StaticResource MainTextBoxStyleBase}"
+                        Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        VerticalAlignment="Stretch"
+                        FontSize="16"
+                        TextWrapping="Wrap"
+                        MinLines="12"
+                         MaxLines="12"
+                        ToolTip="Write question here"/>
+                <TextBlock Grid.Row="1"
+                            Text="Write question here"
+                            FontSize="20"
+                            Padding="20,20,20,20"
+                            FontStyle="Italic"
+                            Foreground="{StaticResource BackgroundColorDarkerShade}"
+                           Opacity="0.5"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=textContentInputBox, Path=Text.Length}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
+            <!-- Multimedia type question -->
+            <Grid Margin="10"
+                Grid.Row="3"
+                Grid.Column="0"
+                Grid.ColumnSpan="2">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <TextBlock Grid.Row="0"
+                            Style="{StaticResource MainTextBlockStyle}"
+                            Text="Question (optional)"
+                            Margin="0,0,0,5"/>
+                <TextBox Grid.Row="1"
+                    Style="{StaticResource MainTextBoxStyleBase}"
+                    Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    VerticalAlignment="Stretch"
+                    FontSize="16"
+                    TextWrapping="Wrap"
+                    MinLines="12"
+                    MaxLines="12"
+                    ToolTip="Write question here. For multimedia questions, text is optional."/>
+                <StackPanel Grid.Row="2"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Margin="0,10,0,0">
+                <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                            Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type, StringFormat={}{0} link:}"
+                           Margin="0,10,0,0"/>
+                    <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                               Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}"
+                               FontStyle="Italic"/>
+                    <Button Style="{StaticResource ButtonPrimaryStyle}"
+                            Content="Choose media..."
+                            ToolTip="Click to select media"
+                            Click="LoadMediaButtonClicked"/>
+
+                </StackPanel>
+            </Grid> 
+
+            <Separator Grid.Row="4"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Margin="10,0,10,0" />
+
+            <!-- Delete button -->
+            <StackPanel Orientation="Horizontal"
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <Button Style="{StaticResource DeleteButtonEditBoxWindow}"
+                        HorizontalAlignment="Center"
+                        Content="Delete question"
+                        ToolTip="Click to delete question"
+                        Click="DeleteButtonClicked"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>
