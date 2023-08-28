@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -106,10 +107,12 @@ namespace JeopardyKing.WpfComponents
             typeof(EditQuestionBox));
 
         #endregion
+
         #region Private fields
         private bool _editQuestionBoxIsToTheLeft;
         private readonly Dictionary<string, CurrencyType> _currencyNameMap;
         private readonly Dictionary<CurrencyType, string> _currencyTypeMap;
+        private Regex r = ExtractVideoIdRegex();
         #endregion
 
         public EditQuestionBox()
@@ -128,7 +131,6 @@ namespace JeopardyKing.WpfComponents
 
         private void SetupCurrencyNameMaps()
         {
-            
             foreach (var t in Enum.GetValues<CurrencyType>())
             {
                 var (attr, _) = t.GetCustomAttributeFromEnum<CurrencyAttribute>();
@@ -147,7 +149,7 @@ namespace JeopardyKing.WpfComponents
             Loaded -= EditQuestionBoxLoaded;
             _editQuestionBoxIsToTheLeft = EditQuestionBoxShouldBeToTheLeft(Application.Current.MainWindow.ActualWidth);
 
-            // FIXME: This is a hack to move the edit box to the rigth initially
+            // FIXME: This is a hack to move the edit box to the right initially
             //        as the mouse is "typically" to the left in the beginning.
             //        We should come up with a better solution to ensure that the
             //        edit question box is in the correct place.
@@ -216,7 +218,7 @@ namespace JeopardyKing.WpfComponents
 
         private void DeleteButtonClicked(object sender, RoutedEventArgs e)
         {
-            PopupWindowModal confirmationDialog = new(Application.Current.MainWindow, "Delete question", x =>
+            PopupWindowModal confirmationDialog = new(Application.Current.MainWindow, "Are you sure?", "Delete question", x =>
             {
                 if (x == ModalWindowButton.OK)
                 {
@@ -248,6 +250,25 @@ namespace JeopardyKing.WpfComponents
             {
                 var fileName = dialog.FileName;
             }
+        }
+
+        private void AddYouTubeLinkButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (ModeManager.CurrentlySelectedQuestion == default)
+                return;
+
+            PopupWindowModal confirmationDialog = new(Application.Current.MainWindow, "Add YouTube link", string.Empty, (response, link) =>
+            {
+                if (response == ModalWindowButton.OK && TryExtractVideoId(link, out var videoId))
+                {
+                    ModeManager.CurrentlySelectedQuestion.IsEmbeddedMedia = false;
+                    ModeManager.CurrentlySelectedQuestion.YouTubeVideoId = link;
+                    ModeManager.CurrentlySelectedQuestion.MultimediaContentLink = videoId;
+                }
+            }, ModeManager.CurrentlySelectedQuestion.IsEmbeddedMedia ?
+            string.Empty : ModeManager.CurrentlySelectedQuestion.YouTubeVideoId,
+            ValidateYouTubeLink);
+            _ = confirmationDialog.ShowDialog();
         }
 
         #region Static methods
@@ -293,6 +314,25 @@ namespace JeopardyKing.WpfComponents
                 QuestionType.Video => "All files (*.*)|*.*",
                 _ => throw new NotSupportedException(),
             };
+
+        private static (bool isValid, string errorMessage) ValidateYouTubeLink(string link)
+        {
+            if (string.IsNullOrEmpty(link))
+                return (false, "YouTube link invalid - input is empty");
+
+            var linkValid = TryExtractVideoId(link, out _);
+            return (linkValid, linkValid ? string.Empty : "YouTube link invalid - could not extract video ID");
+        }
+
+        private static bool TryExtractVideoId(string link, out string videoId)
+        {
+            var m = ExtractVideoIdRegex().Match(link);
+            videoId = m.Success ? m.Value : string.Empty;
+            return m.Success;
+        }
+
+        [GeneratedRegex(@"((?<=(v|V)/)|(?<=(\\?|\\&)v=)|(?<=be/)|(?<=embed/)|(?<=shorts/))([a-zA-Z0-9-_]{5,30})")]
+        private static partial Regex ExtractVideoIdRegex();
         #endregion
     }
 }

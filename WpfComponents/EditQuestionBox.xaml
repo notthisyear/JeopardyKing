@@ -4,7 +4,8 @@
              xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
              xmlns:game="clr-namespace:JeopardyKing.GameComponents"
              xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib">
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf">
 
     <Border x:Name="editQuestionBox"
             DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=.}"
@@ -295,10 +296,12 @@
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20" />
+                    <RowDefinition Height="45" />
+                    <RowDefinition Height="25" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="40" />
                 </Grid.RowDefinitions>
-                
+  
                 <Grid.Style>
                     <Style TargetType="{x:Type Grid}">
                         <Setter Property="Visibility" Value="Visible" />
@@ -309,34 +312,73 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
+                
                 <TextBlock Grid.Row="0"
                             Style="{StaticResource MainTextBlockStyle}"
-                            Text="Question (optional)"
+                            Text="Question text (optional)"
                             Margin="0,0,0,5"/>
+
+                <!-- Multimedia question text -->
                 <TextBox Grid.Row="1"
                     Style="{StaticResource MainTextBoxStyleBase}"
                     Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     VerticalAlignment="Stretch"
                     FontSize="16"
                     TextWrapping="Wrap"
-                    MinLines="12"
-                    MaxLines="12"
+                    MinLines="2"
+                    MaxLines="2"
                     ToolTip="Write question here. For multimedia questions, text is optional."/>
-                <StackPanel Grid.Row="2"
+
+
+                <TextBlock Grid.Row="2"
+                            Style="{StaticResource MainTextBlockStyle}"
+                            Text="Preview"
+                            Margin="0,5,0,0"/>
+                
+                <!-- Multimedia preview -->
+                <!--<wpf:ChromiumWebBrowser Grid.Row="1"
+                                    x:Name="browser"
+                                    Address="https://www.youtube.com/embed/1UOVLdPslmo?autoplay=1&amp;controls=0" />-->
+
+               
+                <StackPanel Grid.Row="4"
                             VerticalAlignment="Center"
                             Orientation="Horizontal"
                             Margin="0,10,0,0">
-                <TextBlock Style="{StaticResource MainTextBlockStyle}"
-                            Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type, StringFormat={}{0} link:}"
-                           Margin="0,10,0,0"/>
                     <TextBlock Style="{StaticResource MainTextBlockStyle}"
-                               Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}"
-                               FontStyle="Italic"/>
+                                Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type, StringFormat={}{0} link:}"
+                                Margin="0,10,0,0"/>
+
+                    <TextBlock Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}"
+                               FontStyle="Italic"
+                               Margin="10,10,10,0">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    
                     <Button Style="{StaticResource ButtonPrimaryStyle}"
                             Content="Choose media..."
-                            ToolTip="Click to select media"
+                            ToolTip="Click to select media on disk"
                             Click="LoadMediaButtonClicked"/>
 
+                    <Button Content="Add YouTube link..."
+                            ToolTip="Click to add YouTube link"
+                            Click="AddYouTubeLinkButtonClicked">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    
                 </StackPanel>
             </Grid> 
 

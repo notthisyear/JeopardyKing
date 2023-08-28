@@ -2,6 +2,8 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using CefSharp;
+using CefSharp.Wpf;
 
 namespace JeopardyKing
 {
@@ -15,6 +17,10 @@ namespace JeopardyKing
                 => ShowUnhandledExceptionDialog(e.Exception, "Dispatcher.UnhandledException");
             TaskScheduler.UnobservedTaskException += (s, e)
                 => ShowUnhandledExceptionDialog(e.Exception, "TaskScheduler.UnobservedTaskException");
+
+            var settings = new CefSettings();
+            settings.CefCommandLineArgs["autoplay-policy"] = "no-user-gesture-required";
+            Cef.Initialize(settings, true, browserProcessHandler: null);
         }
 
         private static void ShowUnhandledExceptionDialog(Exception e, string source)

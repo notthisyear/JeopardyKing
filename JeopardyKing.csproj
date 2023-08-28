@@ -6,8 +6,12 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <Platforms>x64</Platforms>
+    <UseCurrentRuntimeIdentifier Condition="'$(UseCurrentRuntimeIdentifier)' == ''">true</UseCurrentRuntimeIdentifier>
+    <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <EditorConfigFiles Remove="D:\programming\vs\JeopardyKing\.editorconfig" />
   </ItemGroup>
@@ -30,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="116.0.150" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />

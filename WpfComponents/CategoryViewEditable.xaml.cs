@@ -54,7 +54,7 @@ namespace JeopardyKing.WpfComponents
 
         private void DeleteButtonClicked(object sender, RoutedEventArgs e)
         {
-            PopupWindowModal confirmationDialog = new(Application.Current.MainWindow, "Delete category", x =>
+            PopupWindowModal confirmationDialog = new(Application.Current.MainWindow, "Are you sure?", "Delete category", x =>
             {
                 if (x == ModalWindowButton.OK)
                 {

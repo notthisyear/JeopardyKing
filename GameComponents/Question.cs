@@ -23,8 +23,10 @@ namespace JeopardyKing.GameComponents
         private QuestionType _type;
         private CurrencyType _currency;
         private bool _isBonus;
+        private bool _isEmbeddedMedia;
         private string _content = string.Empty;
         private string _multimediaContentLink = string.Empty;
+        private string _youTubeVideoId = string.Empty;
         #endregion
 
         public int Id { get; }
@@ -79,10 +81,22 @@ namespace JeopardyKing.GameComponents
             set => SetProperty(ref _content, value);
         }
 
+        public bool IsEmbeddedMedia
+        {
+            get => _isEmbeddedMedia;
+            set => SetProperty(ref _isEmbeddedMedia, value);
+        }
+
         public string MultimediaContentLink
         {
             get => _multimediaContentLink;
             set => SetProperty(ref _multimediaContentLink, value);
+        }
+
+        public string YouTubeVideoId
+        {
+            get => _youTubeVideoId;
+            set => SetProperty(ref _youTubeVideoId, value);
         }
         #endregion
 
