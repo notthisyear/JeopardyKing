@@ -58,10 +58,10 @@ namespace JeopardyKing.WpfComponents
                 if (x == ModalWindowButton.OK)
                 {
                     if (ModeManager.CurrentlySelectedQuestion != default &&
-                    ModeManager.CurrentlySelectedQuestion.CategoryId == Category.Id)
+                        ModeManager.CurrentlySelectedQuestion.CategoryId == Category.Id)
                     {
-                        ModeManager.CurrentlySelectedQuestion.IsBeingEdited = false;
-                        ModeManager.CurrentState = CreateWindowState.NothingSelected;
+                        ModeManager.SetSelectedQuestionEditStatus(false);
+                        ModeManager.DeselectQuestion();
                     }
                     Category.DeleteCategory();
                 }
@@ -81,7 +81,10 @@ namespace JeopardyKing.WpfComponents
         private void KeyPressedEditBox(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter || e.Key == Key.Escape)
+            {
                 CloseEditBox(sender, e);
+                e.Handled = true;
+            }
         }
 
         private void CloseEditBox(object sender, RoutedEventArgs e)
@@ -99,14 +102,13 @@ namespace JeopardyKing.WpfComponents
             if (ModeManager.CurrentState != CreateWindowState.NothingSelected)
                 return;
 
-            ModeManager.CurrentlySelectedQuestion = q;
-            ModeManager.CurrentState = CreateWindowState.QuestionHighlighted;
+            ModeManager.SetQuestionHighlightedStatus(true, q);
         }
 
         private void MouseLeaveQuestionCard(object sender, MouseEventArgs e)
         {
             if (ModeManager.CurrentState != CreateWindowState.EditingQuestion)
-                ModeManager.CurrentState = CreateWindowState.NothingSelected;
+                ModeManager.SetQuestionHighlightedStatus(false);
         }
 
         private void MouseClickQuestionCard(object sender, MouseButtonEventArgs e)
@@ -116,27 +118,23 @@ namespace JeopardyKing.WpfComponents
 
             if (ModeManager.CurrentState != CreateWindowState.EditingQuestion)
             {
-                ModeManager.CurrentState = CreateWindowState.EditingQuestion;
-                q.IsBeingEdited = true;
+                ModeManager.SetSelectedQuestionEditStatus(true);
             }
             else
             {
                 if (ModeManager.CurrentlySelectedQuestion == q)
                 {
-                    q.IsBeingEdited = false;
-                    ModeManager.CurrentState = CreateWindowState.QuestionHighlighted;
+                    ModeManager.SetSelectedQuestionEditStatus(false);
+                    ModeManager.SetQuestionHighlightedStatus(true, q);
                 }
                 else
                 {
                     if (ModeManager.CurrentlySelectedQuestion != default)
-                        ModeManager.CurrentlySelectedQuestion.IsBeingEdited = false;
+                        ModeManager.SetSelectedQuestionEditStatus(false);
 
-
-                    ModeManager.CurrentlySelectedQuestion = q;
                     // Setting it to highlight in between ensures that the edit box moves to the correct place
-                    ModeManager.CurrentState = CreateWindowState.QuestionHighlighted;
-                    ModeManager.CurrentState = CreateWindowState.EditingQuestion;
-                    q.IsBeingEdited = true;
+                    ModeManager.SetQuestionHighlightedStatus(true, q);
+                    ModeManager.SetSelectedQuestionEditStatus(true);
                 }
             }
         }

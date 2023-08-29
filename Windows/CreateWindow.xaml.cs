@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using JeopardyKing.ViewModels;
 using JeopardyKing.WpfComponents;
 
@@ -48,12 +49,17 @@ namespace JeopardyKing.Windows
             }
         }
 
-        private void QuestionDeletionRequest(object sender, RoutedEventArgs e)
+        private void CreateWindowKeyDown(object sender, KeyEventArgs e)
         {
-            var categoryId = ViewModel.ModeManager.CurrentlySelectedQuestion?.CategoryId;
-            var questionId = ViewModel.ModeManager.CurrentlySelectedQuestion?.Id;
-            if (categoryId != null && questionId != null)
-                ViewModel.GameBoard.DeleteQuestion((int)categoryId, (int)questionId);
+            // NOTE: If escape is pressed while the mouse is over the currently edited
+            //       question, the question box will disappear while the question
+            //       remains highlighted. This can perhaps be considered a bug, but
+            //       it's so minor that we'll leave it for now.
+            if (e.Key == Key.Escape && ViewModel.ModeManager.CurrentState == CreateWindowState.EditingQuestion)
+            {
+                ViewModel.ModeManager.SetSelectedQuestionEditStatus(false);
+                ViewModel.ModeManager.SetQuestionHighlightedStatus(false);
+            }
         }
     }
 }

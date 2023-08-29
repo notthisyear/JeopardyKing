@@ -18,13 +18,28 @@ namespace JeopardyKing.Windows
         public CreateWindowState CurrentState
         {
             get => _currentState;
-            set => SetProperty(ref _currentState, value);
+            private set => SetProperty(ref _currentState, value);
         }
 
         public Question? CurrentlySelectedQuestion
         {
             get => _currentlySelectedQuestion;
             set => SetProperty(ref _currentlySelectedQuestion, value);
+        }
+
+        public void SetQuestionHighlightedStatus(bool isBeingHighlighted, Question? q = default)
+        {
+            CurrentState = isBeingHighlighted ? CreateWindowState.QuestionHighlighted : CreateWindowState.NothingSelected;
+            CurrentlySelectedQuestion = q;
+        }
+
+        public void SetSelectedQuestionEditStatus(bool isBeingEdited)
+        {
+            if (CurrentlySelectedQuestion != default)
+                CurrentlySelectedQuestion.IsBeingEdited = isBeingEdited;
+
+            if (isBeingEdited)
+                CurrentState = CreateWindowState.EditingQuestion;
         }
 
         public void DeselectQuestion()

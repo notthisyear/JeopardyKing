@@ -128,7 +128,10 @@ namespace JeopardyKing.WpfComponents
         private void KeyPressedEditBox(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter || e.Key == Key.Escape)
+            {
                 ValueIsBeingEdited = false;
+                e.Handled = true;
+            }
         }
 
         #region Static methods
