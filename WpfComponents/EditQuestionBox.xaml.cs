@@ -1,30 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using JeopardyKing.Common;
-using JeopardyKing.GameComponents;
+using JeopardyKing.ViewModels;
 using JeopardyKing.Windows;
-using Ookii.Dialogs.Wpf;
 
 namespace JeopardyKing.WpfComponents
 {
     public partial class EditQuestionBox : UserControl
     {
         #region Dependency properties
-        public CreateWindowModeManager ModeManager
+        public EditQuestionBoxViewModel ViewModel
         {
-            get => (CreateWindowModeManager)GetValue(ModeManagerProperty);
-            set => SetValue(ModeManagerProperty, value);
+            get => (EditQuestionBoxViewModel)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
         }
-        public static readonly DependencyProperty ModeManagerProperty = DependencyProperty.Register(
-            nameof(ModeManager),
-            typeof(CreateWindowModeManager),
+        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
+            nameof(ViewModel),
+            typeof(EditQuestionBoxViewModel),
             typeof(EditQuestionBox),
             new FrameworkPropertyMetadata(default));
 
@@ -60,88 +55,16 @@ namespace JeopardyKing.WpfComponents
             typeof(bool),
             typeof(EditQuestionBox),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
-
-        public List<string>? CurrencyNames
-        {
-            get => (List<string>)GetValue(s_currencyNames);
-            private set => SetValue(s_currencyNamesKey, value);
-        }
-        private static readonly DependencyPropertyKey s_currencyNamesKey = DependencyProperty.RegisterReadOnly(
-            nameof(CurrencyNames),
-            typeof(List<string>),
-            typeof(EditQuestionBox),
-            new FrameworkPropertyMetadata(default, FrameworkPropertyMetadataOptions.AffectsRender));
-        private static readonly DependencyProperty s_currencyNames = s_currencyNamesKey.DependencyProperty;
-
-        public string SelectedCurrency
-        {
-            get => (string)GetValue(SelectedCurrencyProperty);
-            set => SetValue(SelectedCurrencyProperty, value);
-        }
-        public static readonly DependencyProperty SelectedCurrencyProperty = DependencyProperty.Register(
-            nameof(SelectedCurrency),
-            typeof(string),
-            typeof(EditQuestionBox),
-            new FrameworkPropertyMetadata(string.Empty, SelectedCurrencyChanged));
-
-        private static void SelectedCurrencyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is EditQuestionBox editBox && e.NewValue is string newName)
-            {
-                if (editBox.ModeManager != default && editBox.ModeManager.CurrentlySelectedQuestion != default)
-                    editBox.ModeManager.CurrentlySelectedQuestion.Currency = editBox._currencyNameMap[newName];
-            }
-        }
-        #endregion
-
-        #region Custom events
-        public event RoutedEventHandler QuestionDeletionRequest
-        {
-            add { AddHandler(QuestionDeletionRequestEvent, value); }
-            remove { RemoveHandler(QuestionDeletionRequestEvent, value); }
-        }
-        public static readonly RoutedEvent QuestionDeletionRequestEvent = EventManager.RegisterRoutedEvent(
-            nameof(QuestionDeletionRequest),
-            RoutingStrategy.Bubble,
-            typeof(RoutedEventHandler),
-            typeof(EditQuestionBox));
-
         #endregion
 
         #region Private fields
         private bool _editQuestionBoxIsToTheLeft;
-        private readonly Dictionary<string, CurrencyType> _currencyNameMap;
-        private readonly Dictionary<CurrencyType, string> _currencyTypeMap;
-        private Regex r = ExtractVideoIdRegex();
         #endregion
 
         public EditQuestionBox()
         {
-            CurrencyNames = new();
-            _currencyNameMap = new();
-            _currencyTypeMap = new();
-
-            SetupCurrencyNameMaps();
-
-            SelectedCurrency = CurrencyNames.First();
-
             InitializeComponent();
             Loaded += EditQuestionBoxLoaded;
-        }
-
-        private void SetupCurrencyNameMaps()
-        {
-            foreach (var t in Enum.GetValues<CurrencyType>())
-            {
-                var (attr, _) = t.GetCustomAttributeFromEnum<CurrencyAttribute>();
-                if (attr != default)
-                {
-                    var displayName = $"{attr.Name} ({attr.Code})";
-                    CurrencyNames!.Add(displayName);
-                    _currencyNameMap.Add(displayName, t);
-                    _currencyTypeMap.Add(t, displayName);
-                }
-            }
         }
 
         private void EditQuestionBoxLoaded(object sender, RoutedEventArgs e)
@@ -159,7 +82,7 @@ namespace JeopardyKing.WpfComponents
                                 Application.Current.MainWindow.ActualWidth,
                                 editQuestionBox.ActualWidth,
                                 editQuestionBox.Margin), 0.0));
-            ModeManager.PropertyChanged += ModeManagerPropertyChanged;
+            ViewModel.ModeManager.PropertyChanged += ModeManagerPropertyChanged;
         }
 
         private void ModeManagerPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -167,13 +90,14 @@ namespace JeopardyKing.WpfComponents
             if (sender is not CreateWindowModeManager modeManager)
                 return;
 
-            if (e.PropertyName == nameof(modeManager.CurrentlySelectedQuestion))
+            if (e.PropertyName == nameof(modeManager.CurrentState))
             {
-                if (modeManager.CurrentlySelectedQuestion != null)
-                    SelectedCurrency = _currencyTypeMap[modeManager.CurrentlySelectedQuestion.Currency];
-            }
-            else if (e.PropertyName == nameof(modeManager.CurrentState))
-            {
+                if (modeManager.CurrentState == CreateWindowState.NothingSelected)
+                {
+                    BeginAnimation(EditQuestionOpacityValueProperty, GetEditQuestionOpacityAnimation(0.0, EditQuestionOpacityValue));
+                    return;
+                }
+
                 if (modeManager.CurrentState == CreateWindowState.QuestionHighlighted)
                 {
                     BeginAnimation(EditQuestionOpacityValueProperty, GetEditQuestionOpacityAnimation(0.95, EditQuestionOpacityValue));
@@ -191,10 +115,6 @@ namespace JeopardyKing.WpfComponents
 
                     _editQuestionBoxIsToTheLeft = shouldBeToTheLeft;
                 }
-                else if (modeManager.CurrentState == CreateWindowState.NothingSelected)
-                {
-                    BeginAnimation(EditQuestionOpacityValueProperty, GetEditQuestionOpacityAnimation(0.0, EditQuestionOpacityValue));
-                }
             }
         }
 
@@ -208,67 +128,7 @@ namespace JeopardyKing.WpfComponents
         private void KeyPressedEditBox(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter || e.Key == Key.Escape)
-                CloseEditBox(sender, e);
-        }
-
-        private void CloseEditBox(object sender, RoutedEventArgs e)
-        {
-            ValueIsBeingEdited = false;
-        }
-
-        private void DeleteButtonClicked(object sender, RoutedEventArgs e)
-        {
-            PopupWindowModal confirmationDialog = new(Application.Current.MainWindow, "Are you sure?", "Delete question", x =>
-            {
-                if (x == ModalWindowButton.OK)
-                {
-                    if (ModeManager.CurrentlySelectedQuestion == default)
-                        return;
-
-                    RaiseEvent(new(QuestionDeletionRequestEvent));
-                    ModeManager.CurrentlySelectedQuestion = null;
-                    ModeManager.CurrentState = CreateWindowState.NothingSelected;
-                }
-            },
-           $"You are about to delete a question. Are you sure?");
-            _ = confirmationDialog.ShowDialog();
-        }
-
-        private void LoadMediaButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (ModeManager.CurrentlySelectedQuestion == default)
-                return;
-
-            VistaOpenFileDialog dialog = new()
-            {
-                Title = $"Select {ModeManager.CurrentlySelectedQuestion.Type} resource",
-                Multiselect = false,
-                Filter = GetFileExtensionsForType(ModeManager.CurrentlySelectedQuestion.Type),
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                var fileName = dialog.FileName;
-            }
-        }
-
-        private void AddYouTubeLinkButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (ModeManager.CurrentlySelectedQuestion == default)
-                return;
-
-            PopupWindowModal confirmationDialog = new(Application.Current.MainWindow, "Add YouTube link", string.Empty, (response, link) =>
-            {
-                if (response == ModalWindowButton.OK && TryExtractVideoId(link, out var videoId))
-                {
-                    ModeManager.CurrentlySelectedQuestion.IsEmbeddedMedia = false;
-                    ModeManager.CurrentlySelectedQuestion.YouTubeVideoId = link;
-                    ModeManager.CurrentlySelectedQuestion.MultimediaContentLink = videoId;
-                }
-            }, ModeManager.CurrentlySelectedQuestion.IsEmbeddedMedia ?
-            string.Empty : ModeManager.CurrentlySelectedQuestion.YouTubeVideoId,
-            ValidateYouTubeLink);
-            _ = confirmationDialog.ShowDialog();
+                ValueIsBeingEdited = false;
         }
 
         #region Static methods
@@ -305,34 +165,6 @@ namespace JeopardyKing.WpfComponents
 
         private static double GetEditQuestionBoxLeft(Thickness boxMargin)
                 => boxMargin.Left;
-
-        private static string GetFileExtensionsForType(QuestionType type)
-            => type switch
-            {
-                QuestionType.Image => "PNG images (*.png)|*.png|JPG images (*.jpg)|*.jpg|Bitmap images (*.bmp)|*.bmp",
-                QuestionType.Audio => "All files (*.*)|*.*",
-                QuestionType.Video => "All files (*.*)|*.*",
-                _ => throw new NotSupportedException(),
-            };
-
-        private static (bool isValid, string errorMessage) ValidateYouTubeLink(string link)
-        {
-            if (string.IsNullOrEmpty(link))
-                return (false, "YouTube link invalid - input is empty");
-
-            var linkValid = TryExtractVideoId(link, out _);
-            return (linkValid, linkValid ? string.Empty : "YouTube link invalid - could not extract video ID");
-        }
-
-        private static bool TryExtractVideoId(string link, out string videoId)
-        {
-            var m = ExtractVideoIdRegex().Match(link);
-            videoId = m.Success ? m.Value : string.Empty;
-            return m.Success;
-        }
-
-        [GeneratedRegex(@"((?<=(v|V)/)|(?<=(\\?|\\&)v=)|(?<=be/)|(?<=embed/)|(?<=shorts/))([a-zA-Z0-9-_]{5,30})")]
-        private static partial Regex ExtractVideoIdRegex();
         #endregion
     }
 }

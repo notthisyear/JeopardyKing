@@ -64,7 +64,7 @@
                         Margin="0,20,0,10">
                 
                 <TextBlock Style="{StaticResource MainTextBlockStyle}"
-                        Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.CategoryName}"
+                        Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.CategoryName}"
                         HorizontalAlignment="Center"
                         FontSize="12"/>
 
@@ -94,8 +94,8 @@
                         </TextBlock.Style>
                         <TextBlock.Text>
                             <MultiBinding Converter="{StaticResource valueDisplayConverter}">
-                                <Binding Path="ModeManager.CurrentlySelectedQuestion.Value" />
-                                <Binding Path="ModeManager.CurrentlySelectedQuestion.Currency" />
+                                <Binding Path="ViewModel.ModeManager.CurrentlySelectedQuestion.Value" />
+                                <Binding Path="ViewModel.ModeManager.CurrentlySelectedQuestion.Currency" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>
@@ -149,7 +149,7 @@
                              FontSize="54"
                              Width="200">
                         <TextBox.Text>
-                            <Binding Path="ModeManager.CurrentlySelectedQuestion.Value"
+                            <Binding Path="ViewModel.ModeManager.CurrentlySelectedQuestion.Value"
                                     Mode="TwoWay"
                                     UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
@@ -173,8 +173,8 @@
                         </TextBox.Style>
 
                     </TextBox>
-                    <ComboBox ItemsSource="{Binding Path=CurrencyNames}"
-                                SelectedItem="{Binding Path=SelectedCurrency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    <ComboBox ItemsSource="{Binding Path=ViewModel.CurrencyNames}"
+                                SelectedItem="{Binding Path=ViewModel.SelectedCurrency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="Choose question value currency">
                         <ComboBox.Style>
                             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource ComboBoxStyle}">
@@ -211,7 +211,7 @@
                 <ComboBox Style="{StaticResource ComboBoxStyle}"
                           MinWidth="60"
                           ItemsSource="{Binding Source={StaticResource questionTypeSource}}"
-                          SelectedItem="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           ToolTip="Select question type"/>
             </StackPanel>
 
@@ -228,7 +228,7 @@
                             FontStyle="Italic"
                             Margin="0,2,10,0"/>
 
-                <CheckBox IsChecked="{Binding ModeManager.CurrentlySelectedQuestion.IsBonus, Mode=TwoWay}"
+                <CheckBox IsChecked="{Binding ViewModel.ModeManager.CurrentlySelectedQuestion.IsBonus, Mode=TwoWay}"
                           ToolTip="Check to make this question be a bonus question. A bonus question is worth twice its advertised value."/>
             </StackPanel>
 
@@ -246,7 +246,7 @@
                     <Style TargetType="{x:Type Grid}">
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
+                            <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -259,7 +259,7 @@
                 <TextBox x:Name="textContentInputBox"
                          Grid.Row="1"
                         Style="{StaticResource MainTextBoxStyleBase}"
-                        Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         VerticalAlignment="Stretch"
                         FontSize="16"
                         TextWrapping="Wrap"
@@ -306,7 +306,7 @@
                     <Style TargetType="{x:Type Grid}">
                         <Setter Property="Visibility" Value="Visible" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
+                            <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
                                 <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -320,14 +320,14 @@
 
                 <!-- Multimedia question text -->
                 <TextBox Grid.Row="1"
-                    Style="{StaticResource MainTextBoxStyleBase}"
-                    Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    VerticalAlignment="Stretch"
-                    FontSize="16"
-                    TextWrapping="Wrap"
-                    MinLines="2"
-                    MaxLines="2"
-                    ToolTip="Write question here. For multimedia questions, text is optional."/>
+                        Style="{StaticResource MainTextBoxStyleBase}"
+                        Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        VerticalAlignment="Stretch"
+                        FontSize="16"
+                        TextWrapping="Wrap"
+                        MinLines="2"
+                        MaxLines="2"
+                        ToolTip="Write question here. For multimedia questions, text is optional."/>
 
 
                 <TextBlock Grid.Row="2"
@@ -346,10 +346,10 @@
                             Orientation="Horizontal"
                             Margin="0,10,0,0">
                     <TextBlock Style="{StaticResource MainTextBlockStyle}"
-                                Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type, StringFormat={}{0} link:}"
+                                Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type, StringFormat={}{0} link:}"
                                 Margin="0,10,0,0"/>
 
-                    <TextBlock Text="{Binding Path=ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}"
+                    <TextBlock Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}"
                                FontStyle="Italic"
                                Margin="10,10,10,0">
                         <TextBlock.Style>
@@ -362,16 +362,16 @@
                     <Button Style="{StaticResource ButtonPrimaryStyle}"
                             Content="Choose media..."
                             ToolTip="Click to select media on disk"
-                            Click="LoadMediaButtonClicked"/>
+                            Command="{Binding Path=ViewModel.LoadMediaCommand}" />
 
                     <Button Content="Add YouTube link..."
                             ToolTip="Click to add YouTube link"
-                            Click="AddYouTubeLinkButtonClicked">
+                            Command="{Binding Path=ViewModel.GetYoutubeLinkCommand}">
                         <Button.Style>
                             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}">
+                                    <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}">
                                         <Setter Property="Visibility" Value="Visible" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -399,7 +399,7 @@
                         HorizontalAlignment="Center"
                         Content="Delete question"
                         ToolTip="Click to delete question"
-                        Click="DeleteButtonClicked"/>
+                        Command="{Binding Path=ViewModel.DeleteQuestionCommand}"/>
             </StackPanel>
         </Grid>
     </Border>

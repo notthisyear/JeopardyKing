@@ -63,8 +63,8 @@
                 </ItemsControl>
 
                 <!-- Edit question box -->
-                <components:EditQuestionBox ModeManager="{Binding Path=ViewModel.ModeManager}"
-                                            QuestionDeletionRequest="QuestionDeletionRequest"
+                <!--QuestionDeletionRequest="QuestionDeletionRequest"-->
+                <components:EditQuestionBox ViewModel="{Binding Path=ViewModel.EditQuestionViewModel}"
                                             Grid.Row="1"
                                             HorizontalAlignment="Left"
                                             VerticalAlignment="Top"/>

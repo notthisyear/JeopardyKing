@@ -7,9 +7,11 @@ namespace JeopardyKing.ViewModels
     public class CreateWindowViewModel : ObservableObject
     {
         #region Public properties
-        public Board GameBoard { get; } 
+        public Board GameBoard { get; }
 
         public CreateWindowModeManager ModeManager { get; }
+
+        public EditQuestionBoxViewModel EditQuestionViewModel{ get; }
 
         public string ProgramDescription => "Jeopardy game creator";
         #endregion
@@ -18,6 +20,7 @@ namespace JeopardyKing.ViewModels
         {
             ModeManager = new();
             GameBoard = new(createDefault: true);
+            EditQuestionViewModel = new(this);
         }
 
         public void NotifyWindowClosed()

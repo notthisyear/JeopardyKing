@@ -27,5 +27,10 @@ namespace JeopardyKing.Windows
             set => SetProperty(ref _currentlySelectedQuestion, value);
         }
 
+        public void DeselectQuestion()
+        {
+            CurrentlySelectedQuestion = null;
+            CurrentState = CreateWindowState.NothingSelected;
+        }
     }
 }
