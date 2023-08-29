@@ -85,7 +85,7 @@ namespace JeopardyKing.GameComponents
         {
             lock (_questionsLock)
             {
-               foreach (var q in Questions)
+                foreach (var q in Questions)
                     q.CategoryName = Title;
             }
         }

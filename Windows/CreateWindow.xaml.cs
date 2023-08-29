@@ -23,7 +23,6 @@ namespace JeopardyKing.Windows
 
             MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
             MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
-            
         }
 
         private void TitleBarButtonPressed(object sender, RoutedEventArgs e)

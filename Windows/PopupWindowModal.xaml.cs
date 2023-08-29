@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -120,7 +119,7 @@ namespace JeopardyKing.Windows
 
         private void CancelButtonClick(object sender, RoutedEventArgs e)
             => CloseModalWindow(ModalWindowButton.Cancel);
-        
+
         private void OkButtonClick(object sender, RoutedEventArgs e)
             => CloseModalWindow(ModalWindowButton.OK);
 

@@ -11,7 +11,7 @@ namespace JeopardyKing.ViewModels
 
         public CreateWindowModeManager ModeManager { get; }
 
-        public EditQuestionBoxViewModel EditQuestionViewModel{ get; }
+        public EditQuestionBoxViewModel EditQuestionViewModel { get; }
 
         public string ProgramDescription => "Jeopardy game creator";
         #endregion

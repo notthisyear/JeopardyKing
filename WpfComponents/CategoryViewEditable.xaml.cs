@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using JeopardyKing.GameComponents;
@@ -41,7 +40,7 @@ namespace JeopardyKing.WpfComponents
             typeof(bool),
             typeof(CategoryViewEditable),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
-     
+
         public CategoryViewEditable()
         {
             InitializeComponent();

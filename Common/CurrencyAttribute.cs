@@ -19,7 +19,7 @@ namespace JeopardyKing.Common
 
         public string CultureTag { get; init; }
 
-        public string Code{ get; init; }
+        public string Code { get; init; }
 
         public CurrencyAttribute(string name, string cultureTag, string code)
         {

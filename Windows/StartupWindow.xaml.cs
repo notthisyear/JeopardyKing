@@ -8,7 +8,7 @@ namespace JeopardyKing.Windows
         public StartupWindow()
         {
             InitializeComponent();
-            CreateButtonClick(default, default);
+            CreateButtonClick(this, new());
         }
 
         private void PlayButtonClick(object sender, RoutedEventArgs e)
