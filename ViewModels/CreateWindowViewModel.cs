@@ -13,6 +13,8 @@ namespace JeopardyKing.ViewModels
 
         public EditQuestionBoxViewModel EditQuestionViewModel { get; }
 
+        public CategoryViewEditableViewModel CategoryViewViewModel { get; }
+
         public string ProgramDescription => "Jeopardy game creator";
         #endregion
 
@@ -21,6 +23,7 @@ namespace JeopardyKing.ViewModels
             ModeManager = new();
             GameBoard = new(createDefault: true);
             EditQuestionViewModel = new(this);
+            CategoryViewViewModel = new(ModeManager);
         }
 
         public void NotifyWindowClosed()

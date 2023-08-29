@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Data;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using JeopardyKing.Common;
 
 namespace JeopardyKing.GameComponents
@@ -27,6 +29,16 @@ namespace JeopardyKing.GameComponents
         #endregion
 
         #region Commands
+        private RelayCommand? _addQuestionCommand;
+
+        public ICommand AddQuestionCommand
+        {
+            get
+            {
+                _addQuestionCommand ??= new RelayCommand(AddQuestion);
+                return _addQuestionCommand;
+            }
+        }
         #endregion
 
         private readonly object _questionsLock = new();

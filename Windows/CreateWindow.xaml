@@ -57,7 +57,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <components:CategoryViewEditable Category="{Binding Path=.}"
-                                                             ModeManager="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.ViewModel.ModeManager}"
+                                                             ViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.ViewModel.CategoryViewViewModel}"
                                                              Padding="10,0"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
