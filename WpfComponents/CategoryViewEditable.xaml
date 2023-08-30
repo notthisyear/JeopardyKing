@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:interactive="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:game="clr-namespace:JeopardyKing.GameComponents"
-             xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules">
+             xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules"
+             xmlns:components="clr-namespace:JeopardyKing.WpfComponents">
 
     <Grid DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=.}">
 
@@ -207,10 +208,11 @@
                             <SolidColorBrush Color="{StaticResource MainBackgroundRaw}" Opacity="0"/>
                         </Border.Background>
 
-                        <Grid HorizontalAlignment="Center"
-                              VerticalAlignment="Stretch">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Orientation="Vertical">
 
-                            <Grid.Resources>
+                            <StackPanel.Resources>
                                 <Style x:Key="questionCard" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
                                     <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
                                     <Style.Triggers>
@@ -223,11 +225,130 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Grid.Resources>
+                            </StackPanel.Resources>
 
-                            <TextBlock Grid.Row="1"
-                                       Style="{StaticResource questionCard}"
-                                       VerticalAlignment="Center"
+                            <!-- Icons -->
+                            <StackPanel Orientation="Horizontal"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center">
+                                <components:TextIcon VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"
+                                            ToolTip="Text question">
+                                    <components:TextIcon.Style>
+                                        <Style TargetType="{x:Type components:TextIcon}">
+                                            <Setter Property="StrokeColor" Value="Transparent" />
+                                            <Setter Property="FillColor" Value="White" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                            <Setter Property="ScaleFactor" Value="0.75" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="1" />
+                                                    <Setter Property="ScaleFactor" Value="0.9" />
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding Path=Type}" Value="{x:Static game:QuestionType.Text}">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </components:TextIcon.Style>
+                                </components:TextIcon>
+                                <components:ImageIcon VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    ToolTip="Image question">
+                                    <components:ImageIcon.Style>
+                                        <Style TargetType="{x:Type components:ImageIcon}">
+                                            <Setter Property="StrokeColor" Value="Transparent" />
+                                            <Setter Property="FillColor" Value="White" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                            <Setter Property="ScaleFactor" Value="0.75" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="1" />
+                                                    <Setter Property="ScaleFactor" Value="0.9" />
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding Path=Type}" Value="{x:Static game:QuestionType.Image}">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </components:ImageIcon.Style>
+                                </components:ImageIcon>
+                                <components:AudioIcon VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"
+                                            ToolTip="Audio question">
+                                    <components:AudioIcon.Style>
+                                        <Style TargetType="{x:Type components:AudioIcon}">
+                                            <Setter Property="StrokeColor" Value="Transparent" />
+                                            <Setter Property="FillColor" Value="White" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                            <Setter Property="ScaleFactor" Value="0.75" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="1" />
+                                                    <Setter Property="ScaleFactor" Value="0.9" />
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding Path=Type}" Value="{x:Static game:QuestionType.Audio}">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </components:AudioIcon.Style>
+                                </components:AudioIcon>
+                                <components:VideoIcon VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"
+                                            ToolTip="Video question">
+                                    <components:VideoIcon.Style>
+                                        <Style TargetType="{x:Type components:VideoIcon}">
+                                            <Setter Property="StrokeColor" Value="Transparent" />
+                                            <Setter Property="FillColor" Value="White" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                            <Setter Property="ScaleFactor" Value="0.75" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="1" />
+                                                    <Setter Property="ScaleFactor" Value="0.9" />
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding Path=Type}" Value="{x:Static game:QuestionType.Video}">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </components:VideoIcon.Style>
+                                </components:VideoIcon>
+                                <components:StarIcon VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    ToolTip="Bonus question">
+                                    <components:StarIcon.Style>
+                                        <Style TargetType="{x:Type components:StarIcon}">
+                                            <Setter Property="StrokeColor" Value="White" />
+                                            <Setter Property="FillColor" Value="Transparent" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                            <Setter Property="StrokeThickness" Value="2" />
+                                            <Setter Property="ScaleFactor" Value="0.75" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="StrokeColor" Value="{StaticResource MainWarningColor}" />
+                                                    <Setter Property="FillColor" Value="{StaticResource MainWarningColor}" />
+                                                    <Setter Property="Opacity" Value="1" />
+                                                    <Setter Property="ScaleFactor" Value="0.9" />
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding Path=IsBonus}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </components:StarIcon.Style>
+                                </components:StarIcon>
+                            </StackPanel>
+
+                            <!-- Question value-->
+                            <TextBlock Style="{StaticResource questionCard}"
+                                       VerticalAlignment="Bottom"
                                        HorizontalAlignment="Center"
                                        FontSize="30">
                                 <TextBlock.Text>
@@ -237,7 +358,7 @@
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
-                        </Grid>
+                        </StackPanel>
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
