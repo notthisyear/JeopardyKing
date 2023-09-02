@@ -19,10 +19,7 @@
     <Compile Update="WpfComponents\EditQuestionBox.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="WpfComponents\Icons\StarIcon.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="WpfComponents\Icons\TextIcon.xaml.cs">
+    <Compile Update="WpfComponents\QuestionPropertyIcon.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -42,19 +39,7 @@
     <Page Update="WpfComponents\EditQuestionBox.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="WpfComponents\Icons\VideoIcon.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="WpfComponents\Icons\AudioIcon.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="WpfComponents\Icons\StarIcon.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="WpfComponents\Icons\ImageIcon.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="WpfComponents\Icons\TextIcon.xaml">
+    <Page Update="WpfComponents\QuestionPropertyIcon.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

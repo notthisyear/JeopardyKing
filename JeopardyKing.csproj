@@ -66,16 +66,4 @@
     <Resource Include="Resources\Fonts\Lato-Thin.ttf" />
     <Resource Include="Resources\Fonts\Lato-ThinItalic.ttf" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="WpfComponents\Icons\VideoIcon.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="WpfComponents\Icons\AudioIcon.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="WpfComponents\Icons\ImageIcon.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
 </Project>
