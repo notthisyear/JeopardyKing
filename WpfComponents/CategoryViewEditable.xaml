@@ -234,14 +234,14 @@
                             <StackPanel Orientation="Horizontal"
                                          HorizontalAlignment="Center"
                                          VerticalAlignment="Center">
-                                <components:QuestionPropertyIcon VerticalAlignment="Center"
+                                <components:IconBox VerticalAlignment="Center"
                                                                   HorizontalAlignment="Center">
-                                    <components:QuestionPropertyIcon.Style>
-                                        <Style TargetType="{x:Type components:QuestionPropertyIcon}">
+                                    <components:IconBox.Style>
+                                        <Style TargetType="{x:Type components:IconBox}">
                                             <Setter Property="StrokeColor" Value="Transparent" />
                                             <Setter Property="FillColor" Value="White" />
                                             <Setter Property="Opacity" Value="0.5" />
-                                            <Setter Property="ScaleFactor" Value="0.75" />
+                                            <Setter Property="ScaleFactor" Value="0.8" />
                                             <Setter Property="IconType" Value="{Binding Path=Type, Converter={StaticResource questionToIconTypeConverter}}" />
                                             <Setter Property="ToolTip" Value="" />
                                             <Style.Triggers>
@@ -263,13 +263,13 @@
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
-                                    </components:QuestionPropertyIcon.Style>
-                                </components:QuestionPropertyIcon>
-                                <components:QuestionPropertyIcon VerticalAlignment="Center"
+                                    </components:IconBox.Style>
+                                </components:IconBox>
+                                <components:IconBox VerticalAlignment="Center"
                                                     HorizontalAlignment="Center"
                                                     ToolTip="Bonus question">
-                                    <components:QuestionPropertyIcon.Style>
-                                        <Style TargetType="{x:Type components:QuestionPropertyIcon}">
+                                    <components:IconBox.Style>
+                                        <Style TargetType="{x:Type components:IconBox}">
                                             <Setter Property="StrokeColor" Value="White" />
                                             <Setter Property="FillColor" Value="Transparent" />
                                             <Setter Property="Opacity" Value="0.5" />
@@ -289,8 +289,8 @@
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
-                                    </components:QuestionPropertyIcon.Style>
-                                </components:QuestionPropertyIcon>
+                                    </components:IconBox.Style>
+                                </components:IconBox>
                             </StackPanel>
 
                             <!-- Question value-->
