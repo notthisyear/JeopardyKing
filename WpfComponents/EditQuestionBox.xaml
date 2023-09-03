@@ -2,10 +2,10 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+             xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
              xmlns:game="clr-namespace:JeopardyKing.GameComponents"
              xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf">
+             xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <Border x:Name="editQuestionBox"
             DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=.}"
@@ -335,8 +335,8 @@
                             Margin="0,5,0,0"/>
                 
                 <!-- Multimedia preview -->
-                
-                <Border Grid.Row="3"
+                <Border x:Name="multimediaPreviewBox"
+                        Grid.Row="3"
                         BorderBrush="White"
                         BorderThickness="1"
                         CornerRadius="3">
@@ -370,6 +370,25 @@
                         </TextBlock>
 
                         <!-- Image -->
+                        <Image Source="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}">
+                            <Image.Style>
+                                <Style TargetType="{x:Type Image}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Image}" />
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <MultiDataTrigger.Setters>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger.Setters>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
                         <!-- Audio -->
                         <!-- Video -->
                         <!-- Youtube link preview -->
@@ -382,7 +401,7 @@
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
                                                 <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
-                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.IsEmbeddedMedia}" Value="False" />
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.IsYoutubeLink}" Value="True" />
                                                 <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
                                             </MultiDataTrigger.Conditions>
                                             <MultiDataTrigger.Setters>
@@ -396,6 +415,7 @@
                     </Grid>
                 </Border>
 
+                <!-- Multimedia action buttons -->
                 <Grid Grid.Row="4"
                       Margin="0,10,0,0">
                     
@@ -414,20 +434,20 @@
                                Grid.Column="0"
                                VerticalAlignment="Center"
                                Style="{StaticResource MainTextBlockStyle}"
-                               Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type, StringFormat={}{0} link:}" />
+                               Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type, StringFormat={}{0} source:}" />
                     <TextBlock Grid.Row="0"
                                Grid.Column="1"
                                VerticalAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
                                 <Setter Property="FontStyle" Value="Italic" />
-                                <Setter Property="Text" Value="" />
-                                <Setter Property="ToolTip" Value="" />
+                                <Setter Property="Text" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MediaName, Converter={StaticResource stringShortenerConverter}, ConverterParameter=15}" />
+                                <Setter Property="ToolTip" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
                                             <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
-                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.IsEmbeddedMedia}" Value="False" />
+                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.IsYoutubeLink}" Value="True" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="Text" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.YoutubeVideoId}" />

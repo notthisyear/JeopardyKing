@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.IO;
+using CommunityToolkit.Mvvm.ComponentModel;
 using JeopardyKing.Common;
 
 namespace JeopardyKing.GameComponents
@@ -25,6 +27,8 @@ namespace JeopardyKing.GameComponents
         private bool _isBonus;
 
         private bool _hasMediaLink = false;
+        private string _mediaName = string.Empty;
+        private bool _isYoutubeLink = false;
         private bool _isEmbeddedMedia;
         private string _content = string.Empty;
         private string _multimediaContentLink = string.Empty;
@@ -62,7 +66,16 @@ namespace JeopardyKing.GameComponents
         public QuestionType Type
         {
             get => _type;
-            set => SetProperty(ref _type, value);
+            set
+            {
+                if (value != _type)
+                {
+                    if (HasMediaLink)
+                        ResetAllMediaParameters();
+                    Content = string.Empty;
+                }
+                SetProperty(ref _type, value);
+            }
         }
 
         public CurrencyType Currency
@@ -81,6 +94,12 @@ namespace JeopardyKing.GameComponents
         {
             get => _hasMediaLink;
             private set => SetProperty(ref _hasMediaLink, value);
+        }
+
+        public string MediaName
+        {
+            get => _mediaName;
+            private set => SetProperty(ref _mediaName, value);
         }
 
         public string Content
@@ -105,6 +124,13 @@ namespace JeopardyKing.GameComponents
         {
             get => _youtubeVideoId;
             private set => SetProperty(ref _youtubeVideoId, value);
+        }
+
+        public bool IsYoutubeLink
+        {
+            get => _isYoutubeLink;
+            private set => SetProperty(ref _isYoutubeLink, value);
+
         }
 
         public string OriginalYoutubeUrl { get; private set; } = string.Empty;
@@ -134,13 +160,24 @@ namespace JeopardyKing.GameComponents
             return (minutes, _startVideoAtSeconds - (minutes * 60));
         }
 
+        public void SetImageParameters(string imagePath)
+        {
+            MultimediaContentLink = imagePath;
+            MediaName = Path.GetFileName(imagePath);
+            HasMediaLink = true;
+        }
+
         public void SetYoutubeVideoParameters(string originalUrl, string youtubeVideoId, bool autoplay, bool showControls)
         {
+            if (youtubeVideoId.Equals(YoutubeVideoId, StringComparison.Ordinal))
+                return;
+
             YoutubeVideoId = youtubeVideoId;
             OriginalYoutubeUrl = originalUrl;
             MultimediaContentLink = GetYoutubeVideoUrl(youtubeVideoId, autoplay, showControls, 0);
+            IsYoutubeLink = true;
             HasMediaLink = true;
-            IsEmbeddedMedia = false;
+            _startVideoAtSeconds = 0;
         }
 
         public void SetStartAtForCurrentVideo(int minutes, int seconds)
@@ -161,6 +198,18 @@ namespace JeopardyKing.GameComponents
 
         #endregion
 
+        #region Private methods
+        private void ResetAllMediaParameters()
+        {
+            HasMediaLink = false;
+            MediaName = string.Empty;
+            IsEmbeddedMedia = false;
+            MultimediaContentLink = string.Empty;
+            YoutubeVideoId = string.Empty;
+            IsYoutubeLink = false;
+            OriginalYoutubeUrl = string.Empty;
+        }
+
         private static string GetYoutubeVideoUrl(string videoId, bool autoplay, bool showControls, int startAtSeconds)
             => $"{YoutubeEmbeddedRootUrl}/{videoId}?" +
             $"autoplay={GetValueForBooleanInLink(autoplay)}" +
@@ -169,5 +218,7 @@ namespace JeopardyKing.GameComponents
 
         private static string GetValueForBooleanInLink(bool b)
             => b ? "1" : "0";
+        #endregion
+
     }
 }

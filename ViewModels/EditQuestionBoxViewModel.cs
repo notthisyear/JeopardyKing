@@ -113,9 +113,7 @@ namespace JeopardyKing.ViewModels
                     };
 
                     if (dialog.ShowDialog() == true)
-                    {
-                        var fileName = dialog.FileName;
-                    }
+                        ModeManager.CurrentlySelectedQuestion.SetImageParameters(dialog.FileName);
                 });
                 return _loadMediaCommand;
             }
