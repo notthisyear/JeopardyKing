@@ -5,6 +5,7 @@ namespace JeopardyKing.WpfComponents
     internal enum MenuItemButton
     {
         Save,
+        SaveAs,
         Open,
         AddCategory
     }

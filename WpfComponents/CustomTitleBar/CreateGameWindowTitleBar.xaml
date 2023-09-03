@@ -227,6 +227,7 @@
 
                 <Style x:Key="contentMenuButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource EmptyButton}">
                     <Setter Property="Template" Value="{StaticResource titleBarMenuItemsButtonTemplate}" />
+                    <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
                 </Style>
                 
                 <ControlTemplate x:Key="contextMenuFile" TargetType="{x:Type ContextMenu}">
@@ -244,6 +245,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
                                 <RowDefinition Height="10" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
@@ -254,7 +256,6 @@
                                        Text="&#xE74E;"
                                        FontSize="14"
                                        Opacity="0.8"/>
-
                             <Button Grid.Column="1"
                                     Grid.Row="0"
                                     Content="Save"
@@ -265,22 +266,35 @@
                             <TextBlock Grid.Row="1"
                                        Grid.Column="0" 
                                        Style="{StaticResource SymbolButtonStyle}"
-                                       Text="&#xE8E5;"
+                                       Text="&#xE792;"
                                        FontSize="14"
                                        Opacity="0.8"/>
 
-                            <Button Grid.Column="2"
+                            <Button Grid.Column="1"
                                     Grid.Row="1"
+                                     Content="Save As"
+                                     ToolTip="Click to save game as"
+                                     Click="SaveMenuItemPressed"
+                                     Style="{StaticResource contentMenuButtonStyle}" />
+
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="0" 
+                                       Style="{StaticResource SymbolButtonStyle}"
+                                       Text="&#xE8E5;"
+                                       FontSize="14"
+                                       Opacity="0.8"/>
+                            <Button Grid.Row="2"
+                                    Grid.Column="2"
                                     Content="Open"
                                     ToolTip="Click to open existing game (Ctrl+L)"
                                     Click="OpenMenuItemPressed"
                                     Style="{StaticResource contentMenuButtonStyle}" />
 
-                            <Separator Grid.Row="2"
+                            <Separator Grid.Row="3"
                                        Grid.Column="1" />
                             
                             <Button Grid.Column="1"
-                                    Grid.Row="3"
+                                    Grid.Row="4"
                                     Content="Exit"
                                     ToolTip="Click to exit"
                                     Click="ExitMenuItemPressed"

@@ -166,6 +166,12 @@ namespace JeopardyKing.WpfComponents
             RaiseEvent(eventArgs);
         }
 
+        private void SaveAsMenuItemPressed(object sender, RoutedEventArgs e)
+        {
+            var eventArgs = new MenuItemButtonClickedEventArgs(TitleBarButtonPressedEvent, MenuItemButton.SaveAs);
+            RaiseEvent(eventArgs);
+        }
+
         private void OpenMenuItemPressed(object sender, RoutedEventArgs e)
         {
             var eventArgs = new MenuItemButtonClickedEventArgs(TitleBarButtonPressedEvent, MenuItemButton.Open);
