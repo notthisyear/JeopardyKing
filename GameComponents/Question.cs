@@ -23,10 +23,12 @@ namespace JeopardyKing.GameComponents
         private QuestionType _type;
         private CurrencyType _currency;
         private bool _isBonus;
+
+        private bool _hasMediaLink = false;
         private bool _isEmbeddedMedia;
         private string _content = string.Empty;
         private string _multimediaContentLink = string.Empty;
-        private string _youTubeVideoId = string.Empty;
+        private string _youtubeVideoId = string.Empty;
         #endregion
 
         public int Id { get; }
@@ -75,6 +77,12 @@ namespace JeopardyKing.GameComponents
             set => SetProperty(ref _isBonus, value);
         }
 
+        public bool HasMediaLink
+        {
+            get => _hasMediaLink;
+            private set => SetProperty(ref _hasMediaLink, value);
+        }
+
         public string Content
         {
             get => _content;
@@ -84,20 +92,27 @@ namespace JeopardyKing.GameComponents
         public bool IsEmbeddedMedia
         {
             get => _isEmbeddedMedia;
-            set => SetProperty(ref _isEmbeddedMedia, value);
+            private set => SetProperty(ref _isEmbeddedMedia, value);
         }
 
         public string MultimediaContentLink
         {
             get => _multimediaContentLink;
-            set => SetProperty(ref _multimediaContentLink, value);
+            private set => SetProperty(ref _multimediaContentLink, value);
         }
 
-        public string YouTubeVideoId
+        public string YoutubeVideoId
         {
-            get => _youTubeVideoId;
-            set => SetProperty(ref _youTubeVideoId, value);
+            get => _youtubeVideoId;
+            private set => SetProperty(ref _youtubeVideoId, value);
         }
+
+        public string OriginalYoutubeUrl { get; private set; } = string.Empty;
+        #endregion
+
+        #region Private fields
+        private const string YoutubeEmbeddedRootUrl = "https://www.youtube.com/embed";
+        private int _startVideoAtSeconds = 0;
         #endregion
 
         public Question(int id, int categoryId, string categoryName, QuestionType type, decimal value, CurrencyType currency)
@@ -111,5 +126,48 @@ namespace JeopardyKing.GameComponents
             IsBonus = false;
             Content = string.Empty;
         }
+
+        #region Public methods
+        public (int minutes, int seconds) GetCurrentStartAtForVideo()
+        {
+            var minutes = _startVideoAtSeconds / 60;
+            return (minutes, _startVideoAtSeconds - (minutes * 60));
+        }
+
+        public void SetYoutubeVideoParameters(string originalUrl, string youtubeVideoId, bool autoplay, bool showControls)
+        {
+            YoutubeVideoId = youtubeVideoId;
+            OriginalYoutubeUrl = originalUrl;
+            MultimediaContentLink = GetYoutubeVideoUrl(youtubeVideoId, autoplay, showControls, 0);
+            HasMediaLink = true;
+            IsEmbeddedMedia = false;
+        }
+
+        public void SetStartAtForCurrentVideo(int minutes, int seconds)
+        {
+            if (Type != QuestionType.Video || minutes < 0 || seconds < 0)
+                return;
+
+            _startVideoAtSeconds = minutes * 60 + seconds;
+        }
+
+        public void RefreshYoutubeVideoUrl(bool autoplay, bool showControls)
+        {
+            if (Type != QuestionType.Video || string.IsNullOrEmpty(YoutubeVideoId))
+                return;
+
+            MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, _startVideoAtSeconds);
+        }
+
+        #endregion
+
+        private static string GetYoutubeVideoUrl(string videoId, bool autoplay, bool showControls, int startAtSeconds)
+            => $"{YoutubeEmbeddedRootUrl}/{videoId}?" +
+            $"autoplay={GetValueForBooleanInLink(autoplay)}" +
+            $"&amp;controls={GetValueForBooleanInLink(showControls)}" +
+            $"{(startAtSeconds > 0 ? $"&amp;start={startAtSeconds}" : string.Empty)}";
+
+        private static string GetValueForBooleanInLink(bool b)
+            => b ? "1" : "0";
     }
 }

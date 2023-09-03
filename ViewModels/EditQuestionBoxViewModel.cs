@@ -19,6 +19,8 @@ namespace JeopardyKing.ViewModels
 
         #region Backing fields
         private string _selectedCurrency = string.Empty;
+        private int _startVideoAtMinutes = 0;
+        private int _startVideoAtSeconds = 0;
         #endregion
 
         public string SelectedCurrency
@@ -32,6 +34,26 @@ namespace JeopardyKing.ViewModels
             }
         }
 
+        public int StartVideoAtMinutes
+        {
+            get => _startVideoAtMinutes;
+            set
+            {
+                SetStartAtForVideo(ModeManager.CurrentlySelectedQuestion, value, StartVideoAtSeconds);
+                SetProperty(ref _startVideoAtMinutes, value);
+            }
+        }
+
+        public int StartVideoAtSeconds
+        {
+            get => _startVideoAtSeconds;
+            set
+            {
+                SetStartAtForVideo(ModeManager.CurrentlySelectedQuestion, StartVideoAtMinutes, value);
+                SetProperty(ref _startVideoAtSeconds, value);
+            }
+        }
+
         public CreateWindowModeManager ModeManager { get; }
 
         public List<string> CurrencyNames { get; }
@@ -41,6 +63,7 @@ namespace JeopardyKing.ViewModels
         private RelayCommand? _deleteQuestionCommand;
         private RelayCommand? _loadMediaCommand;
         private RelayCommand? _getYoutubeLinkCommand;
+        private RelayCommand? _refreshYoutubeVideoLink;
 
         public ICommand DeleteQuestionCommand
         {
@@ -114,19 +137,28 @@ namespace JeopardyKing.ViewModels
                         (response, link) =>
                         {
                             if (response == ModalWindowButton.OK && TryExtractVideoId(link, out var videoId))
-                            {
-                                ModeManager.CurrentlySelectedQuestion.IsEmbeddedMedia = false;
-                                ModeManager.CurrentlySelectedQuestion.YouTubeVideoId = link;
-                                ModeManager.CurrentlySelectedQuestion.MultimediaContentLink = videoId;
-                            }
+                                ModeManager.CurrentlySelectedQuestion.SetYoutubeVideoParameters(link, videoId, false, true);
                         },
-                        ModeManager.CurrentlySelectedQuestion.IsEmbeddedMedia ?
-                            string.Empty : ModeManager.CurrentlySelectedQuestion.YouTubeVideoId,
-                        ValidateYouTubeLink);
+                        ModeManager.CurrentlySelectedQuestion.OriginalYoutubeUrl,
+                        ValidateYoutubeLink);
 
                     _ = confirmationDialog.ShowDialog();
                 });
                 return _getYoutubeLinkCommand;
+            }
+        }
+
+        public ICommand RefreshYoutubeVideoLink
+        {
+            get
+            {
+                _refreshYoutubeVideoLink ??= new RelayCommand(() =>
+                {
+                    if (ModeManager.CurrentlySelectedQuestion == default)
+                        return;
+                    ModeManager.CurrentlySelectedQuestion.RefreshYoutubeVideoUrl(false, true);
+                });
+                return _refreshYoutubeVideoLink;
             }
         }
         #endregion
@@ -164,7 +196,10 @@ namespace JeopardyKing.ViewModels
                 if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion))
                 {
                     if (ModeManager.CurrentlySelectedQuestion != null)
+                    {
                         SelectedCurrency = _currencyTypeMap[ModeManager.CurrentlySelectedQuestion.Currency];
+                        (StartVideoAtMinutes, StartVideoAtSeconds) = ModeManager.CurrentlySelectedQuestion.GetCurrentStartAtForVideo();
+                    }
                 }
             };
         }
@@ -179,7 +214,7 @@ namespace JeopardyKing.ViewModels
                _ => throw new NotSupportedException(),
            };
 
-        private static (bool isValid, string errorMessage) ValidateYouTubeLink(string link)
+        private static (bool isValid, string errorMessage) ValidateYoutubeLink(string link)
         {
             if (string.IsNullOrEmpty(link))
                 return (false, "YouTube link invalid - input is empty");
@@ -193,6 +228,15 @@ namespace JeopardyKing.ViewModels
             var m = ExtractVideoIdRegex().Match(link);
             videoId = m.Success ? m.Value : string.Empty;
             return m.Success;
+        }
+
+        private static void SetStartAtForVideo(Question? currentQuestion, int minutes, int seconds)
+        {
+            if (currentQuestion == null)
+                return;
+
+            currentQuestion.SetStartAtForCurrentVideo(minutes, seconds);
+
         }
 
         [GeneratedRegex(@"((?<=(v|V)/)|(?<=(\\?|\\&)v=)|(?<=be/)|(?<=embed/)|(?<=shorts/))([a-zA-Z0-9-_]{5,30})")]
