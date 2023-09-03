@@ -271,7 +271,7 @@
                                        Opacity="0.8"/>
 
                             <Button Grid.Column="1"
-                                    Grid.Row="1"
+                                     Grid.Row="1"
                                      Content="Save As"
                                      ToolTip="Click to save game as"
                                      Click="SaveMenuItemPressed"
@@ -322,17 +322,39 @@
 
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0" 
-                                       Style="{StaticResource SymbolButtonStyle}"
                                        Text="&#xE710;"
-                                       FontSize="10"
-                                       Opacity="0.8"/>
+                                       FontSize="10">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource SymbolButtonStyle}">
+                                        <Setter Property="Opacity" Value="0.8" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=addCategoryButton, Path=IsEnabled}" Value="False">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
 
-                            <Button Grid.Column="1"
+                            <Button x:Name="addCategoryButton"
                                     Grid.Row="0"
+                                    Grid.Column="1"
                                     Content="Add category"
-                                    ToolTip="Click to add category"
                                     Click="AddCategoryMenuItemPressed"
-                                    Style="{StaticResource contentMenuButtonStyle}" />
+                                    IsEnabled="{Binding Path=CanAddNewCategory}">
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource contentMenuButtonStyle}">
+                                        <Setter Property="Opacity" Value="1" />
+                                        <Setter Property="ToolTip" Value="Click to add category" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                                <Setter Property="ToolTip" Value="Cannot add category" />
+                                            </Trigger> 
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
                         </Grid>
                     </Border>
                 </ControlTemplate>

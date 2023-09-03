@@ -29,6 +29,17 @@ namespace JeopardyKing.WpfComponents
             typeof(CreateGameWindowTitleBar),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
 
+        public bool CanAddNewCategory
+        {
+            get => (bool)GetValue(CanAddNewCategoryProperty);
+            set => SetValue(CanAddNewCategoryProperty, value);
+        }
+        public static readonly DependencyProperty CanAddNewCategoryProperty = DependencyProperty.Register(
+            nameof(CanAddNewCategory),
+            typeof(bool),
+            typeof(CreateGameWindowTitleBar),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+
         public string ApplicationDescription
         {
             get => (string)GetValue(ApplicationDescriptionProperty);

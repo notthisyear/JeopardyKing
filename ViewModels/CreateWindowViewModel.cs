@@ -15,7 +15,7 @@ namespace JeopardyKing.ViewModels
 
         public CategoryViewEditableViewModel CategoryViewViewModel { get; }
 
-        public string ProgramDescription => "Jeopardy game creator";
+        public static string ProgramDescription => "Jeopardy game creator";
         #endregion
 
         public CreateWindowViewModel()
