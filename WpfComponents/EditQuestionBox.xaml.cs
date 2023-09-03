@@ -70,19 +70,26 @@ namespace JeopardyKing.WpfComponents
         private void EditQuestionBoxLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= EditQuestionBoxLoaded;
-            _editQuestionBoxIsToTheLeft = EditQuestionBoxShouldBeToTheLeft(Application.Current.MainWindow.ActualWidth);
 
-            // FIXME: This is a hack to move the edit box to the right initially
-            //        as the mouse is "typically" to the left in the beginning.
-            //        We should come up with a better solution to ensure that the
-            //        edit question box is in the correct place.
-            BeginAnimation(EditQuestionBoxXValueProperty,
+            // Note: In Designer mode, Application.Current.MainWindow is not set, so the designer crashes
+            if (!DesignerProperties.GetIsInDesignMode(this))
+            {
+                _editQuestionBoxIsToTheLeft = EditQuestionBoxShouldBeToTheLeft(Application.Current.MainWindow.ActualWidth);
+
+                // FIXME: This is a hack to move the edit box to the right initially
+                //        as the mouse is "typically" to the left in the beginning.
+                //        We should come up with a better solution to ensure that the
+                //        edit question box is in the correct place.
+                BeginAnimation(EditQuestionBoxXValueProperty,
                         GetEditQuestionXValueAnimation(
                             GetEditQuestionBoxRight(
                                 Application.Current.MainWindow.ActualWidth,
                                 editQuestionBox.ActualWidth,
                                 editQuestionBox.Margin), 0.0));
-            ViewModel.ModeManager.PropertyChanged += ModeManagerPropertyChanged;
+
+                if (ViewModel != default)
+                    ViewModel.ModeManager.PropertyChanged += ModeManagerPropertyChanged;
+            }
         }
 
         private void ModeManagerPropertyChanged(object? sender, PropertyChangedEventArgs e)
