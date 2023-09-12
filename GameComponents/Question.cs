@@ -10,7 +10,8 @@ namespace JeopardyKing.GameComponents
         Text,
         Image,
         Audio,
-        Video
+        Video,
+        YoutubeVideo
     }
 
     public class Question : ObservableObject
@@ -31,7 +32,6 @@ namespace JeopardyKing.GameComponents
         private int _videoOrAudioLengthSeconds = 0;
         private int _startVideoOrAudioAtSeconds = 0;
         private int _endVideoOrAudioAtSeconds = 0;
-        private bool _isYoutubeLink = false;
         private bool _isEmbeddedMedia;
         private string _content = string.Empty;
         private string _multimediaContentLink = string.Empty;
@@ -147,13 +147,6 @@ namespace JeopardyKing.GameComponents
             private set => SetProperty(ref _youtubeVideoId, value);
         }
 
-        public bool IsYoutubeLink
-        {
-            get => _isYoutubeLink;
-            private set => SetProperty(ref _isYoutubeLink, value);
-
-        }
-
         public string OriginalYoutubeUrl { get; private set; } = string.Empty;
         #endregion
 
@@ -189,7 +182,6 @@ namespace JeopardyKing.GameComponents
             YoutubeVideoId = youtubeVideoId;
             OriginalYoutubeUrl = originalUrl;
             MultimediaContentLink = GetYoutubeVideoUrl(youtubeVideoId, autoplay, showControls, 0);
-            IsYoutubeLink = true;
             HasMediaLink = true;
             StartVideoOrAudioAtSeconds = 0;
         }
@@ -211,7 +203,6 @@ namespace JeopardyKing.GameComponents
             IsEmbeddedMedia = false;
             MultimediaContentLink = string.Empty;
             YoutubeVideoId = string.Empty;
-            IsYoutubeLink = false;
             OriginalYoutubeUrl = string.Empty;
         }
 

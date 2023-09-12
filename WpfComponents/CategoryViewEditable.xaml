@@ -261,6 +261,9 @@
                                                 <DataTrigger Binding="{Binding Path=Type}" Value="{x:Static game:QuestionType.Video}">
                                                     <Setter Property="ToolTip" Value="Video question" />
                                                 </DataTrigger>
+                                                <DataTrigger Binding="{Binding Path=Type}" Value="{x:Static game:QuestionType.YoutubeVideo}">
+                                                    <Setter Property="ToolTip" Value="Youtube video question" />
+                                                </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </components:IconBox.Style>

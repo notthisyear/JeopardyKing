@@ -12,7 +12,8 @@ namespace JeopardyKing.WpfComponents
         Video,
         Star,
         Play,
-        Pause
+        Pause,
+        Youtube
     }
 
     public static class IconDataProvider
@@ -24,6 +25,7 @@ namespace JeopardyKing.WpfComponents
         private const string StarIconPathData = "m 22.5 26.5 l -7.467 -5.488 l -7.467 5.488 l 2.867 -8.863 l -7.463 -5.453 h 9.214 l 2.849 -8.878 l 2.849 8.878 h 9.213 l -7.462 5.453 z";
         private const string PlayIconPathData = "m 27 18.8 l -19.2474 10.545 c -2.8342 1.5947 -6.3344 -0.4551 -6.3344 -3.7037 v -21.0863 c 0 -3.2523 3.5002 -5.2984 6.3344 -3.7037 l 19.2474 10.545 c 2.8897 1.6243 2.8897 5.7831 0 7.4074 z";
         private const string PauseIconPathData = "m 8.125 0 a 4.375 4.375 90 0 0 -4.375 4.375 v 21.25 a 4.375 4.375 90 0 0 8.75 0 v -21.25 a 4.375 4.375 90 0 0 -4.375 -4.375 z m 13.75 0 a 4.375 4.375 90 0 0 -4.375 4.375 v 21.25 a 4.375 4.375 90 0 0 8.75 0 v -21.25 a 4.375 4.375 90 0 0 -4.375 -4.375 z";
+        private const string YoutubeIconPathData = "m 29 8 c -0.3312 -1.2468 -1.3068 -2.2296 -2.5464 -2.5632 c -2.2452 -0.6048 -11.2512 -0.6048 -11.2512 -0.6048 s -9.006 0 -11.2524 0.6048 c -1.2384 0.3336 -2.214 1.3152 -2.5452 2.5632 c -0.6024 2.2608 -0.6024 6.9768 -0.6024 6.9768 s 0 4.716 0.6024 6.9768 c 0.3312 1.2468 1.3068 2.2296 2.5464 2.5632 c 2.2452 0.6048 11.2512 0.6048 11.2512 0.6048 s 9.006 0 11.2524 -0.6048 c 1.2384 -0.3336 2.214 -1.3152 2.5464 -2.5632 c 0.6012 -2.2608 0.6012 -6.9768 0.6012 -6.9768 s 0 -4.716 -0.6024 -6.9768 z m -16.7424 11.2596 v -8.5656 l 7.5264 4.2828 l -7.5264 4.2828 z";
 
         private static readonly Dictionary<IconType, Geometry> s_iconGeometryMap = new()
         {
@@ -34,7 +36,8 @@ namespace JeopardyKing.WpfComponents
             { IconType.Video, Geometry.Parse(VideoIconPathData) },
             { IconType.Star, Geometry.Parse(StarIconPathData) },
             { IconType.Play, Geometry.Parse(PlayIconPathData) },
-            { IconType.Pause, Geometry.Parse(PauseIconPathData) }
+            { IconType.Pause, Geometry.Parse(PauseIconPathData) },
+            { IconType.Youtube, Geometry.Parse(YoutubeIconPathData) }
         };
 
         public static Geometry GetDataForIcon(IconType type)

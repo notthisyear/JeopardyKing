@@ -69,6 +69,9 @@ namespace JeopardyKing.WpfComponents
         private static readonly Dictionary<(double to, double from), DoubleAnimation> s_opacityAnimationCache = new();
         #endregion
 
+        private const string LibVlcWindowTitle = "LibVLCSharp.WPF";
+        private Window? _libVlcWindow;
+
         public EditQuestionBox()
         {
             InitializeComponent();
@@ -120,11 +123,8 @@ namespace JeopardyKing.WpfComponents
             if (ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Video ||
                                  ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Audio)
             {
-                if (ViewModel.ModeManager.CurrentlySelectedQuestion.IsYoutubeLink == false)
-                {
-                    SetMediaPlayerMediaForQuestion(ViewModel.ModeManager.CurrentlySelectedQuestion);
-                    playPauseIcon.Visibility = Visibility.Visible;
-                }
+                SetMediaPlayerMediaForQuestion(ViewModel.ModeManager.CurrentlySelectedQuestion);
+                playPauseIcon.Visibility = Visibility.Visible;
             }
         }
 
@@ -212,6 +212,7 @@ namespace JeopardyKing.WpfComponents
 
             var media = new Media(_libVlc, q.MultimediaContentLink);
             audioVideoPlayer.MediaPlayer!.Media = media;
+            audioVideoPlayer.MediaPlayer.Stop();
 
             q.VideoOrAudioLengthSeconds = -1;
             Task.Run(async () =>
@@ -221,6 +222,12 @@ namespace JeopardyKing.WpfComponents
                 {
                     if (ViewModel.ModeManager.CurrentlySelectedQuestion != default)
                         ViewModel.ModeManager.CurrentlySelectedQuestion.VideoOrAudioLengthSeconds = (int)(media.Duration / 1000.0);
+
+                    if (_libVlcWindow == default)
+                        TrySetVlcWindow();
+
+                    if (_libVlcWindow != default)
+                        _libVlcWindow.Visibility = Visibility.Visible;
                     playPauseIcon.Visibility = Visibility.Visible;
                 });
                 media.Dispose();
@@ -238,9 +245,28 @@ namespace JeopardyKing.WpfComponents
                 playPauseIcon.IconType = IconType.Play;
             }
 
+            audioVideoPlayer.MediaPlayer.Media?.Dispose();
             audioVideoPlayer.MediaPlayer.Media = default;
+
+            if (_libVlcWindow == default)
+                TrySetVlcWindow();
+
+            if (_libVlcWindow != default)
+                _libVlcWindow.Visibility = Visibility.Collapsed;
             playPauseIcon.Visibility = Visibility.Collapsed;
         }
+
+        private void TrySetVlcWindow()
+        {
+            foreach (Window w in Application.Current.Windows)
+            {
+                if (LibVlcWindowTitle.Equals(w.Title))
+                {
+                    _libVlcWindow = w;
+                    break;
+                }
+            }
+         }
 
         #region Static methods
         private static DoubleAnimation GetEditQuestionXValueAnimation(double to, double from)

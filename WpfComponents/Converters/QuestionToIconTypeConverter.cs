@@ -17,6 +17,7 @@ namespace JeopardyKing.WpfComponents.Converters
                     QuestionType.Image => IconType.Image,
                     QuestionType.Audio => IconType.Audio,
                     QuestionType.Video => IconType.Video,
+                    QuestionType.YoutubeVideo => IconType.Youtube,
                     _ => IconType.None
                 };
             }

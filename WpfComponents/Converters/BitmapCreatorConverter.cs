@@ -19,6 +19,7 @@ namespace JeopardyKing.WpfComponents.Converters
             var image = new BitmapImage();
             image.BeginInit();
             image.UriSource = new(q.MultimediaContentLink);
+            image.EndInit();
             return image;
         }
 

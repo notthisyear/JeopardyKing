@@ -427,7 +427,7 @@
                         <Image Height="{Binding ElementName=multimediaPreviewBox, Path=ActualHeight}">
                             <Image.Style>
                                 <Style TargetType="{x:Type Image}">
-                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Setter Property="Visibility" Value="Visible" />
                                     <Setter Property="Source" Value="{StaticResource emptyImage}" />
                                     <Style.Triggers>
                                         <MultiDataTrigger>
@@ -498,37 +498,6 @@
                                     </Button.Content>
                                 </Button>
                             </Grid>
-
-                            <vlc:VideoView.Style>
-                                <Style TargetType="{x:Type vlc:VideoView}">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Audio}" />
-                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
-                                            </MultiDataTrigger.Conditions>
-                                            <MultiDataTrigger.Setters>
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </MultiDataTrigger.Setters>
-                                        </MultiDataTrigger>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
-                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
-                                            </MultiDataTrigger.Conditions>
-                                            <MultiDataTrigger.Setters>
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </MultiDataTrigger.Setters>
-                                        </MultiDataTrigger>
-
-
-                                        <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="False">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </vlc:VideoView.Style>
                         </vlc:VideoView>
 
                         <!-- Youtube link preview -->
@@ -540,8 +509,7 @@
                                     <Style.Triggers>
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
-                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.IsYoutubeLink}" Value="True" />
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}" />
                                                 <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
                                             </MultiDataTrigger.Conditions>
                                             <MultiDataTrigger.Setters>
@@ -584,16 +552,10 @@
                                 <Setter Property="Text" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MediaName, Converter={StaticResource stringShortenerConverter}, ConverterParameter=15}" />
                                 <Setter Property="ToolTip" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}" />
                                 <Style.Triggers>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
-                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.IsYoutubeLink}" Value="True" />
-                                        </MultiDataTrigger.Conditions>
-                                        <MultiDataTrigger.Setters>
-                                            <Setter Property="Text" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.YoutubeVideoId}" />
-                                            <Setter Property="ToolTip" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.OriginalYoutubeUrl}" />
-                                        </MultiDataTrigger.Setters>
-                                    </MultiDataTrigger>
+                                    <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}">
+                                        <Setter Property="Text" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.YoutubeVideoId}" />
+                                        <Setter Property="ToolTip" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.OriginalYoutubeUrl}" />
+                                    </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
@@ -602,10 +564,20 @@
                     <Button Grid.Row="0"
                             Grid.Column="2"
                             Width="110"
-                            Style="{StaticResource ButtonPrimaryStyle}"
                             Content="Choose media..."
                             ToolTip="Click to select media on disk"
-                            Command="{Binding Path=ViewModel.LoadMediaCommand}" />
+                            Command="{Binding Path=ViewModel.LoadMediaCommand}">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                     <Button Grid.Row="0"
                             Grid.Column="3"
                             Width="110"
@@ -616,7 +588,7 @@
                             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}">
+                                    <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}">
                                         <Setter Property="Visibility" Value="Visible" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -624,28 +596,28 @@
                         </Button.Style>
                     </Button>
 
+                    <!-- Youtube video start at options -->
                     <TextBlock Grid.Row="1"
                                Grid.Column="0"
                                VerticalAlignment="Center"
                                Text="Start video at:">
                         <TextBlock.Style>
-                             <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
-                                 <Setter Property="Visibility" Value="Collapsed" />
-                                 <Style.Triggers>
-                                     <MultiDataTrigger>
-                                         <MultiDataTrigger.Conditions>
-                                             <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
-                                             <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
-                                         </MultiDataTrigger.Conditions>
-                                         <MultiDataTrigger.Setters>
-                                             <Setter Property="Visibility" Value="Visible" />
-                                         </MultiDataTrigger.Setters>
-                                     </MultiDataTrigger>
-                                 </Style.Triggers>
-                             </Style>
-                         </TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}" />
+                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
                     </TextBlock>
-
                     <StackPanel Grid.Row="1"
                                 Grid.Column="1"
                                 Orientation="Horizontal"
@@ -656,7 +628,7 @@
                                 <Style.Triggers>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
+                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}" />
                                             <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
@@ -666,7 +638,7 @@
                                 </Style.Triggers>
                             </Style>
                         </StackPanel.Style>
-                    
+
                         <TextBox Width="25"
                                  Margin="0,5,0,0"
                                 VerticalContentAlignment="Bottom">
@@ -722,7 +694,6 @@
                             </TextBox.Style>
                         </TextBox>
                     </StackPanel>
-
                     <Button Grid.Row="1"
                             Grid.Column="2"
                             Content="Refresh preview"
@@ -735,7 +706,7 @@
                                 <Style.Triggers>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
+                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}" />
                                             <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
