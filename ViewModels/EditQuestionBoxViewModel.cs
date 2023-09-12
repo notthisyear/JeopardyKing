@@ -40,7 +40,8 @@ namespace JeopardyKing.ViewModels
             get => _startVideoAtMinutes;
             set
             {
-                SetStartAtForVideo(ModeManager.CurrentlySelectedQuestion, value, StartVideoAtSeconds);
+                if (ModeManager.CurrentlySelectedQuestion != default)
+                    ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds = value * 60 + StartVideoAtSeconds;
                 SetProperty(ref _startVideoAtMinutes, value);
             }
         }
@@ -50,7 +51,8 @@ namespace JeopardyKing.ViewModels
             get => _startVideoAtSeconds;
             set
             {
-                SetStartAtForVideo(ModeManager.CurrentlySelectedQuestion, StartVideoAtMinutes, value);
+                if (ModeManager.CurrentlySelectedQuestion != default)
+                    ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds = StartVideoAtMinutes * 60 + value;
                 SetProperty(ref _startVideoAtSeconds, value);
             }
         }
@@ -61,7 +63,8 @@ namespace JeopardyKing.ViewModels
         #endregion
 
         #region Events
-        public event EventHandler? MultimediaParametersChanged;
+        public event EventHandler? NewMediaLoadedEvent;
+        public event EventHandler<QuestionType>? QuestionTypeChangedEvent;
         #endregion
 
         #region Commands
@@ -120,7 +123,7 @@ namespace JeopardyKing.ViewModels
                     if (dialog.ShowDialog() == true)
                     {
                         ModeManager.CurrentlySelectedQuestion.SetMultimediaParameters(dialog.FileName);
-                        MultimediaParametersChanged?.Invoke(this, EventArgs.Empty);
+                        NewMediaLoadedEvent?.Invoke(this, EventArgs.Empty);
                     }
                 });
                 return _loadMediaCommand;
@@ -202,7 +205,8 @@ namespace JeopardyKing.ViewModels
                 if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)
                 {
                     SelectedCurrency = _currencyTypeMap[ModeManager.CurrentlySelectedQuestion.Currency];
-                    (StartVideoAtMinutes, StartVideoAtSeconds) = ModeManager.CurrentlySelectedQuestion.GetCurrentStartAtForVideo();
+                    StartVideoAtMinutes = ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds / 60;
+                    StartVideoAtSeconds = ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds - (StartVideoAtMinutes * 60);
                     ModeManager.CurrentlySelectedQuestion.PropertyChanged += CurrentlySelectedQuestionPropertyChanged;
                 }
             };
@@ -220,19 +224,16 @@ namespace JeopardyKing.ViewModels
                 return;
 
             if (e.PropertyName == nameof(q.Type))
-            {
-                if (q.Type == QuestionType.Video || q.Type == QuestionType.Audio || q.Type == QuestionType.Image)
-                    MultimediaParametersChanged?.Invoke(this, EventArgs.Empty);
-            }
+                QuestionTypeChangedEvent?.Invoke(this, q.Type);
         }
 
         #region Private methods
         private static string GetFileExtensionsForType(QuestionType type)
            => type switch
            {
-               QuestionType.Image => "PNG images (*.png)|*.png|JPG images (*.jpg)|*.jpg|Bitmap images (*.bmp)|*.bmp",
-               QuestionType.Audio => "All files (*.*)|*.*",
-               QuestionType.Video => "All files (*.*)|*.*",
+               QuestionType.Image => "Image files (*.png, *.jpg, *.jpeg, *.bmp)|*.png;*.jpg;*.jpeg;*.bmp|All files (*.*)|*.*",
+               QuestionType.Audio => "Audio files (*.aac, *.aiff, *.flac, *.mid, *.mp1, *.mp2, *.mp3, *.ogg, *.wav, *.wma)|*.aac;*.aiff;*.flac;*.mid;*.mp1;*.mp2;*.mp3;*.ogg;*.wav;*.wma|All files (*.*)|*.*",
+               QuestionType.Video => "Video files (*.3gpp, *.avi, *.divx, *.m1v, *.m2v, *.m4v, *.mkv, *.mov, *.mp2, *.mp2v, *.mp4, *.mp4v, *.mpeg, *.mpeg1, *.mpeg2, *.mpeg4, *.webm, *.wmv)|*.3gpp;*.avi;*.divx;*.m1v;*.m2v;*.m4v;*.mkv;*.mov;*.mp2;*.mp2v;*.mp4;*.mp4v;*.mpeg;*.mpeg1;*.mpeg2;*.mpeg4;*.webm;*.wmv|All files (*.*)|*.*",
                _ => throw new NotSupportedException(),
            };
 
@@ -250,15 +251,6 @@ namespace JeopardyKing.ViewModels
             var m = ExtractVideoIdRegex().Match(link);
             videoId = m.Success ? m.Value : string.Empty;
             return m.Success;
-        }
-
-        private static void SetStartAtForVideo(Question? currentQuestion, int minutes, int seconds)
-        {
-            if (currentQuestion == null)
-                return;
-
-            currentQuestion.SetStartAtForCurrentVideo(minutes, seconds);
-
         }
 
         [GeneratedRegex(@"((?<=(v|V)/)|(?<=(\\?|\\&)v=)|(?<=be/)|(?<=embed/)|(?<=shorts/))([a-zA-Z0-9-_]{5,30})")]

@@ -1,38 +1,28 @@
 ﻿using System;
 using System.Globalization;
-using System.IO;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
+using JeopardyKing.GameComponents;
 
 namespace JeopardyKing.WpfComponents.Converters
 {
-    public class BitmapCreatorConverter : IValueConverter
+    public class BitmapCreatorConverter : IMultiValueConverter
     {
-        private BitmapImage? _emptyImage;
-        private const string ResourceFolderName = "Resources";
-        private const string EmptyImageName = "empty.png";
+        private const string EmptyImageName = "emptyImage";
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (_emptyImage == default)
-            {
-                _emptyImage = new BitmapImage();
-                _emptyImage.BeginInit();
-                _emptyImage.UriSource = new(Path.Combine(AppContext.BaseDirectory, ResourceFolderName, EmptyImageName));
-                _emptyImage.EndInit();
-            }
-
-            if (value is not string s || string.IsNullOrEmpty(s))
-                return _emptyImage;
+            if (values.Length != 2 || values[0] is not Question q || q.Type != QuestionType.Image || string.IsNullOrEmpty(q.MultimediaContentLink))
+                return (Application.Current.FindResource(EmptyImageName) as BitmapImage)!;
 
             var image = new BitmapImage();
             image.BeginInit();
-            image.UriSource = new(s);
-            image.EndInit();
+            image.UriSource = new(q.MultimediaContentLink);
             return image;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
             => throw new NotImplementedException();
     }
 }

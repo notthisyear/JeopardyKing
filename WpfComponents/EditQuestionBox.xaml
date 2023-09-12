@@ -302,24 +302,28 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
+
                 <TextBlock Grid.Row="0"
                             Style="{StaticResource MainTextBlockStyle}"
                             Text="Question"
-                            Margin="0,0,0,5"/>
+                            Margin="0,0,0,5" />
+
                 <TextBox x:Name="textContentInputBox"
                          Grid.Row="1"
-                        Style="{StaticResource MainTextBoxStyleBase}"
-                        Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        VerticalAlignment="Stretch"
-                        FontSize="16"
-                        TextWrapping="Wrap"
-                        MinLines="12"
-                         MaxLines="12"
-                        ToolTip="Write question here"/>
+                         Padding="10,0,10,0"
+                         Style="{StaticResource MainTextBoxStyleBase}"
+                         Text="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="16"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         MinLines="18"
+                         MaxLines="18"
+                         ToolTip="Write question here"
+                         VerticalContentAlignment="Top"/>
+
                 <TextBlock Grid.Row="1"
                             Text="Write question here"
                             FontSize="20"
-                            Padding="20,20,20,20"
                             FontStyle="Italic"
                             Foreground="{StaticResource BackgroundColorDarkerShade}"
                            Opacity="0.5"
@@ -428,13 +432,20 @@
                                     <Style.Triggers>
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Image}" />
                                                 <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Image}" />
                                             </MultiDataTrigger.Conditions>
                                             <MultiDataTrigger.Setters>
                                                 <Setter Property="Visibility" Value="Visible" />
-                                                <Setter Property="Source" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink, Converter={StaticResource bitmapCreatorConverter}}" />
-                                        </MultiDataTrigger.Setters>
+                                                <Setter Property="Source">
+                                                    <Setter.Value>
+                                                        <MultiBinding Converter="{StaticResource bitmapCreatorConverter}">
+                                                            <Binding Path="ViewModel.ModeManager.CurrentlySelectedQuestion" />
+                                                            <Binding Path="ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink" />
+                                                        </MultiBinding>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </MultiDataTrigger.Setters>
                                         </MultiDataTrigger>
                                     </Style.Triggers>
                                 </Style>

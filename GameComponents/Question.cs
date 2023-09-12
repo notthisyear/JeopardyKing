@@ -28,6 +28,9 @@ namespace JeopardyKing.GameComponents
 
         private bool _hasMediaLink = false;
         private string _mediaName = string.Empty;
+        private int _videoOrAudioLengthSeconds = 0;
+        private int _startVideoOrAudioAtSeconds = 0;
+        private int _endVideoOrAudioAtSeconds = 0;
         private bool _isYoutubeLink = false;
         private bool _isEmbeddedMedia;
         private string _content = string.Empty;
@@ -102,6 +105,24 @@ namespace JeopardyKing.GameComponents
             private set => SetProperty(ref _mediaName, value);
         }
 
+        public int VideoOrAudioLengthSeconds
+        {
+            get => _videoOrAudioLengthSeconds;
+            set => SetProperty(ref _videoOrAudioLengthSeconds, value);
+        }
+
+        public int StartVideoOrAudioAtSeconds
+        {
+            get => _startVideoOrAudioAtSeconds;
+            set => SetProperty(ref _startVideoOrAudioAtSeconds, value);
+        }
+
+        public int EndVideoOrAudioAtSeconds
+        {
+            get => _endVideoOrAudioAtSeconds;
+            set => SetProperty(ref _endVideoOrAudioAtSeconds, value);
+        }
+
         public string Content
         {
             get => _content;
@@ -138,7 +159,6 @@ namespace JeopardyKing.GameComponents
 
         #region Private fields
         private const string YoutubeEmbeddedRootUrl = "https://www.youtube.com/embed";
-        private int _startVideoAtSeconds = 0;
         #endregion
 
         public Question(int id, int categoryId, string categoryName, QuestionType type, decimal value, CurrencyType currency)
@@ -154,12 +174,6 @@ namespace JeopardyKing.GameComponents
         }
 
         #region Public methods
-        public (int minutes, int seconds) GetCurrentStartAtForVideo()
-        {
-            var minutes = _startVideoAtSeconds / 60;
-            return (minutes, _startVideoAtSeconds - (minutes * 60));
-        }
-
         public void SetMultimediaParameters(string pathToMedia)
         {
             MultimediaContentLink = pathToMedia;
@@ -177,23 +191,14 @@ namespace JeopardyKing.GameComponents
             MultimediaContentLink = GetYoutubeVideoUrl(youtubeVideoId, autoplay, showControls, 0);
             IsYoutubeLink = true;
             HasMediaLink = true;
-            _startVideoAtSeconds = 0;
+            StartVideoOrAudioAtSeconds = 0;
         }
-
-        public void SetStartAtForCurrentVideo(int minutes, int seconds)
-        {
-            if (Type != QuestionType.Video || minutes < 0 || seconds < 0)
-                return;
-
-            _startVideoAtSeconds = minutes * 60 + seconds;
-        }
-
         public void RefreshYoutubeVideoUrl(bool autoplay, bool showControls)
         {
             if (Type != QuestionType.Video || string.IsNullOrEmpty(YoutubeVideoId))
                 return;
 
-            MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, _startVideoAtSeconds);
+            MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, StartVideoOrAudioAtSeconds);
         }
 
         #endregion
