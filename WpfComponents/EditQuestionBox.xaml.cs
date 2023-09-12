@@ -1,14 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using JeopardyKing.GameComponents;
 using JeopardyKing.ViewModels;
 using JeopardyKing.Windows;
+using LibVLCSharp.Shared;
 
 namespace JeopardyKing.WpfComponents
 {
+    using VlcMediaPlayer = LibVLCSharp.Shared.MediaPlayer;
+
     public partial class EditQuestionBox : UserControl
     {
         #region Dependency properties
@@ -59,11 +64,14 @@ namespace JeopardyKing.WpfComponents
 
         #region Private fields
         private bool _editQuestionBoxIsToTheLeft;
+        private readonly LibVLC _libVlc;
+        private static readonly Dictionary<(double to, double from), DoubleAnimation> s_opacityAnimationCache = new();
         #endregion
 
         public EditQuestionBox()
         {
             InitializeComponent();
+            _libVlc = new LibVLC();
             Loaded += EditQuestionBoxLoaded;
         }
 
@@ -88,7 +96,46 @@ namespace JeopardyKing.WpfComponents
                                 editQuestionBox.Margin), 0.0));
 
                 if (ViewModel != default)
+                {
                     ViewModel.ModeManager.PropertyChanged += ModeManagerPropertyChanged;
+                    ViewModel.MultimediaParametersChanged += MultimediaParametersChanged;
+                }
+
+                playPauseIcon.IconType = IconType.Play;
+                var mediaPlayer = new VlcMediaPlayer(_libVlc);
+                audioVideoPlayer.MediaPlayer = mediaPlayer;
+            }
+        }
+
+        private void MultimediaParametersChanged(object? sender, EventArgs e)
+        {
+            if (ViewModel == default || ViewModel.ModeManager.CurrentlySelectedQuestion == default)
+                return;
+
+            var mediaPlayer = audioVideoPlayer.MediaPlayer!;
+            var isAudioOrVideo = ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Video ||
+                                 ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Audio;
+            var hasMultimediaLink = !string.IsNullOrEmpty(ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink);
+            var hadMedia = mediaPlayer.Media != default;
+
+            if (hadMedia && !hasMultimediaLink)
+            {
+                if (mediaPlayer.IsPlaying)
+                {
+                    mediaPlayer.Stop();
+                    playPauseIcon.IconType = IconType.Play;
+                }
+                mediaPlayer.Media = default;
+                playPauseIcon.Visibility = Visibility.Collapsed;
+            }
+            else if (isAudioOrVideo && hasMultimediaLink)
+            {
+                if (ViewModel.ModeManager.CurrentlySelectedQuestion.IsYoutubeLink == false)
+                {
+                    using var media = new Media(_libVlc, ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink);
+                    mediaPlayer.Media = media;
+                    playPauseIcon.Visibility = Visibility.Visible;
+                }
             }
         }
 
@@ -101,13 +148,13 @@ namespace JeopardyKing.WpfComponents
             {
                 if (modeManager.CurrentState == CreateWindowState.NothingSelected)
                 {
-                    BeginAnimation(EditQuestionOpacityValueProperty, GetEditQuestionOpacityAnimation(0.0, EditQuestionOpacityValue));
+                    BeginAnimation(EditQuestionOpacityValueProperty, GetOpacityAnimation(EditQuestionOpacityValue, 0.0));
                     return;
                 }
 
                 if (modeManager.CurrentState == CreateWindowState.QuestionHighlighted)
                 {
-                    BeginAnimation(EditQuestionOpacityValueProperty, GetEditQuestionOpacityAnimation(0.95, EditQuestionOpacityValue));
+                    BeginAnimation(EditQuestionOpacityValueProperty, GetOpacityAnimation(EditQuestionOpacityValue, 0.95));
                     var shouldBeToTheLeft = EditQuestionBoxShouldBeToTheLeft(Application.Current.MainWindow.ActualWidth);
                     if (_editQuestionBoxIsToTheLeft == shouldBeToTheLeft)
                         return;
@@ -141,17 +188,24 @@ namespace JeopardyKing.WpfComponents
             }
         }
 
-        #region Static methods
-        private static DoubleAnimation GetEditQuestionOpacityAnimation(double to, double from)
+        private void PlayOrPauseButtonClicked(object sender, RoutedEventArgs e)
         {
-            return new DoubleAnimation
+            if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
+                return;
+
+            if (!audioVideoPlayer.MediaPlayer.IsPlaying)
             {
-                From = from,
-                To = to,
-                Duration = TimeSpan.FromSeconds(0.2)
-            };
+                playPauseIcon.IconType = IconType.Pause;
+                audioVideoPlayer.MediaPlayer.Play();
+            }
+            else
+            {
+                playPauseIcon.IconType = IconType.Play;
+                audioVideoPlayer.MediaPlayer.Pause();
+            }
         }
 
+        #region Static methods
         private static DoubleAnimation GetEditQuestionXValueAnimation(double to, double from)
         {
             return new DoubleAnimation
@@ -175,6 +229,35 @@ namespace JeopardyKing.WpfComponents
 
         private static double GetEditQuestionBoxLeft(Thickness boxMargin)
                 => boxMargin.Left;
+
+        private void EnclosingGridMouseEnter(object sender, MouseEventArgs e)
+        {
+            playPauseIcon.BeginAnimation(OpacityProperty, GetOpacityAnimation(0.0, 0.5));
+        }
+
+        private void EnclosingGridMouseLeave(object sender, MouseEventArgs e)
+        {
+            playPauseIcon.BeginAnimation(OpacityProperty, GetOpacityAnimation(0.5, 0.0));
+        }
+
+        private static DoubleAnimation GetOpacityAnimation(double from, double to)
+        {
+            lock (s_opacityAnimationCache)
+            {
+                if (!s_opacityAnimationCache.TryGetValue((to, from), out var opacityAnimation))
+                {
+                    s_opacityAnimationCache.Add((to, from),
+                    new DoubleAnimation
+                    {
+                        From = from,
+                        To = to,
+                        Duration = TimeSpan.FromMilliseconds(200)
+                    });
+                }
+            }
+
+            return s_opacityAnimationCache[(to, from)];
+        }
         #endregion
     }
 }

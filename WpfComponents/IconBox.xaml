@@ -9,7 +9,7 @@
             <SolidColorBrush Color="White"
                              Opacity="0"/>
         </Border.Background>
-        
+
         <Path Data="{Binding Path=PathData}"
               Fill="{Binding Path=FillColor}"
               Stroke="{Binding Path=StrokeColor}"

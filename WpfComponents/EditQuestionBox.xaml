@@ -7,6 +7,7 @@
              xmlns:components="clr-namespace:JeopardyKing.WpfComponents"
              xmlns:converters="clr-namespace:JeopardyKing.WpfComponents.Converters"
              xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules"
+             xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
              xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <Border x:Name="editQuestionBox"
@@ -30,16 +31,28 @@
                         <x:Type TypeName="game:QuestionType"/>
                     </ObjectDataProvider.MethodParameters>
                 </ObjectDataProvider>
-                <Storyboard x:Key="animateOpacityToZeroPointEight"
-                            PresentationOptions:Freeze="True">
-                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
-                        <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="0.8" />
-                    </DoubleAnimationUsingKeyFrames>
-                </Storyboard>
                 <Storyboard x:Key="animateOpacityToZero"
                             PresentationOptions:Freeze="True">
                     <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
                         <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="0" />
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+                <Storyboard x:Key="animateOpacityToPointFive"
+                            PresentationOptions:Freeze="True">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                        <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="0.5" />
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+                <Storyboard x:Key="animateOpacityToZeroPointNine"
+                            PresentationOptions:Freeze="True">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                        <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="0.9" />
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+                <Storyboard x:Key="animateOpacityToOne"
+                            PresentationOptions:Freeze="True">
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                        <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="0.9" />
                     </DoubleAnimationUsingKeyFrames>
                 </Storyboard>
                 <Storyboard x:Key="animateScaleUp"
@@ -165,7 +178,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ElementName=valueDisplay, Path=IsMouseOver}" Value="True">
                                         <DataTrigger.EnterActions>
-                                            <BeginStoryboard Storyboard="{StaticResource animateOpacityToZeroPointEight}" />
+                                            <BeginStoryboard Storyboard="{StaticResource animateOpacityToZeroPointNine}" />
                                         </DataTrigger.EnterActions>
                                         <DataTrigger.ExitActions>
                                             <BeginStoryboard Storyboard="{StaticResource animateOpacityToZero}" />
@@ -420,15 +433,93 @@
                                             </MultiDataTrigger.Conditions>
                                             <MultiDataTrigger.Setters>
                                                 <Setter Property="Visibility" Value="Visible" />
-                                            </MultiDataTrigger.Setters>
+                                                <Setter Property="Source" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink, Converter={StaticResource bitmapCreatorConverter}}" />
+                                        </MultiDataTrigger.Setters>
                                         </MultiDataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Image.Style>
                         </Image>
 
-                        <!-- Audio -->
-                        <!-- Video -->
+                        <!-- Audio and video -->
+                        <vlc:VideoView x:Name="audioVideoPlayer">
+                            <Grid Background="#01000000"
+                                  VerticalAlignment="Stretch"
+                                  HorizontalAlignment="Stretch"
+                                  MouseEnter="EnclosingGridMouseEnter"
+                                  MouseLeave="EnclosingGridMouseLeave">
+                                <Button Style="{StaticResource EmptyButton}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Click="PlayOrPauseButtonClicked"
+                                       Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}}">
+                                    <Button.Content>
+                                        <components:IconBox x:Name="playPauseIcon"
+                                                            StrokeThickness="0"
+                                                            FillColor="White">
+                                            <components:IconBox.Style>
+                                                <Style TargetType="{x:Type components:IconBox}">
+                                                    <Setter Property="Opacity" Value="0.0" />
+                                                    <Setter Property="ToolTip" Value="Click to play" />
+                                                    <Setter Property="RenderTransformOrigin" Value="0.5, 0.5" />
+                                                    <Setter Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="2" ScaleY="2" />
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <EventTrigger RoutedEvent="MouseEnter">
+                                                            <EventTrigger.Actions>
+                                                                <BeginStoryboard Storyboard="{StaticResource animateScaleUp}" />
+                                                                <BeginStoryboard Storyboard="{StaticResource animateOpacityToOne}" />
+                                                            </EventTrigger.Actions>
+                                                        </EventTrigger>
+                                                        <EventTrigger RoutedEvent="MouseLeave">
+                                                            <EventTrigger.Actions>
+                                                                <BeginStoryboard Storyboard="{StaticResource animateScaleDown}" />
+                                                                <BeginStoryboard Storyboard="{StaticResource animateOpacityToPointFive}" />
+                                                            </EventTrigger.Actions>
+                                                        </EventTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </components:IconBox.Style>
+                                        </components:IconBox>
+                                    </Button.Content>
+                                </Button>
+                            </Grid>
+
+                            <vlc:VideoView.Style>
+                                <Style TargetType="{x:Type vlc:VideoView}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Audio}" />
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <MultiDataTrigger.Setters>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger.Setters>
+                                        </MultiDataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
+                                                <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <MultiDataTrigger.Setters>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger.Setters>
+                                        </MultiDataTrigger>
+
+
+                                        <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </vlc:VideoView.Style>
+                        </vlc:VideoView>
+
                         <!-- Youtube link preview -->
                         <wpf:ChromiumWebBrowser>
                             <wpf:ChromiumWebBrowser.Style>

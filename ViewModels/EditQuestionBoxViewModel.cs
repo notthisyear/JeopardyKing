@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -59,6 +60,10 @@ namespace JeopardyKing.ViewModels
         public List<string> CurrencyNames { get; }
         #endregion
 
+        #region Events
+        public event EventHandler? MultimediaParametersChanged;
+        #endregion
+
         #region Commands
         private RelayCommand? _deleteQuestionCommand;
         private RelayCommand? _loadMediaCommand;
@@ -113,7 +118,10 @@ namespace JeopardyKing.ViewModels
                     };
 
                     if (dialog.ShowDialog() == true)
-                        ModeManager.CurrentlySelectedQuestion.SetImageParameters(dialog.FileName);
+                    {
+                        ModeManager.CurrentlySelectedQuestion.SetMultimediaParameters(dialog.FileName);
+                        MultimediaParametersChanged?.Invoke(this, EventArgs.Empty);
+                    }
                 });
                 return _loadMediaCommand;
             }
@@ -191,15 +199,31 @@ namespace JeopardyKing.ViewModels
             SelectedCurrency = CurrencyNames.First();
             ModeManager.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion))
+                if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)
                 {
-                    if (ModeManager.CurrentlySelectedQuestion != null)
-                    {
-                        SelectedCurrency = _currencyTypeMap[ModeManager.CurrentlySelectedQuestion.Currency];
-                        (StartVideoAtMinutes, StartVideoAtSeconds) = ModeManager.CurrentlySelectedQuestion.GetCurrentStartAtForVideo();
-                    }
+                    SelectedCurrency = _currencyTypeMap[ModeManager.CurrentlySelectedQuestion.Currency];
+                    (StartVideoAtMinutes, StartVideoAtSeconds) = ModeManager.CurrentlySelectedQuestion.GetCurrentStartAtForVideo();
+                    ModeManager.CurrentlySelectedQuestion.PropertyChanged += CurrentlySelectedQuestionPropertyChanged;
                 }
             };
+
+            ModeManager.PropertyChanging += (s, e) =>
+            {
+                if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)
+                    ModeManager.CurrentlySelectedQuestion.PropertyChanged -= CurrentlySelectedQuestionPropertyChanged;
+            };
+        }
+
+        private void CurrentlySelectedQuestionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is not Question q)
+                return;
+
+            if (e.PropertyName == nameof(q.Type))
+            {
+                if (q.Type == QuestionType.Video || q.Type == QuestionType.Audio || q.Type == QuestionType.Image)
+                    MultimediaParametersChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         #region Private methods
