@@ -160,10 +160,10 @@ namespace JeopardyKing.GameComponents
             return (minutes, _startVideoAtSeconds - (minutes * 60));
         }
 
-        public void SetImageParameters(string imagePath)
+        public void SetMultimediaParameters(string pathToMedia)
         {
-            MultimediaContentLink = imagePath;
-            MediaName = Path.GetFileName(imagePath);
+            MultimediaContentLink = pathToMedia;
+            MediaName = Path.GetFileName(pathToMedia);
             HasMediaLink = true;
         }
 

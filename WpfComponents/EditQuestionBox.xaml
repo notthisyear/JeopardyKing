@@ -4,6 +4,8 @@
              xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
              xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
              xmlns:game="clr-namespace:JeopardyKing.GameComponents"
+             xmlns:components="clr-namespace:JeopardyKing.WpfComponents"
+             xmlns:converters="clr-namespace:JeopardyKing.WpfComponents.Converters"
              xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules"
              xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
@@ -40,6 +42,41 @@
                         <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="0" />
                     </DoubleAnimationUsingKeyFrames>
                 </Storyboard>
+                <Storyboard x:Key="animateScaleUp"
+                            PresentationOptions:Freeze="True">
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                     From="2"
+                                     To="2.5">
+                        <DoubleAnimation.EasingFunction>
+                            <CircleEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                     From="2"
+                                     To="2.5">
+                        <DoubleAnimation.EasingFunction>
+                            <CircleEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+                <Storyboard x:Key="animateScaleDown"
+                            PresentationOptions:Freeze="True">
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                     From="2.5"
+                                     To="2">
+                        <DoubleAnimation.EasingFunction>
+                             <CircleEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                     From="2.5"
+                                     To="2">
+                        <DoubleAnimation.EasingFunction>
+                             <CircleEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+                <converters:BitmapCreatorConverter x:Key="bitmapCreatorConverter" />
             </Grid.Resources>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -370,10 +407,11 @@
                         </TextBlock>
 
                         <!-- Image -->
-                        <Image Source="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}">
+                        <Image Height="{Binding ElementName=multimediaPreviewBox, Path=ActualHeight}">
                             <Image.Style>
                                 <Style TargetType="{x:Type Image}">
                                     <Setter Property="Visibility" Value="Collapsed" />
+                                    <Setter Property="Source" Value="{StaticResource emptyImage}" />
                                     <Style.Triggers>
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>

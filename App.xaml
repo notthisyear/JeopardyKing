@@ -10,6 +10,8 @@
         <FontFamily x:Key="Cascadia Code">pack://application:,,,/Resources/Fonts/#Cascadia Code</FontFamily>
         <FontFamily x:Key="Lato">pack://application:,,,/Resources/Fonts/#Lato</FontFamily>
 
+        <BitmapImage x:Key="emptyImage" UriSource="/JeopardyKing;component/Resources/empty.png"/>
+
         <!-- Converters -->
         <converters:BooleanToVisibleOrCollapsedConverter x:Key="booleanToVisibleOrCollapsedConverter" />
         <converters:ValueDisplayConverter x:Key="valueDisplayConverter" />

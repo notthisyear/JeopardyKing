@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\empty.png" />
     <None Remove="Resources\Fonts\Lato-Black.ttf" />
     <None Remove="Resources\Fonts\Lato-BlackItalic.ttf" />
     <None Remove="Resources\Fonts\Lato-Bold.ttf" />
@@ -36,12 +37,17 @@
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="116.0.150" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.7.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.18" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\empty.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\Fonts\CascadiaCode-Bold.ttf" />
     <Resource Include="Resources\Fonts\CascadiaCode-BoldItalic.ttf" />
     <Resource Include="Resources\Fonts\CascadiaCode-ExtraLight.ttf" />
