@@ -457,13 +457,31 @@
                             <Grid Background="#01000000"
                                   VerticalAlignment="Stretch"
                                   HorizontalAlignment="Stretch"
-                                  MouseEnter="EnclosingGridMouseEnter"
-                                  MouseLeave="EnclosingGridMouseLeave">
+                                  MouseEnter="EnclosingAudioVideoMouseEnter"
+                                  MouseLeave="EnclosingAudioVideoMouseLeave">
+
+                                <Grid.Resources>
+                                    <Style x:Key="audioButtonPanelStyle" TargetType="{x:Type StackPanel}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Audio}" />
+                                                    <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                                </MultiDataTrigger.Conditions>
+                                                <MultiDataTrigger.Setters>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger.Setters>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Resources>
+
                                 <Button Style="{StaticResource EmptyButton}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Click="PlayOrPauseButtonClicked"
-                                       Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}}">
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Click="PlayOrPauseButtonClicked"
+                                        Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}}">
                                     <Button.Content>
                                         <components:IconBox x:Name="playPauseIcon"
                                                             StrokeThickness="0"
@@ -500,12 +518,12 @@
                             </Grid>
                         </vlc:VideoView>
 
-                        <!-- Youtube link preview -->
+                        <!-- Youtube video -->
                         <wpf:ChromiumWebBrowser>
                             <wpf:ChromiumWebBrowser.Style>
                                 <Style TargetType="{x:Type wpf:ChromiumWebBrowser}">
                                     <Setter Property="Visibility" Value="Collapsed" />
-                                    <Setter Property="Address" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}" />
+                                    <Setter Property="Address" Value="" />
                                     <Style.Triggers>
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
@@ -514,6 +532,7 @@
                                             </MultiDataTrigger.Conditions>
                                             <MultiDataTrigger.Setters>
                                                 <Setter Property="Visibility" Value="Visible" />
+                                                <Setter Property="Address" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}" />
                                             </MultiDataTrigger.Setters>
                                         </MultiDataTrigger>
                                     </Style.Triggers>

@@ -121,10 +121,9 @@ namespace JeopardyKing.WpfComponents
                 ResetMediaPlayer();
 
             if (ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Video ||
-                                 ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Audio)
+                ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Audio)
             {
-                SetMediaPlayerMediaForQuestion(ViewModel.ModeManager.CurrentlySelectedQuestion);
-                playPauseIcon.Visibility = Visibility.Visible;
+                SetMediaPlayerMediaForQuestion(ViewModel.ModeManager.CurrentlySelectedQuestion, true);
             }
         }
 
@@ -190,22 +189,20 @@ namespace JeopardyKing.WpfComponents
 
         private void PlayOrPauseButtonClicked(object sender, RoutedEventArgs e)
         {
+            if (sender is not Button b || b.Content is not IconBox iconBox)
+                return;
+
             if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
                 return;
 
+            iconBox.IconType = audioVideoPlayer.MediaPlayer.IsPlaying ? IconType.Play : IconType.Pause;
             if (!audioVideoPlayer.MediaPlayer.IsPlaying)
-            {
-                playPauseIcon.IconType = IconType.Pause;
                 audioVideoPlayer.MediaPlayer.Play();
-            }
             else
-            {
-                playPauseIcon.IconType = IconType.Play;
                 audioVideoPlayer.MediaPlayer.Pause();
-            }
         }
 
-        private void SetMediaPlayerMediaForQuestion(Question q)
+        private void SetMediaPlayerMediaForQuestion(Question q, bool isFirstTimeLoaded = false)
         {
             if (ViewModel == default || audioVideoPlayer.MediaPlayer == default || string.IsNullOrEmpty(q.MultimediaContentLink))
                 return;
@@ -228,6 +225,8 @@ namespace JeopardyKing.WpfComponents
 
                     if (_libVlcWindow != default)
                         _libVlcWindow.Visibility = Visibility.Visible;
+
+                    playPauseIcon.IconType = IconType.Play;
                     playPauseIcon.Visibility = Visibility.Visible;
                 });
                 media.Dispose();
@@ -240,10 +239,7 @@ namespace JeopardyKing.WpfComponents
                 return;
 
             if (audioVideoPlayer.MediaPlayer.IsPlaying)
-            {
                 audioVideoPlayer.MediaPlayer!.Stop();
-                playPauseIcon.IconType = IconType.Play;
-            }
 
             audioVideoPlayer.MediaPlayer.Media?.Dispose();
             audioVideoPlayer.MediaPlayer.Media = default;
@@ -266,7 +262,7 @@ namespace JeopardyKing.WpfComponents
                     break;
                 }
             }
-         }
+        }
 
         #region Static methods
         private static DoubleAnimation GetEditQuestionXValueAnimation(double to, double from)
@@ -293,12 +289,12 @@ namespace JeopardyKing.WpfComponents
         private static double GetEditQuestionBoxLeft(Thickness boxMargin)
                 => boxMargin.Left;
 
-        private void EnclosingGridMouseEnter(object sender, MouseEventArgs e)
+        private void EnclosingAudioVideoMouseEnter(object sender, MouseEventArgs e)
         {
             playPauseIcon.BeginAnimation(OpacityProperty, GetOpacityAnimation(0.0, 0.5));
         }
 
-        private void EnclosingGridMouseLeave(object sender, MouseEventArgs e)
+        private void EnclosingAudioVideoMouseLeave(object sender, MouseEventArgs e)
         {
             playPauseIcon.BeginAnimation(OpacityProperty, GetOpacityAnimation(0.5, 0.0));
         }
