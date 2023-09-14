@@ -263,14 +263,14 @@
         <Rectangle Height="{Binding Path=Height}"
                    Width="{Binding Path=Width}"
                    Fill="{Binding Path=MainBackgroundColor}"
-                   RadiusX="5"
-                   RadiusY="5"/>
+                   RadiusX="3"
+                   RadiusY="3"/>
         <Rectangle Height="{Binding Path=Height}"
                    Width="{Binding Path=MarkedAreaWidth}"
                    Fill="{Binding Path=MarkedAreaColor}"
                    Canvas.Left="{Binding Path=MarkedAreaCanvasLeft}"
-                   RadiusX="5"
-                   RadiusY="5"/>
+                   RadiusX="3"
+                   RadiusY="3"/>
         <Slider Style="{StaticResource progressSliderStyle}"
                 Width="{Binding Path=Width}"
                 Value="{Binding ProgressMarkerValue, Mode=TwoWay}"
