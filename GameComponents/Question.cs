@@ -169,6 +169,7 @@ namespace JeopardyKing.GameComponents
         #region Public methods
         public void SetMultimediaParameters(string pathToMedia)
         {
+            StartVideoOrAudioAtSeconds = 0;
             MultimediaContentLink = pathToMedia;
             MediaName = Path.GetFileName(pathToMedia);
             HasMediaLink = true;
@@ -204,6 +205,9 @@ namespace JeopardyKing.GameComponents
             MultimediaContentLink = string.Empty;
             YoutubeVideoId = string.Empty;
             OriginalYoutubeUrl = string.Empty;
+            StartVideoOrAudioAtSeconds = 0;
+            EndVideoOrAudioAtSeconds = 0;
+            VideoOrAudioLengthSeconds = 0;
         }
 
         private static string GetYoutubeVideoUrl(string videoId, bool autoplay, bool showControls, int startAtSeconds)

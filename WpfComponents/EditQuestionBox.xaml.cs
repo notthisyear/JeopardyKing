@@ -61,6 +61,17 @@ namespace JeopardyKing.WpfComponents
             typeof(bool),
             typeof(EditQuestionBox),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+
+        public double ProgressBarMarkerPosition
+        {
+            get => (double)GetValue(ProgressBarMarkerPositionProperty);
+            set => SetValue(ProgressBarMarkerPositionProperty, value);
+        }
+        public static readonly DependencyProperty ProgressBarMarkerPositionProperty = DependencyProperty.Register(
+            nameof(ProgressBarMarkerPosition),
+            typeof(double),
+            typeof(EditQuestionBox),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
         #endregion
 
         #region Private fields
@@ -218,7 +229,11 @@ namespace JeopardyKing.WpfComponents
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     if (ViewModel.ModeManager.CurrentlySelectedQuestion != default)
+                    {
                         ViewModel.ModeManager.CurrentlySelectedQuestion.VideoOrAudioLengthSeconds = (int)(media.Duration / 1000.0);
+                        if (isFirstTimeLoaded)
+                            ViewModel.ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds = ViewModel.ModeManager.CurrentlySelectedQuestion.VideoOrAudioLengthSeconds;
+                    }
 
                     if (_libVlcWindow == default)
                         TrySetVlcWindow();

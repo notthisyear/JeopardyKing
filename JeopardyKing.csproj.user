@@ -22,6 +22,12 @@
     <Compile Update="WpfComponents\IconBox.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="WpfComponents\ProgressSliderWithMarkedArea.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="WpfComponents\TwoPartTimeSlider.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Windows\CreateWindow.xaml">
@@ -43,6 +49,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="WpfComponents\IconBox.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="WpfComponents\ProgressSliderWithMarkedArea.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="WpfComponents\TwoPartTimeSlider.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
