@@ -15,8 +15,8 @@ namespace JeopardyKing
                 => ShowUnhandledExceptionDialog((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
             Dispatcher.UnhandledException += (s, e)
                 => ShowUnhandledExceptionDialog(e.Exception, "Dispatcher.UnhandledException");
-            TaskScheduler.UnobservedTaskException += (s, e)
-                => ShowUnhandledExceptionDialog(e.Exception, "TaskScheduler.UnobservedTaskException");
+            //TaskScheduler.UnobservedTaskException += (s, e)
+            //    => ShowUnhandledExceptionDialog(e.Exception, "TaskScheduler.UnobservedTaskException");
 
             var settings = new CefSettings();
             settings.CefCommandLineArgs["autoplay-policy"] = "no-user-gesture-required";

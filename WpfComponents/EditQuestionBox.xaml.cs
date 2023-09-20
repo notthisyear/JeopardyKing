@@ -213,6 +213,18 @@ namespace JeopardyKing.WpfComponents
                 audioVideoPlayer.MediaPlayer.Pause();
         }
 
+        private void AudioVideoSetCursorButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button)
+                return;
+
+            if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
+                return;
+
+            progressSlider.ProgressMarkerValue = progressSlider.AreaStart;
+        }
+
+
         private void SetMediaPlayerMediaForQuestion(Question q, bool isFirstTimeLoaded = false)
         {
             if (ViewModel == default || audioVideoPlayer.MediaPlayer == default || string.IsNullOrEmpty(q.MultimediaContentLink))
@@ -258,6 +270,7 @@ namespace JeopardyKing.WpfComponents
 
             audioVideoPlayer.MediaPlayer.Media?.Dispose();
             audioVideoPlayer.MediaPlayer.Media = default;
+            ProgressBarMarkerPosition = 0.0;
 
             if (_libVlcWindow == default)
                 TrySetVlcWindow();

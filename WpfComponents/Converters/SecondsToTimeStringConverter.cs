@@ -18,7 +18,7 @@ namespace JeopardyKing.WpfComponents.Converters
             else if (value is double d)
                 seconds = (double)d;
             else
-                return 0;
+                return "-";
 
             var numberOfHours = (int)(seconds / SecondsPerHour);
             seconds -= numberOfHours * SecondsPerHour;
