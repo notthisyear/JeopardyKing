@@ -474,6 +474,15 @@
                                                     <Setter Property="Visibility" Value="Visible" />
                                                 </MultiDataTrigger.Setters>
                                             </MultiDataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
+                                                    <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                                </MultiDataTrigger.Conditions>
+                                                <MultiDataTrigger.Setters>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger.Setters>
+                                            </MultiDataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Grid.Resources>
@@ -714,6 +723,15 @@
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
                                             <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Audio}" />
+                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
                                             <Condition Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
