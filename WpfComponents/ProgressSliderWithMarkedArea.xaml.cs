@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using JeopardyKing.WpfComponents.CustomEventArgs;
 
 namespace JeopardyKing.WpfComponents
 {
@@ -39,7 +41,7 @@ namespace JeopardyKing.WpfComponents
             nameof(ProgressMarkerValue),
             typeof(double),
             typeof(ProgressSliderWithMarkedArea),
-            new FrameworkPropertyMetadata(0.5, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, default, ClampToRange));
+            new FrameworkPropertyMetadata(0.5, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, default, ClampToFullRange));
 
         public double AreaStart
         {
@@ -50,7 +52,7 @@ namespace JeopardyKing.WpfComponents
             nameof(AreaStart),
             typeof(double),
             typeof(ProgressSliderWithMarkedArea),
-            new FrameworkPropertyMetadata(0.2, FrameworkPropertyMetadataOptions.AffectsRender, AreaStartChangedCallback, ClampToRange));
+            new FrameworkPropertyMetadata(0.2, FrameworkPropertyMetadataOptions.AffectsRender, AreaStartChangedCallback, ClampLowerToRange));
 
         public double AreaEnd
         {
@@ -61,7 +63,7 @@ namespace JeopardyKing.WpfComponents
             nameof(AreaEnd),
             typeof(double),
             typeof(ProgressSliderWithMarkedArea),
-            new FrameworkPropertyMetadata(0.8, FrameworkPropertyMetadataOptions.AffectsRender, AreaEndChangedCallback, ClampToRange));
+            new FrameworkPropertyMetadata(0.8, FrameworkPropertyMetadataOptions.AffectsRender, AreaEndChangedCallback, ClampUpperToRange));
 
         public SolidColorBrush MainBackgroundColor
         {
@@ -109,18 +111,43 @@ namespace JeopardyKing.WpfComponents
             typeof(ProgressSliderWithMarkedArea),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender));
         private static readonly DependencyProperty s_markedAreaWidthProperty = s_markedAreaWidthPropertyKey.DependencyProperty;
+
+        public bool DragActive
+        {
+            get => (bool)GetValue(s_dragActiveProperty);
+            private set => SetValue(s_dragActivePropertyKey, value);
+        }
+        private static readonly DependencyPropertyKey s_dragActivePropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(DragActive),
+            typeof(bool),
+            typeof(ProgressSliderWithMarkedArea),
+            new FrameworkPropertyMetadata(false));
+        private static readonly DependencyProperty s_dragActiveProperty = s_dragActivePropertyKey.DependencyProperty;
         #endregion
 
         #endregion
 
         #region Property changed and coerce callbacks
-        private static object ClampToRange(DependencyObject d, object baseValue)
+        private static object ClampToFullRange(DependencyObject d, object baseValue)
         {
             if (d is ProgressSliderWithMarkedArea p && baseValue is double val)
                 return Math.Clamp(val, p.Minimum, p.Maximum);
             return baseValue;
         }
 
+        private static object ClampUpperToRange(DependencyObject d, object baseValue)
+        {
+            if (d is ProgressSliderWithMarkedArea p && baseValue is double val)
+                return Math.Clamp(val, p.AreaStart, p.Maximum);
+            return baseValue;
+        }
+
+        private static object ClampLowerToRange(DependencyObject d, object baseValue)
+        {
+            if (d is ProgressSliderWithMarkedArea p && baseValue is double val)
+                return Math.Clamp(val, p.Minimum, p.AreaEnd);
+            return baseValue;
+        }
         private static void AreaStartChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is not ProgressSliderWithMarkedArea p || e.NewValue is not double val)
@@ -154,9 +181,35 @@ namespace JeopardyKing.WpfComponents
         }
 
         #endregion
+
+        public event RoutedEventHandler ProgressMarkerDragDone
+        {
+            add { AddHandler(ProgressMarkerDragDoneEvent, value); }
+            remove { RemoveHandler(ProgressMarkerDragDoneEvent, value); }
+        }
+        public static readonly RoutedEvent ProgressMarkerDragDoneEvent = EventManager.RegisterRoutedEvent(
+            nameof(ProgressMarkerDragDone),
+            RoutingStrategy.Bubble,
+            typeof(RoutedEventHandler),
+            typeof(ProgressSliderWithMarkedArea));
+
         public ProgressSliderWithMarkedArea()
         {
             InitializeComponent();
+        }
+
+        private void ThumbDragStarted(object sender, DragStartedEventArgs e)
+        {
+            DragActive = true;
+        }
+
+        private void ThumbDragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            DragActive = false;
+            if (sender is not Slider s)
+                return;
+
+            RaiseEvent(new ProgressMarkerDragDoneEventArgs(ProgressMarkerDragDoneEvent, s.Value));
         }
     }
 }

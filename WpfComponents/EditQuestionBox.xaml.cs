@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using JeopardyKing.GameComponents;
 using JeopardyKing.ViewModels;
 using JeopardyKing.Windows;
+using JeopardyKing.WpfComponents.CustomEventArgs;
 using LibVLCSharp.Shared;
 
 namespace JeopardyKing.WpfComponents
@@ -121,6 +123,7 @@ namespace JeopardyKing.WpfComponents
                 var mediaPlayer = new VlcMediaPlayer(_libVlc);
                 audioVideoPlayer.MediaPlayer = mediaPlayer;
                 audioVideoPlayer.MediaPlayer.Playing += MediaPlayerPlayingChanged;
+                audioVideoPlayer.MediaPlayer.EndReached += MediaPlayerEndReached;
                 audioVideoPlayer.MediaPlayer.PositionChanged += MediaPlayerPositionChanged;
             }
         }
@@ -210,13 +213,9 @@ namespace JeopardyKing.WpfComponents
 
             iconBox.IconType = audioVideoPlayer.MediaPlayer.IsPlaying ? IconType.Play : IconType.Pause;
             if (!audioVideoPlayer.MediaPlayer.IsPlaying)
-            {
                 audioVideoPlayer.MediaPlayer.Play();
-            }
             else
-            {
                 audioVideoPlayer.MediaPlayer.Pause();
-            }
         }
 
         private void MediaPlayerPlayingChanged(object? sender, EventArgs e)
@@ -226,15 +225,32 @@ namespace JeopardyKing.WpfComponents
                 if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
                     return;
 
-                var mediaPlayer = audioVideoPlayer.MediaPlayer;
-                var progressSliderValue = (long)(progressSlider.ProgressMarkerValue * 1000);
-
                 // Note: Updating LibVLCSharp properties from the same thread that spawned the event can cause
                 //       the app to lock, https://github.com/videolan/libvlcsharp/blob/3.x/docs/best_practices.md
+                var mediaPlayer = audioVideoPlayer.MediaPlayer;
+                var audioTime = (long)(progressSlider.ProgressMarkerValue * 1000);
+                if (mediaPlayer.IsPlaying)
+                    Task.Run(() => SetAudioTime(mediaPlayer, mediaPlayer.Media.Duration, audioTime));
+            });
+        }
+
+        private void MediaPlayerEndReached(object? sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
+                    return;
+
+                playPauseIcon.IconType = IconType.Play;
+                var mediaPlayer = audioVideoPlayer.MediaPlayer;
+                var clipRangeStart = progressSlider.AreaStart;
+                if (!progressSlider.DragActive)
+                    progressSlider.ProgressMarkerValue = clipRangeStart;
+
                 Task.Run(() =>
                 {
-                    if (mediaPlayer.IsPlaying)
-                        mediaPlayer.Time = Math.Min(mediaPlayer.Media.Duration, progressSliderValue);
+                    mediaPlayer.Stop();
+                    SetAudioTime(mediaPlayer, mediaPlayer.Media.Duration, (long)(1000 * clipRangeStart));
                 });
             });
         }
@@ -243,7 +259,11 @@ namespace JeopardyKing.WpfComponents
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                progressSlider.ProgressMarkerValue = progressSlider.Maximum * e.Position;
+                if (!progressSlider.DragActive)
+                    progressSlider.ProgressMarkerValue = progressSlider.Maximum * e.Position;
+
+                if (progressSlider.ProgressMarkerValue >= progressSlider.AreaEnd)
+                    MediaPlayerEndReached(this, EventArgs.Empty);
             });
         }
 
@@ -252,10 +272,26 @@ namespace JeopardyKing.WpfComponents
             if (sender is not Button)
                 return;
 
+            SetAudioOrProgressSliderPosition(progressSlider.AreaStart);
+        }
+
+        private void ProgressSliderDragDone(object sender, RoutedEventArgs e)
+        {
+            if (e is not ProgressMarkerDragDoneEventArgs eventArgs)
+                return;
+
+            SetAudioOrProgressSliderPosition(eventArgs.ProgressMarkerValue);
+        }
+
+        private void SetAudioOrProgressSliderPosition(double position)
+        {
             if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
                 return;
 
-            progressSlider.ProgressMarkerValue = progressSlider.AreaStart;
+            if (audioVideoPlayer.MediaPlayer.IsPlaying)
+                SetAudioTime(audioVideoPlayer.MediaPlayer, audioVideoPlayer.MediaPlayer.Media.Duration, (long)(1000 * position));
+            else
+                progressSlider.ProgressMarkerValue = position;
         }
 
         private void SetMediaPlayerMediaForQuestion(Question q, bool isFirstTimeLoaded = false)
@@ -325,6 +361,11 @@ namespace JeopardyKing.WpfComponents
         }
 
         #region Static methods
+        private static void SetAudioTime(VlcMediaPlayer mediaPlayer, long mediaDurationMs, long newTimeMs)
+        {
+            mediaPlayer.Time = Math.Min(mediaDurationMs, newTimeMs);
+        }
+
         private static DoubleAnimation GetEditQuestionXValueAnimation(double to, double from)
         {
             return new DoubleAnimation

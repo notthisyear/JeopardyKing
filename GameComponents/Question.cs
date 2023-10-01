@@ -114,13 +114,23 @@ namespace JeopardyKing.GameComponents
         public int StartVideoOrAudioAtSeconds
         {
             get => _startVideoOrAudioAtSeconds;
-            set => SetProperty(ref _startVideoOrAudioAtSeconds, value);
+            set
+            {
+                if (value > EndVideoOrAudioAtSeconds)
+                    return;
+                SetProperty(ref _startVideoOrAudioAtSeconds, value);
+            }
         }
 
         public int EndVideoOrAudioAtSeconds
         {
             get => _endVideoOrAudioAtSeconds;
-            set => SetProperty(ref _endVideoOrAudioAtSeconds, value);
+            set
+            {
+                if (value < StartVideoOrAudioAtSeconds)
+                    return;
+                SetProperty(ref _endVideoOrAudioAtSeconds, value);
+            }
         }
 
         public string Content
