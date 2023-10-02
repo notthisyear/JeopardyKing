@@ -28,25 +28,32 @@ namespace JeopardyKing.Windows
 
         private void TitleBarButtonPressed(object sender, RoutedEventArgs e)
         {
-            if (e is TitleBarButtonClickedEventArgs eventArgs)
+            if (e is not TitleBarButtonClickedEventArgs eventArgs)
+                return;
+
+            switch (eventArgs.ButtonClicked)
             {
-                switch (eventArgs.ButtonClicked)
-                {
-                    case TitleBarButton.Minimize:
-                        WindowState = WindowState.Minimized;
-                        break;
-                    case TitleBarButton.Maximize:
-                        WindowState = WindowState.Maximized;
-                        break;
-                    case TitleBarButton.Restore:
-                        WindowState = WindowState.Normal;
-                        break;
-                    case TitleBarButton.Close:
-                        ViewModel.NotifyWindowClosed();
-                        Close();
-                        break;
-                };
-            }
+                case TitleBarButton.Minimize:
+                    WindowState = WindowState.Minimized;
+                    break;
+                case TitleBarButton.Maximize:
+                    WindowState = WindowState.Maximized;
+                    break;
+                case TitleBarButton.Restore:
+                    WindowState = WindowState.Normal;
+                    break;
+                case TitleBarButton.Close:
+                    ViewModel.NotifyWindowClosed();
+                    Close();
+                    break;
+            };
+        }
+
+        private void MenuItemButtonPressed(object sender, RoutedEventArgs e)
+        {
+            if (e is not MenuItemButtonClickedEventArgs eventArgs)
+                return;
+            ViewModel.MenuItemPressed(eventArgs.ItemClicked);
         }
 
         private void CreateWindowKeyDown(object sender, KeyEventArgs e)

@@ -551,8 +551,8 @@
                                         <components:TwoPartTimeSlider Width="260"
                                                                   Minimum="0"
                                                                   Maximum="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.VideoOrAudioLengthSeconds}"
-                                                                  LowerValue="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds, Mode=TwoWay}"
-                                                                  UpperValue="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds, Mode=TwoWay}"
+                                                                  LowerValue="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds}"
+                                                                  UpperValue="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds}"
                                                                   Margin="0,0,0,5">
                                             <components:TwoPartTimeSlider.Style>
                                                 <Style TargetType="{x:Type components:TwoPartTimeSlider}">
@@ -748,8 +748,8 @@
                                     Margin="0,0,5,0">
                             <TextBlock.Text>
                                 <MultiBinding Converter="{StaticResource clipLengthToTimeConverter}">
-                                    <Binding ElementName="progressSlider" Path="AreaStart" />
-                                    <Binding ElementName="progressSlider" Path="AreaEnd" />
+                                    <Binding Path="ViewModel.ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds" />
+                                    <Binding Path="ViewModel.ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds" />
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>

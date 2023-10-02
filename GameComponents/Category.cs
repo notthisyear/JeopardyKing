@@ -5,6 +5,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using JeopardyKing.Common;
+using Newtonsoft.Json;
 
 namespace JeopardyKing.GameComponents
 {
@@ -13,10 +14,8 @@ namespace JeopardyKing.GameComponents
         #region Public properties
 
         #region Backing fields
-        public string _title = string.Empty;
+        private string _title = string.Empty;
         #endregion
-
-        public ObservableCollection<Question> Questions { get; }
 
         public string Title
         {
@@ -25,12 +24,16 @@ namespace JeopardyKing.GameComponents
         }
 
         public int Id { get; }
+
+        public ObservableCollection<Question> Questions { get; }
+
         public const int MaxNumberOfQuestions = 5;
         #endregion
 
         #region Commands
         private RelayCommand? _addQuestionCommand;
 
+        [JsonIgnore]
         public ICommand AddQuestionCommand
         {
             get

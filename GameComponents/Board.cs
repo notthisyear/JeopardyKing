@@ -1,12 +1,23 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Data;
+using CommunityToolkit.Mvvm.ComponentModel;
 using JeopardyKing.Common;
 
 namespace JeopardyKing.GameComponents
 {
-    public class Board
+    public class Board : ObservableObject
     {
+        #region Backing fields
+        private string _gameName = string.Empty;
+        #endregion
+
+        public string GameName
+        {
+            get => _gameName;
+            set => SetProperty(ref _gameName, value);
+        }
+
         public ObservableCollection<Category> Categories { get; }
 
         public const int MaxNumberOfCategories = 6;

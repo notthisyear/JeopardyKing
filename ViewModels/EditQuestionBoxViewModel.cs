@@ -205,8 +205,11 @@ namespace JeopardyKing.ViewModels
                 if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)
                 {
                     SelectedCurrency = _currencyTypeMap[ModeManager.CurrentlySelectedQuestion.Currency];
-                    StartVideoAtMinutes = ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds / 60;
-                    StartVideoAtSeconds = ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds - (StartVideoAtMinutes * 60);
+                    if (ModeManager.CurrentlySelectedQuestion.Type == QuestionType.YoutubeVideo)
+                    {
+                        StartVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) / 60;
+                        StartVideoAtSeconds = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) - (StartVideoAtMinutes * 60);
+                    }
                     ModeManager.CurrentlySelectedQuestion.PropertyChanged += CurrentlySelectedQuestionPropertyChanged;
                 }
             };

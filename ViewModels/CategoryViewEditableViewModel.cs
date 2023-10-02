@@ -113,7 +113,6 @@ namespace JeopardyKing.ViewModels
         public CategoryViewEditableViewModel(CreateWindowModeManager modeManager)
         {
             _modeManager = modeManager;
-
         }
     }
 }

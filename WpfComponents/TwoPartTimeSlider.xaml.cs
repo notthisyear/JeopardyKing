@@ -38,7 +38,7 @@ namespace JeopardyKing.WpfComponents
             nameof(LowerValue),
             typeof(double),
             typeof(TwoPartTimeSlider),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender, LowerValueChangedCallback, LowerValueCoerceCallback));
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, LowerValueChangedCallback, LowerValueCoerceCallback));
 
         public double UpperValue
         {
@@ -49,7 +49,7 @@ namespace JeopardyKing.WpfComponents
             nameof(UpperValue),
             typeof(double),
             typeof(TwoPartTimeSlider),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender, UpperValueChangedCallback, UpperValueCoerceCallback));
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, UpperValueChangedCallback, UpperValueCoerceCallback));
 
         public double Difference
         {
@@ -91,7 +91,7 @@ namespace JeopardyKing.WpfComponents
         {
             if (d is not TwoPartTimeSlider target || baseValue is not double val)
                 return baseValue;
-            return Math.Min(val, target.UpperValue);
+            return Math.Min(val, target.UpperValue <= 0 ? target.Maximum : target.UpperValue);
         }
 
         private static object UpperValueCoerceCallback(DependencyObject d, object baseValue)

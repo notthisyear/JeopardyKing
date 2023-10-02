@@ -39,9 +39,11 @@
                 <components:CreateGameWindowTitleBar x:Name="titleBar"
                                                      Grid.Row="0"
                                                      ApplicationDescription="{x:Static viewmodels:CreateWindowViewModel.ProgramDescription}"
+                                                     Title="{Binding Path=ViewModel.GameBoard.GameName}"
                                                      CurrentWindowState="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}, Path=WindowState}"
                                                      ShowMaximizeButton="True"
-                                                     TitleBarButtonPressed="TitleBarButtonPressed">
+                                                     TitleBarButtonPressed="TitleBarButtonPressed"
+                                                     MenuItemButtonPressed="MenuItemButtonPressed">
                     <components:CreateGameWindowTitleBar.Style>
                         <Style TargetType="{x:Type components:CreateGameWindowTitleBar}">
                             <Setter Property="CanAddNewCategory" Value="True" />

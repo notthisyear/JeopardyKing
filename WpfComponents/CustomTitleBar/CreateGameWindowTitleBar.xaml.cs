@@ -173,19 +173,19 @@ namespace JeopardyKing.WpfComponents
 
         private void SaveMenuItemPressed(object sender, RoutedEventArgs e)
         {
-            var eventArgs = new MenuItemButtonClickedEventArgs(TitleBarButtonPressedEvent, MenuItemButton.Save);
+            var eventArgs = new MenuItemButtonClickedEventArgs(MenuItemButtonPressedEvent, MenuItemButton.Save);
             RaiseEvent(eventArgs);
         }
 
         private void SaveAsMenuItemPressed(object sender, RoutedEventArgs e)
         {
-            var eventArgs = new MenuItemButtonClickedEventArgs(TitleBarButtonPressedEvent, MenuItemButton.SaveAs);
+            var eventArgs = new MenuItemButtonClickedEventArgs(MenuItemButtonPressedEvent, MenuItemButton.SaveAs);
             RaiseEvent(eventArgs);
         }
 
         private void OpenMenuItemPressed(object sender, RoutedEventArgs e)
         {
-            var eventArgs = new MenuItemButtonClickedEventArgs(TitleBarButtonPressedEvent, MenuItemButton.Open);
+            var eventArgs = new MenuItemButtonClickedEventArgs(MenuItemButtonPressedEvent, MenuItemButton.Open);
             RaiseEvent(eventArgs);
         }
 
@@ -194,7 +194,7 @@ namespace JeopardyKing.WpfComponents
 
         private void AddCategoryMenuItemPressed(object sender, RoutedEventArgs e)
         {
-            var eventArgs = new MenuItemButtonClickedEventArgs(TitleBarButtonPressedEvent, MenuItemButton.AddCategory);
+            var eventArgs = new MenuItemButtonClickedEventArgs(MenuItemButtonPressedEvent, MenuItemButton.AddCategory);
             RaiseEvent(eventArgs);
         }
     }

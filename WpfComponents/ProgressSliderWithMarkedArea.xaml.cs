@@ -52,7 +52,7 @@ namespace JeopardyKing.WpfComponents
             nameof(AreaStart),
             typeof(double),
             typeof(ProgressSliderWithMarkedArea),
-            new FrameworkPropertyMetadata(0.2, FrameworkPropertyMetadataOptions.AffectsRender, AreaStartChangedCallback, ClampLowerToRange));
+            new FrameworkPropertyMetadata(0.2, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AreaStartChangedCallback, ClampLowerToRange));
 
         public double AreaEnd
         {
@@ -63,7 +63,7 @@ namespace JeopardyKing.WpfComponents
             nameof(AreaEnd),
             typeof(double),
             typeof(ProgressSliderWithMarkedArea),
-            new FrameworkPropertyMetadata(0.8, FrameworkPropertyMetadataOptions.AffectsRender, AreaEndChangedCallback, ClampUpperToRange));
+            new FrameworkPropertyMetadata(0.8, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AreaEndChangedCallback, ClampUpperToRange));
 
         public SolidColorBrush MainBackgroundColor
         {
@@ -145,7 +145,7 @@ namespace JeopardyKing.WpfComponents
         private static object ClampLowerToRange(DependencyObject d, object baseValue)
         {
             if (d is ProgressSliderWithMarkedArea p && baseValue is double val)
-                return Math.Clamp(val, p.Minimum, p.AreaEnd);
+                return Math.Clamp(val, p.Minimum, p.AreaEnd <= p.Minimum ? p.Maximum : p.AreaEnd);
             return baseValue;
         }
         private static void AreaStartChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)

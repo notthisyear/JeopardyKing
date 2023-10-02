@@ -2,6 +2,8 @@
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using JeopardyKing.Common;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace JeopardyKing.GameComponents
 {
@@ -30,8 +32,8 @@ namespace JeopardyKing.GameComponents
         private bool _hasMediaLink = false;
         private string _mediaName = string.Empty;
         private int _videoOrAudioLengthSeconds = 0;
-        private int _startVideoOrAudioAtSeconds = 0;
-        private int _endVideoOrAudioAtSeconds = 0;
+        private double _startVideoOrAudioAtSeconds = 0.0;
+        private double _endVideoOrAudioAtSeconds = 0.0;
         private bool _isEmbeddedMedia;
         private string _content = string.Empty;
         private string _multimediaContentLink = string.Empty;
@@ -42,12 +44,14 @@ namespace JeopardyKing.GameComponents
 
         public int CategoryId { get; }
 
+        [JsonIgnore]
         public bool IsAnswered
         {
             get => _isAnswered;
             private set => SetProperty(ref _isAnswered, value);
         }
 
+        [JsonIgnore]
         public bool IsBeingEdited
         {
             get => _isBeingEdited;
@@ -66,6 +70,7 @@ namespace JeopardyKing.GameComponents
             set => SetProperty(ref _value, value);
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public QuestionType Type
         {
             get => _type;
@@ -81,6 +86,7 @@ namespace JeopardyKing.GameComponents
             }
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public CurrencyType Currency
         {
             get => _currency;
@@ -111,18 +117,19 @@ namespace JeopardyKing.GameComponents
             set => SetProperty(ref _videoOrAudioLengthSeconds, value);
         }
 
-        public int StartVideoOrAudioAtSeconds
+        public double StartVideoOrAudioAtSeconds
         {
             get => _startVideoOrAudioAtSeconds;
             set
             {
-                if (value > EndVideoOrAudioAtSeconds)
+                // We do not know the length of Youtube videos
+                if (Type != QuestionType.YoutubeVideo && value > EndVideoOrAudioAtSeconds)
                     return;
                 SetProperty(ref _startVideoOrAudioAtSeconds, value);
             }
         }
 
-        public int EndVideoOrAudioAtSeconds
+        public double EndVideoOrAudioAtSeconds
         {
             get => _endVideoOrAudioAtSeconds;
             set
@@ -201,7 +208,7 @@ namespace JeopardyKing.GameComponents
             if (Type != QuestionType.Video || string.IsNullOrEmpty(YoutubeVideoId))
                 return;
 
-            MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, StartVideoOrAudioAtSeconds);
+            MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, (int)StartVideoOrAudioAtSeconds);
         }
 
         #endregion
