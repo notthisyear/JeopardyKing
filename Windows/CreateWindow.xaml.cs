@@ -62,9 +62,9 @@ namespace JeopardyKing.Windows
             //       question, the question box will disappear while the question
             //       remains highlighted. This can perhaps be considered a bug, but
             //       it's so minor that we'll leave it for now.
-            if (e.Key == Key.Escape && ViewModel.ModeManager.CurrentState == CreateWindowState.EditingQuestion)
+            if (e.Key == Key.Escape && ViewModel.ModeManager.CurrentState == QuestionVisualState.QuestionSelected)
             {
-                ViewModel.ModeManager.SetSelectedQuestionEditStatus(false);
+                ViewModel.ModeManager.SetQuestionSelectedStatus(false);
                 ViewModel.ModeManager.SetQuestionHighlightedStatus(false);
             }
         }

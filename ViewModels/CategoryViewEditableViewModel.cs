@@ -29,11 +29,11 @@ namespace JeopardyKing.ViewModels
                         {
                             if (x == ModalWindowButton.OK && c != default)
                             {
-                                if (_modeManager.CurrentlySelectedQuestion != default &&
-                                _modeManager.CurrentlySelectedQuestion.CategoryId == c.Id)
+                                if (ModeManager.CurrentlySelectedQuestion != default &&
+                                ModeManager.CurrentlySelectedQuestion.CategoryId == c.Id)
                                 {
-                                    _modeManager.SetSelectedQuestionEditStatus(false);
-                                    _modeManager.DeselectQuestion();
+                                    ModeManager.SetQuestionSelectedStatus(false);
+                                    ModeManager.DeselectQuestion();
                                 }
                                 c?.DeleteCategory();
                             }

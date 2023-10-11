@@ -12,7 +12,7 @@ namespace JeopardyKing.GameComponents
 
         #region Backing fields
         private bool _isAnswered = false;
-        private bool _isBeingEdited = false;
+        private bool _isSelected = false;
         private string _categoryName = string.Empty;
         private decimal _value;
         private QuestionType _type;
@@ -42,10 +42,10 @@ namespace JeopardyKing.GameComponents
         }
 
         [JsonIgnore]
-        public bool IsBeingEdited
+        public bool IsSelected
         {
-            get => _isBeingEdited;
-            set => SetProperty(ref _isBeingEdited, value);
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
         }
 
         public string CategoryName
@@ -92,13 +92,13 @@ namespace JeopardyKing.GameComponents
         public bool HasMediaLink
         {
             get => _hasMediaLink;
-            private set => SetProperty(ref _hasMediaLink, value);
+            set => SetProperty(ref _hasMediaLink, value);
         }
 
         public string MediaName
         {
             get => _mediaName;
-            private set => SetProperty(ref _mediaName, value);
+            set => SetProperty(ref _mediaName, value);
         }
 
         public int VideoOrAudioLengthSeconds
@@ -139,22 +139,22 @@ namespace JeopardyKing.GameComponents
         public bool IsEmbeddedMedia
         {
             get => _isEmbeddedMedia;
-            private set => SetProperty(ref _isEmbeddedMedia, value);
+            set => SetProperty(ref _isEmbeddedMedia, value);
         }
 
         public string MultimediaContentLink
         {
             get => _multimediaContentLink;
-            private set => SetProperty(ref _multimediaContentLink, value);
+            set => SetProperty(ref _multimediaContentLink, value);
         }
 
         public string YoutubeVideoId
         {
             get => _youtubeVideoId;
-            private set => SetProperty(ref _youtubeVideoId, value);
+            set => SetProperty(ref _youtubeVideoId, value);
         }
 
-        public string OriginalYoutubeUrl { get; private set; } = string.Empty;
+        public string OriginalYoutubeUrl { get; set; } = string.Empty;
         #endregion
 
         #region Private fields
@@ -193,6 +193,7 @@ namespace JeopardyKing.GameComponents
             HasMediaLink = true;
             StartVideoOrAudioAtSeconds = 0;
         }
+
         public void RefreshYoutubeVideoUrl(bool autoplay, bool showControls)
         {
             if (Type != QuestionType.Video || string.IsNullOrEmpty(YoutubeVideoId))
@@ -200,7 +201,6 @@ namespace JeopardyKing.GameComponents
 
             MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, (int)StartVideoOrAudioAtSeconds);
         }
-
         #endregion
 
         #region Private methods

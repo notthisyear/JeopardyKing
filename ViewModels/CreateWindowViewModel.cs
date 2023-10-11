@@ -14,7 +14,7 @@ namespace JeopardyKing.ViewModels
         #region Public properties
         public Board GameBoard { get; }
 
-        public CreateWindowModeManager ModeManager { get; }
+        public QuestionModeManager ModeManager { get; }
 
         public EditQuestionBoxViewModel EditQuestionViewModel { get; }
 

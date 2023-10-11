@@ -57,7 +57,7 @@ namespace JeopardyKing.ViewModels
             }
         }
 
-        public CreateWindowModeManager ModeManager { get; }
+        public QuestionModeManager ModeManager { get; }
 
         public List<string> CurrencyNames { get; }
         #endregion
