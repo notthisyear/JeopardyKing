@@ -138,7 +138,7 @@ namespace JeopardyKing.WpfComponents
         private static object ClampUpperToRange(DependencyObject d, object baseValue)
         {
             if (d is ProgressSliderWithMarkedArea p && baseValue is double val)
-                return Math.Clamp(val, p.AreaStart, p.Maximum);
+                return Math.Clamp(val, p.AreaStart >= p.Maximum ? p.Minimum : p.AreaStart, p.Maximum);
             return baseValue;
         }
 

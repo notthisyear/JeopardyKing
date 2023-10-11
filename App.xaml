@@ -17,6 +17,7 @@
         <converters:ValueDisplayConverter x:Key="valueDisplayConverter" />
         <converters:StringShortenerConverter x:Key="stringShortenerConverter" />
         <converters:SecondsToTimeStringConverter x:Key="secondsToTimeStringConverter" />
+        <converters:QuestionToIconTypeConverter x:Key="questionToIconTypeConverter" />
 
         <!-- Background colors-->
         <Color x:Key="MainBackgroundRaw" A="255" R="59" G="59" B="59" />

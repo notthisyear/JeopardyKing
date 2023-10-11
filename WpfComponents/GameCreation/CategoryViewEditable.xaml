@@ -174,7 +174,11 @@
         </Border>
 
         <!-- Questions -->
-        <ItemsControl Grid.Row="1"
+        <components:DetailedQuestionVisualizer Grid.Row="1"
+                                               Questions="{Binding Path=Category.Questions}" 
+                                               ViewModel="{Binding Path=ViewModel}"
+                                               ValueFontSize="30" />
+        <!--<ItemsControl Grid.Row="1"
                       ItemsSource="{Binding Path=Category.Questions}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -221,16 +225,14 @@
                                             <Setter Property="Foreground" Value="{StaticResource MainMouseOverColor}" />
                                         </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding Path=IsBeingEdited}" Value="True">
+                                        <DataTrigger Binding="{Binding Path=IsSelected}" Value="True">
                                             <Setter Property="Foreground" Value="{StaticResource MainHighlightColor}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-
-                                <converters:QuestionToIconTypeConverter x:Key="questionToIconTypeConverter" />
                             </StackPanel.Resources>
 
-                            <!-- Icons -->
+                            --><!-- Icons --><!--
                             <StackPanel Orientation="Horizontal"
                                          HorizontalAlignment="Center"
                                          VerticalAlignment="Center">
@@ -296,7 +298,7 @@
                                 </components:IconBox>
                             </StackPanel>
 
-                            <!-- Question value-->
+                            --><!-- Question value--><!--
                             <TextBlock Style="{StaticResource questionCard}"
                                        VerticalAlignment="Bottom"
                                        HorizontalAlignment="Center"
@@ -312,6 +314,6 @@
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        </ItemsControl>-->
     </Grid>
 </UserControl>

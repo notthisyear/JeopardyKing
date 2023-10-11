@@ -145,18 +145,18 @@ namespace JeopardyKing.WpfComponents
 
         private void ModeManagerPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is not CreateWindowModeManager modeManager)
+            if (sender is not QuestionModeManager modeManager)
                 return;
 
             if (e.PropertyName == nameof(modeManager.CurrentState))
             {
-                if (modeManager.CurrentState == CreateWindowState.NothingSelected)
+                if (modeManager.CurrentState == QuestionVisualState.NothingSelected)
                 {
                     BeginAnimation(EditQuestionOpacityValueProperty, GetOpacityAnimation(EditQuestionOpacityValue, 0.0));
                     return;
                 }
 
-                if (modeManager.CurrentState == CreateWindowState.QuestionHighlighted)
+                if (modeManager.CurrentState == QuestionVisualState.QuestionHighlighted)
                 {
                     BeginAnimation(EditQuestionOpacityValueProperty, GetOpacityAnimation(EditQuestionOpacityValue, 0.95));
                     var shouldBeToTheLeft = EditQuestionBoxShouldBeToTheLeft(Application.Current.MainWindow.ActualWidth);

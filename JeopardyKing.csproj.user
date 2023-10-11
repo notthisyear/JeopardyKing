@@ -16,19 +16,25 @@
     <Compile Update="Windows\StartupWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="WpfComponents\CategoryViewEditable.xaml.cs">
+    <Compile Update="WpfComponents\Common\DetailedQuestionVisualizer.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="WpfComponents\EditQuestionBox.xaml.cs">
+    <Compile Update="WpfComponents\GameCreation\CategoryViewEditable.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="WpfComponents\IconBox.xaml.cs">
+    <Compile Update="WpfComponents\GameCreation\EditQuestionBox.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="WpfComponents\ProgressSliderWithMarkedArea.xaml.cs">
+    <Compile Update="WpfComponents\Common\IconBox.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="WpfComponents\TwoPartTimeSlider.xaml.cs">
+    <Compile Update="WpfComponents\Common\ProgressSliderWithMarkedArea.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="WpfComponents\GameManager\QuestionOverview.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="WpfComponents\Common\TwoPartTimeSlider.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -45,22 +51,31 @@
     <Page Update="Windows\StartupWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="WpfComponents\CategoryViewEditable.xaml">
+    <Page Update="WpfComponents\Common\DetailedQuestionVisualizer.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="WpfComponents\GameManager\CategoryViewGameManager.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="WpfComponents\GameCreation\CategoryViewEditable.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="WpfComponents\CustomTitleBar\CreateGameWindowTitleBar.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="WpfComponents\EditQuestionBox.xaml">
+    <Page Update="WpfComponents\GameCreation\EditQuestionBox.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="WpfComponents\IconBox.xaml">
+    <Page Update="WpfComponents\Common\IconBox.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="WpfComponents\ProgressSliderWithMarkedArea.xaml">
+    <Page Update="WpfComponents\Common\ProgressSliderWithMarkedArea.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="WpfComponents\TwoPartTimeSlider.xaml">
+    <Page Update="WpfComponents\GameManager\QuestionOverview.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="WpfComponents\Common\TwoPartTimeSlider.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

@@ -78,7 +78,6 @@
                 </ItemsControl>
 
                 <!-- Edit question box -->
-                <!--QuestionDeletionRequest="QuestionDeletionRequest"-->
                 <components:EditQuestionBox ViewModel="{Binding Path=ViewModel.EditQuestionViewModel}"
                                             Grid.Row="1"
                                             HorizontalAlignment="Left"
