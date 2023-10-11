@@ -8,16 +8,19 @@ namespace JeopardyKing.Windows
         public StartupWindow()
         {
             InitializeComponent();
-            CreateButtonClick(this, new());
+            PlayButtonClick(this, new());
         }
 
         private void PlayButtonClick(object sender, RoutedEventArgs e)
         {
-            var createWindow = new PlayWindow { ViewModel = new() };
-            Application.Current.MainWindow = createWindow;
-            createWindow.Show();
+            var playWindow = new PlayWindow { ViewModel = new() };
+            var gameManagerWindow = new GameManagerWindow(playWindow) { ViewModel = new() };
+            Application.Current.MainWindow = gameManagerWindow;
+            gameManagerWindow.Show();
+            playWindow.Show();
             Close();
         }
+
         private void CreateButtonClick(object sender, RoutedEventArgs e)
         {
             var createWindow = new CreateWindow { ViewModel = new() };

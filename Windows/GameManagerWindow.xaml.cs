@@ -4,26 +4,29 @@ using JeopardyKing.WpfComponents;
 
 namespace JeopardyKing.Windows
 {
-    public partial class PlayWindow : Window
+    public partial class GameManagerWindow : Window
     {
-        public PlayWindowViewModel ViewModel
+        public GameManagerViewModel ViewModel
         {
-            get => (PlayWindowViewModel)GetValue(ViewModelProperty);
+            get => (GameManagerViewModel)GetValue(ViewModelProperty);
             set => SetValue(ViewModelProperty, value);
         }
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
             nameof(ViewModel),
-            typeof(PlayWindowViewModel),
-            typeof(PlayWindow),
+            typeof(GameManagerViewModel),
+            typeof(GameManagerWindow),
             new FrameworkPropertyMetadata(null));
 
+        private readonly Window _playWindow;
 
-        public PlayWindow()
+        public GameManagerWindow(Window playWindow)
         {
             InitializeComponent();
 
             MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
             MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
+
+            _playWindow = playWindow;
         }
 
         private void TitleBarButtonPressed(object sender, RoutedEventArgs e)
@@ -43,6 +46,7 @@ namespace JeopardyKing.Windows
                         break;
                     case TitleBarButton.Close:
                         ViewModel.NotifyWindowClosed();
+                        _playWindow.Close();
                         Close();
                         break;
                 };
