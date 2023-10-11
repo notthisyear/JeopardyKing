@@ -1,19 +1,15 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using JeopardyKing.GameComponents;
 using JeopardyKing.Windows;
 
 namespace JeopardyKing.ViewModels
 {
-    public partial class CategoryViewEditableViewModel : ObservableObject
+    public class CategoryViewEditableViewModel : CategoryViewViewModel
     {
         #region Commands
         private RelayCommand<Category>? _deleteCategoryCommand;
-        private RelayCommand<Question>? _mouseEnterQuestionCardCommand;
-        private RelayCommand? _mouseLeaveQuestionCardCommand;
-        private RelayCommand<Question>? _mouseClickQuestionCardCommand;
 
         public ICommand DeleteCategoryCommand
         {
@@ -44,75 +40,9 @@ namespace JeopardyKing.ViewModels
                 return _deleteCategoryCommand;
             }
         }
-
-        public ICommand MouseEnterQuestionCardCommand
-        {
-            get
-            {
-                _mouseEnterQuestionCardCommand ??= new RelayCommand<Question>(q =>
-                {
-                    if (_modeManager.CurrentState != CreateWindowState.NothingSelected)
-                        return;
-
-                    _modeManager.SetQuestionHighlightedStatus(true, q);
-                });
-                return _mouseEnterQuestionCardCommand;
-            }
-        }
-
-        public ICommand MouseLeaveQuestionCardCommand
-        {
-            get
-            {
-                _mouseLeaveQuestionCardCommand ??= new RelayCommand(() =>
-                {
-                    if (_modeManager.CurrentState != CreateWindowState.EditingQuestion)
-                        _modeManager.SetQuestionHighlightedStatus(false);
-                });
-                return _mouseLeaveQuestionCardCommand;
-            }
-        }
-
-        public ICommand MouseClickQuestionCardCommand
-        {
-            get
-            {
-                _mouseClickQuestionCardCommand ??= new RelayCommand<Question>(q =>
-                {
-                    if (_modeManager.CurrentState != CreateWindowState.EditingQuestion)
-                    {
-                        _modeManager.SetSelectedQuestionEditStatus(true);
-                    }
-                    else
-                    {
-                        if (_modeManager.CurrentlySelectedQuestion == q)
-                        {
-                            _modeManager.SetSelectedQuestionEditStatus(false);
-                            _modeManager.SetQuestionHighlightedStatus(true, q);
-                        }
-                        else
-                        {
-                            if (_modeManager.CurrentlySelectedQuestion != default)
-                                _modeManager.SetSelectedQuestionEditStatus(false);
-
-                            // Setting it to highlight in between ensures that the edit box moves to the correct place
-                            _modeManager.SetQuestionHighlightedStatus(true, q);
-                            _modeManager.SetSelectedQuestionEditStatus(true);
-                        }
-                    }
-                });
-                return _mouseClickQuestionCardCommand;
-            }
-        }
         #endregion
 
-        #region Private fields        
-        private readonly CreateWindowModeManager _modeManager;
-        #endregion
-
-        public CategoryViewEditableViewModel(CreateWindowModeManager modeManager)
-        {
-            _modeManager = modeManager;
-        }
+        public CategoryViewEditableViewModel(QuestionModeManager modeManager) : base(modeManager)
+        { }
     }
 }
