@@ -187,19 +187,15 @@ namespace JeopardyKing.ViewModels
             _currencyTypeMap = new();
             CurrencyNames = new();
 
-            foreach (var t in Enum.GetValues<CurrencyType>())
+            EnumerationUtilities.ActOnEnumMembersWithAttribute<CurrencyType, CurrencyAttribute>((c, a) =>
             {
-                var (attr, _) = t.GetCustomAttributeFromEnum<CurrencyAttribute>();
-                if (attr != default)
-                {
-                    var displayName = $"{attr.Name} ({attr.Code})";
-                    CurrencyNames!.Add(displayName);
-                    _currencyNameMap.Add(displayName, t);
-                    _currencyTypeMap.Add(t, displayName);
-                }
-            }
-
+                var displayName = $"{a.Name} ({a.Code})";
+                CurrencyNames!.Add(displayName);
+                _currencyNameMap.Add(displayName, c);
+                _currencyTypeMap.Add(c, displayName);
+            });
             SelectedCurrency = CurrencyNames.First();
+
             ModeManager.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)

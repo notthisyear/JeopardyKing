@@ -4,7 +4,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using JeopardyKing.Common;
 using Newtonsoft.Json;
 
 namespace JeopardyKing.GameComponents

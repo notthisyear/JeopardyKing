@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
-using JeopardyKing.Common;
 
 namespace JeopardyKing.GameComponents
 {

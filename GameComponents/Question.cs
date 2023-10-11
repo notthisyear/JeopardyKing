@@ -1,21 +1,11 @@
 ﻿using System;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
-using JeopardyKing.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace JeopardyKing.GameComponents
 {
-    public enum QuestionType
-    {
-        Text,
-        Image,
-        Audio,
-        Video,
-        YoutubeVideo
-    }
-
     public class Question : ObservableObject
     {
         #region Public properties

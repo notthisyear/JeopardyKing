@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
 using JeopardyKing.Common;
+using JeopardyKing.GameComponents;
 
 namespace JeopardyKing.WpfComponents.Converters
 {

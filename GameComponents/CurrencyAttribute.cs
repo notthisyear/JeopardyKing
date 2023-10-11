@@ -1,17 +1,7 @@
 ﻿using System;
 
-namespace JeopardyKing.Common
+namespace JeopardyKing.GameComponents
 {
-    public enum CurrencyType
-    {
-        [Currency("Svenska kronor", "sv-SE", "SEK")]
-        SwedishKrona,
-        [Currency("United States dollar", "en-US", "USD")]
-        AmericanDollar,
-        [Currency("Euro", "en-FR", "EUR")]
-        Euro
-    }
-
     [AttributeUsage(AttributeTargets.Field)]
     public class CurrencyAttribute : Attribute
     {
@@ -27,5 +17,15 @@ namespace JeopardyKing.Common
             CultureTag = cultureTag;
             Code = code;
         }
+    }
+
+    public enum CurrencyType
+    {
+        [Currency("Svenska kronor", "sv-SE", "SEK")]
+        SwedishKrona,
+        [Currency("United States dollar", "en-US", "USD")]
+        AmericanDollar,
+        [Currency("Euro", "en-FR", "EUR")]
+        Euro
     }
 }

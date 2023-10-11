@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using JeopardyKing.GameComponents;
 
 namespace JeopardyKing.Common
 {
@@ -22,6 +23,17 @@ namespace JeopardyKing.Common
                 return (attr, default);
             else
                 return (default, new ArgumentException($"{value} does not have attribute '{typeof(T)}'"));
+        }
+
+        public static void ActOnEnumMembersWithAttribute<TEnum, TAttr>(Action<TEnum, TAttr> action) where TEnum : struct, Enum
+                                                                                             where TAttr : Attribute
+        {
+            foreach (var t in Enum.GetValues<TEnum>())
+            {
+                var (attr, _) = t.GetCustomAttributeFromEnum<TAttr>();
+                if (attr != default)
+                    action(t, attr);
+            }
         }
     }
 }
