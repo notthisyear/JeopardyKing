@@ -1,0 +1,221 @@
+﻿<UserControl x:Class="JeopardyKing.WpfComponents.QuestionOverview"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:game="clr-namespace:JeopardyKing.GameComponents"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel VerticalAlignment="Center"
+                DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=.}"
+                Orientation="Vertical">
+        <StackPanel.Resources>
+
+            <Style x:Key="questionDataLabel" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                <Setter Property="FontStyle" Value="Italic" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=SelectedQuestion.IsAnswered}" Value="True">
+                        <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="questionDataValue" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="FontSize" Value="18" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=SelectedQuestion.IsAnswered}" Value="True">
+                        <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="mediaQuestionEntries" TargetType="{x:Type Grid}">
+                <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=SelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Path=SelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="youtubeQuestionEntries" TargetType="{x:Type Grid}">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=SelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </StackPanel.Resources>
+
+        <!-- Question value -->
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock  Grid.Column="0"
+                    Style="{StaticResource questionDataLabel}"
+                    Text="Value:"/>
+            <TextBlock  Grid.Column="1"
+                    Style="{StaticResource questionDataValue}">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource valueDisplayConverter}">
+                        <Binding Path="SelectedQuestion.Value" />
+                        <Binding Path="SelectedQuestion.Currency" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </Grid>
+
+        <!-- Question type -->
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                    Style="{StaticResource questionDataLabel}"
+                    Text="Type:"/>
+            <TextBlock  Grid.Column="1"
+                    Style="{StaticResource questionDataValue}"
+                    Text="{Binding Path=SelectedQuestion.Type}"/>
+        </Grid>
+
+        <!-- Is bonus -->
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                Style="{StaticResource questionDataLabel}"
+                Text="Is bonus:"/>
+            <TextBlock  Grid.Column="1">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource questionDataValue}">
+                        <Setter Property="Text" Value="No" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=SelectedQuestion.IsBonus}" Value="True">
+                                <Setter Property="Text" Value="Yes" />
+                                <Setter Property="Foreground" Value="{StaticResource MainSuccessColor}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+
+        <!-- Media link -->
+        <Grid Margin="0,0,0,10"
+              Style="{StaticResource mediaQuestionEntries}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock  Grid.Column="0"
+                        Style="{StaticResource questionDataLabel}"
+                        Text="File name:"/>
+            <TextBlock  Grid.Column="1"
+                        Style="{StaticResource questionDataValue}"
+                        Text="{Binding Path=SelectedQuestion.MediaName}"
+                        TextWrapping="Wrap"
+                        ToolTip="{Binding Path=SelectedQuestion.MultimediaContentLink}"/>
+        </Grid>
+
+        <!-- Time information -->
+        <Grid Margin="0,0,0,10">
+            <Grid.Style>
+                <Style TargetType="{x:Type Grid}" BasedOn="{StaticResource mediaQuestionEntries}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=SelectedQuestion.Type}" Value="{x:Static game:QuestionType.Image}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock  Grid.Column="0"
+                Style="{StaticResource questionDataLabel}"
+                Text="Media clip:"/>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal">
+                <TextBlock Style="{StaticResource questionDataValue}"
+                           Text="{Binding Path=SelectedQuestion.StartVideoOrAudioAtSeconds, Converter={StaticResource secondsToTimeStringConverter}}" />
+                <TextBlock Style="{StaticResource questionDataValue}"
+                           Text=" - "/>
+                <TextBlock Style="{StaticResource questionDataValue}"
+                           Text="{Binding Path=SelectedQuestion.EndVideoOrAudioAtSeconds, Converter={StaticResource secondsToTimeStringConverter}}" />
+            </StackPanel>
+        </Grid>
+        
+        <!-- Youtube clip info -->
+        <Grid Margin="0,0,0,10"
+              Style="{StaticResource youtubeQuestionEntries}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock  Grid.Column="0"
+                        Style="{StaticResource questionDataLabel}"
+                        Text="YouTube ID:"/>
+            <TextBlock Grid.Column="1"
+                        Style="{StaticResource questionDataValue}"
+                        Text="{Binding Path=SelectedQuestion.YoutubeVideoId}"
+                        ToolTip="{Binding Path=SelectedQuestion.OriginalYoutubeUrl}"/>
+        </Grid>
+
+        <!-- Youtube clip start-->
+        <Grid Margin="0,0,0,10"
+                Style="{StaticResource youtubeQuestionEntries}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock  Grid.Column="0"
+                Style="{StaticResource questionDataLabel}"
+                Text="Start at:"/>
+            <TextBlock Grid.Column="1"
+                Style="{StaticResource questionDataValue}"
+                Text="{Binding Path=SelectedQuestion.StartVideoOrAudioAtSeconds, Converter={StaticResource secondsToTimeStringConverter}}"/>
+        </Grid>
+
+        <!-- Content -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Style="{StaticResource questionDataLabel}"
+                       Text="Content:"/>
+            <TextBlock  Grid.Column="1"
+                        Style="{StaticResource questionDataValue}"
+                        FontSize="14"
+                        FontWeight="Regular"
+                        Text="{Binding Path=SelectedQuestion.Content}"
+                        TextWrapping="Wrap"/>
+        </Grid>
+
+        <Button Margin="0,30,0,0"
+                Content="Start question">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
+                    <Setter Property="IsEnabled" Value="False" />
+                    <Setter Property="ToolTip" Value="Question already answered" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=SelectedQuestion.IsAnswered}" Value="False">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Setter Property="ToolTip" Value="Click to start the question" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+    </StackPanel>
+</UserControl>
