@@ -83,6 +83,7 @@ namespace JeopardyKing.WpfComponents
 
         private const string LibVlcWindowTitle = "LibVLCSharp.WPF";
         private Window? _libVlcWindow;
+        private bool _isClearingMediaQuestion = false;
 
         public EditQuestionBox()
         {
@@ -219,6 +220,9 @@ namespace JeopardyKing.WpfComponents
 
         private void MediaPlayerPlayingChanged(object? sender, EventArgs e)
         {
+            if (_isClearingMediaQuestion)
+                return;
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
@@ -235,6 +239,9 @@ namespace JeopardyKing.WpfComponents
 
         private void MediaPlayerEndReached(object? sender, EventArgs e)
         {
+            if (_isClearingMediaQuestion)
+                return;
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
@@ -256,6 +263,9 @@ namespace JeopardyKing.WpfComponents
 
         private void MediaPlayerPositionChanged(object? sender, MediaPlayerPositionChangedEventArgs e)
         {
+            if (_isClearingMediaQuestion)
+                return;
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 if (!progressSlider.DragActive)
@@ -332,8 +342,10 @@ namespace JeopardyKing.WpfComponents
             if (audioVideoPlayer.MediaPlayer == default)
                 return;
 
+            _isClearingMediaQuestion = true;
+
             if (audioVideoPlayer.MediaPlayer.IsPlaying)
-                audioVideoPlayer.MediaPlayer!.Stop();
+                audioVideoPlayer.MediaPlayer.Stop();
 
             audioVideoPlayer.MediaPlayer.Media?.Dispose();
             audioVideoPlayer.MediaPlayer.Media = default;
@@ -345,6 +357,8 @@ namespace JeopardyKing.WpfComponents
             if (_libVlcWindow != default)
                 _libVlcWindow.Visibility = Visibility.Collapsed;
             playPauseIcon.Visibility = Visibility.Collapsed;
+
+            _isClearingMediaQuestion = false;
         }
 
         private void TrySetVlcWindow()
