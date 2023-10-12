@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="JeopardyKing.WpfComponents.PlayerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewmodels="clr-namespace:JeopardyKing.ViewModels"
+             xmlns:components="clr-namespace:JeopardyKing.WpfComponents">
+    
+    <StackPanel Orientation="Horizontal">
+        <StackPanel.Style>
+            <Style TargetType="{x:Type StackPanel}">
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=ViewModel.Players.Count}" Value="0">
+                        <Setter Property="HorizontalAlignment" Value="Center" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </StackPanel.Style>
+        
+        <ItemsControl ItemsSource="{Binding Path=ViewModel.Players}"
+                      HorizontalAlignment="Stretch">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="{StaticResource BackgroundColorDarkerShade}"
+                            CornerRadius="5"
+                            BorderThickness="2"
+                            Margin="10,5,10,5"
+                            Padding="5"
+                            HorizontalAlignment="Stretch"
+                            MinWidth="120">
+
+                        <components:PlayerCard CurrentPlayer="{Binding Path=.}"
+                                               ViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.ViewModel}"/>
+
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Height="60"
+                Margin="5"
+                Command="{Binding Path=ViewModel.AddPlayerCommand}"
+                Content="Add player"
+                FontWeight="Bold"
+                FontSize="16">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
+                    <Setter Property="IsEnabled" Value="True"/>
+                    <Setter Property="ToolTip" Value="Click to add an additional player" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=ViewModel.Players.Count}" Value="{x:Static viewmodels:GameManagerViewModel.MaxNumberOfPlayers}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                            <Setter Property="ToolTip" Value="Cannot add more players - maximum reached" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+    </StackPanel>
+</UserControl>

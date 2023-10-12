@@ -1,0 +1,162 @@
+﻿<UserControl x:Class="JeopardyKing.WpfComponents.PlayerCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules">
+    
+    <Grid DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=.}"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Stretch"
+          Background="#01000000">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Path=CurrentPlayer.Name}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"
+                   FontSize="14"
+                   Margin="0,0,0,5">
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=NameIsBeingEdited}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <TextBox x:Name="editNameBox"
+                 Grid.Row="0"
+                 Margin="10,0,10,5"
+                 FontSize="14"
+                 VerticalContentAlignment="Center"
+                 HorizontalContentAlignment="Center"
+                 VerticalAlignment="Bottom"
+                 PreviewKeyDown="KeyPressedEditBox">
+            <TextBox.Text>
+                <Binding Path="CurrentPlayer.Name"
+                         Mode="TwoWay"
+                         UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <validation:TextLengthValidationRule Min="1"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+            <TextBox.Style>
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MainTextBoxStyleBase}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Setter Property="ToolTip" Value="Enter name of player" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=NameIsBeingEdited}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <Trigger Property="Validation.HasError" Value="true">
+                            <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)/ErrorContent}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
+
+        <TextBlock Grid.Row="1"
+               Text="{Binding Path=CurrentPlayer.Cash}"
+               HorizontalAlignment="Center"
+               Style="{StaticResource MainTextBlockStyle}"
+               FontSize="24"/>
+
+        <StackPanel Grid.Row="2"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Top"
+                     Orientation="Horizontal">
+            <StackPanel.Style>
+                <Style TargetType="{x:Type StackPanel}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}, Path=IsMouseOver}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <Button ToolTip="Click to edit player name"
+                     Style="{StaticResource EmptyButton}"
+                     Click="EditPlayerButtonClicked"
+                    Margin="0,0,20,0">
+                <Button.Content>
+                    <TextBlock Text="&#xE70F;">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource SymbolButtonStyle}">
+                                <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
+                                <Setter Property="FontSize" Value="16" />
+                                <Setter Property="FontWeight" Value="Regular" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource MainMouseOverColor}" />
+                                        <Setter Property="FontSize" Value="18" />
+                                        <Setter Property="FontWeight" Value="ExtraBold" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button.Content>
+            </Button>
+
+            <Button ToolTip="Click to assign button"
+                      Style="{StaticResource EmptyButton}"
+                      Click="EditPlayerButtonClicked"
+                     Margin="0,0,20,0">
+                <Button.Content>
+                    <TextBlock Text="&#xE765;">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource SymbolButtonStyle}">
+                                <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
+                                <Setter Property="FontSize" Value="16" />
+                                <Setter Property="FontWeight" Value="Regular" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource MainMouseOverColor}" />
+                                        <Setter Property="FontSize" Value="18" />
+                                        <Setter Property="FontWeight" Value="ExtraBold" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button.Content>
+            </Button>
+
+            <Button  Style="{StaticResource EmptyButton}"
+                     ToolTip="Click to remove player"
+                     Command="{Binding Path=ViewModel.RemovePlayerCommand}"
+                     CommandParameter="{Binding Path=CurrentPlayer}">
+                <Button.Content>
+                    <TextBlock Text="&#xE711;">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource SymbolButtonStyle}">
+                                <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
+                                <Setter Property="FontSize" Value="16" />
+                                <Setter Property="FontWeight" Value="Regular" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource MainErrorColor}" />
+                                        <Setter Property="FontSize" Value="18" />
+                                        <Setter Property="FontWeight" Value="ExtraBold" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button.Content>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

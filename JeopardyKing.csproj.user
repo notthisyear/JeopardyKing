@@ -31,6 +31,12 @@
     <Compile Update="WpfComponents\Common\ProgressSliderWithMarkedArea.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="WpfComponents\GameManager\PlayerCard.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="WpfComponents\GameManager\PlayerPanel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="WpfComponents\GameManager\QuestionOverview.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -70,6 +76,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="WpfComponents\Common\ProgressSliderWithMarkedArea.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="WpfComponents\GameManager\PlayerCard.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="WpfComponents\GameManager\PlayerPanel.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="WpfComponents\GameManager\QuestionOverview.xaml">

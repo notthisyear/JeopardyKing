@@ -120,6 +120,7 @@
                             </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
+                    <!-- Question overview -->
                     <components:QuestionOverview  Grid.Row="1"
                                                   Grid.Column="1"
                                                   Margin="10,0,10,0"
@@ -140,6 +141,15 @@
                             </Style>
                         </components:QuestionOverview.Style>
                     </components:QuestionOverview>
+
+                    <Border Grid.Row="2"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Background="{StaticResource BackgroundColorDarkerShadeWithOpacity}"
+                            CornerRadius="5"
+                            Margin="5">
+                        <components:PlayerPanel />
+                    </Border>
                 </Grid>
             </Grid>
         </Border>
