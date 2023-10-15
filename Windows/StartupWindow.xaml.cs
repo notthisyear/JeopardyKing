@@ -16,8 +16,10 @@ namespace JeopardyKing.Windows
             var playWindow = new PlayWindow { ViewModel = new() };
             var gameManagerWindow = new GameManagerWindow(playWindow) { ViewModel = new() };
             Application.Current.MainWindow = gameManagerWindow;
+
             gameManagerWindow.Show();
             playWindow.Show();
+
             Close();
         }
 

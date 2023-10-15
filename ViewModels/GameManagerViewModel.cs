@@ -1,4 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -12,6 +15,8 @@ using Ookii.Dialogs.Wpf;
 
 namespace JeopardyKing.ViewModels
 {
+    using InputManager = JeopardyKing.InputRaw.InputManager;
+
     public class GameManagerViewModel : ObservableObject
     {
         #region Public properties
@@ -95,7 +100,7 @@ namespace JeopardyKing.ViewModels
                         if (Players.Count == MaxNumberOfPlayers)
                             return;
                         var playerName = $"Player {Players.Count + 1}";
-                        Players.Add(new(playerName));
+                        Players.Add(new(_playerIdCounter++, playerName));
                     }
                 });
                 return _addPlayerCommand;
@@ -153,6 +158,13 @@ namespace JeopardyKing.ViewModels
             Multiselect = false,
         };
         private readonly object _playersAccessLock = new();
+        private readonly InputManager _inputManager;
+        private readonly ConcurrentQueue<InputManager.KeyboardEvent> _eventQueue = new();
+        private readonly Thread _inputThread;
+        private int _playerIdCounter = 0;
+        private bool _shouldExit = false;
+        private bool _windowHandleSet = false;
+        private IntPtr _windowHandle;
         #endregion
 
         public GameManagerViewModel()
@@ -160,11 +172,44 @@ namespace JeopardyKing.ViewModels
             QuestionModeManager = new();
             CategoryViewModel = new(QuestionModeManager);
             Players = new();
+
+            _inputThread = new(MonitorInputThread) { IsBackground = true };
+            _inputManager = new(_eventQueue);
+            _ = _inputManager.TryEnumerateKeyboardDevices(out _);
+            _inputThread.Start();
+
             BindingOperations.EnableCollectionSynchronization(Players, _playersAccessLock);
+        }
+
+        public void SetApplicationWindowHandle(IntPtr handle)
+        {
+            _windowHandle = handle;
+            _windowHandleSet = true;
         }
 
         public void NotifyWindowClosed()
         {
+            _shouldExit = true;
+        }
+
+        private void MonitorInputThread(object? state)
+        {
+            while (!_shouldExit)
+            {
+                Thread.Sleep(50);
+                if (!_windowHandleSet)
+                    continue;
+
+                if (!_inputManager.InputHookSet)
+                {
+                    _ = _inputManager.TryRegisterWindowForKeyboardInput(_windowHandle, out _);
+                    continue;
+                }
+
+                if (_eventQueue.TryDequeue(out _))
+                {
+                }
+            }
         }
     }
 }
