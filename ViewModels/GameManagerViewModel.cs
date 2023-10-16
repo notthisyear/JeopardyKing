@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Linq;
 using System.Threading;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -44,7 +45,6 @@ namespace JeopardyKing.ViewModels
             get => _buttonAssignmentOngoing;
             private set => SetProperty(ref _buttonAssignmentOngoing, value);
         }
-
 
         public QuestionModeManager QuestionModeManager { get; }
 
@@ -113,6 +113,9 @@ namespace JeopardyKing.ViewModels
             {
                 _assignPlayerCommand ??= new RelayCommand<Player>(p =>
                 {
+                    if (p == default)
+                        return;
+
                     var hasLock = Monitor.TryEnter(_playersAccessLock);
                     if (!hasLock)
                         return;
@@ -123,6 +126,36 @@ namespace JeopardyKing.ViewModels
                         Monitor.Exit(_playersAccessLock);
                         return;
                     }
+
+                    SelectButtonPopupModal buttonSelectionDialog = new(Application.Current.MainWindow,
+                        p.Name,
+                        (deviceId, key) =>
+                        {
+                            _ = _inputManager.TryAddPlayerKeyMapping(p.Id, deviceId, key);
+                        });
+
+                    _eventAction = e =>
+                    {
+                        if (e.Event == InputManager.KeyEvent.KeyDown)
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                buttonSelectionDialog.LastEvent = e;
+                                buttonSelectionDialog.LastKeyPressed = e.Key.ToString();
+                                if (_inputManager.TryGetInformationForKeyboard(e.SourceId, out var info))
+                                    buttonSelectionDialog.LastPressedSource = $"{info!.DeviceDescription} [{info!.KeyboardType}] ({e.SourceId})";
+                                else
+                                    buttonSelectionDialog.LastPressedSource = $"Unknown source ({e.SourceId})";
+                            });
+                        }
+                    };
+
+                    _inputManager.SetPropagationMode(InputManager.PropagationMode.All);
+
+                    _ = buttonSelectionDialog.ShowDialog();
+
+                    _inputManager.SetPropagationMode(InputManager.PropagationMode.OnlyMappedKeys);
+                    _eventAction = default;
 
                     ButtonAssignmentOngoing = true;
                     ButtonAssignmentOngoing = false;
@@ -161,10 +194,9 @@ namespace JeopardyKing.ViewModels
         private readonly InputManager _inputManager;
         private readonly ConcurrentQueue<InputManager.KeyboardEvent> _eventQueue = new();
         private readonly Thread _inputThread;
+        private Action<InputManager.KeyboardEvent>? _eventAction;
         private int _playerIdCounter = 0;
         private bool _shouldExit = false;
-        private bool _windowHandleSet = false;
-        private IntPtr _windowHandle;
         #endregion
 
         public GameManagerViewModel()
@@ -174,17 +206,11 @@ namespace JeopardyKing.ViewModels
             Players = new();
 
             _inputThread = new(MonitorInputThread) { IsBackground = true };
+            _inputThread.Start();
             _inputManager = new(_eventQueue);
             _ = _inputManager.TryEnumerateKeyboardDevices(out _);
-            _inputThread.Start();
 
             BindingOperations.EnableCollectionSynchronization(Players, _playersAccessLock);
-        }
-
-        public void SetApplicationWindowHandle(IntPtr handle)
-        {
-            _windowHandle = handle;
-            _windowHandleSet = true;
         }
 
         public void NotifyWindowClosed()
@@ -196,19 +222,16 @@ namespace JeopardyKing.ViewModels
         {
             while (!_shouldExit)
             {
+                if (_eventQueue.TryDequeue(out var newKeyEvent))
+                {
+                    if (_eventAction != default)
+                        _eventAction(newKeyEvent);
+
+                    var player = Players.FirstOrDefault(x => x.Id == newKeyEvent.PlayerId);
+                    if (player != default)
+                        player.IsPressingKey = newKeyEvent.Event == InputManager.KeyEvent.KeyDown;
+                }
                 Thread.Sleep(50);
-                if (!_windowHandleSet)
-                    continue;
-
-                if (!_inputManager.InputHookSet)
-                {
-                    _ = _inputManager.TryRegisterWindowForKeyboardInput(_windowHandle, out _);
-                    continue;
-                }
-
-                if (_eventQueue.TryDequeue(out _))
-                {
-                }
             }
         }
     }

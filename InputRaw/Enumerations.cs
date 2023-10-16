@@ -2,7 +2,7 @@
 
 namespace JeopardyKing.InputRaw
 {
-    internal class Enumerations
+    public class Enumerations
     {
         public enum RawInputDeviceType : uint
         {

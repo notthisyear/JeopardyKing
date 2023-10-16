@@ -33,6 +33,16 @@
                             Padding="5"
                             HorizontalAlignment="Stretch"
                             MinWidth="120">
+                        <Border.Style>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="Background" Value="#01000000" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=IsPressingKey}" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource PrimaryColor}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
 
                         <components:PlayerCard CurrentPlayer="{Binding Path=.}"
                                                ViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.ViewModel}"/>

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Interop;
+﻿using System.Windows;
 using JeopardyKing.ViewModels;
 using JeopardyKing.WpfComponents;
 
@@ -29,15 +27,6 @@ namespace JeopardyKing.Windows
             MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
 
             _playWindow = playWindow;
-
-            Loaded += WindowLoaded;
-        }
-
-        private void WindowLoaded(object? sender, EventArgs e)
-        {
-            Loaded -= WindowLoaded;
-            var interopHelper = new WindowInteropHelper(this);
-            ViewModel.SetApplicationWindowHandle(interopHelper.Handle);
         }
 
         private void TitleBarButtonPressed(object sender, RoutedEventArgs e)

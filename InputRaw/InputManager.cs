@@ -2,13 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Interop;
-using JeopardyKing.InputRaw.InternalTypes;
+using JeopardyKing.Communication;
 using static JeopardyKing.InputRaw.Enumerations;
 
 namespace JeopardyKing.InputRaw
 {
-    internal class InputManager
+    internal class InputManager : IDisposable
     {
         public enum KeyEvent
         {
@@ -31,9 +30,12 @@ namespace JeopardyKing.InputRaw
 
         #region Private fields
         private readonly ConcurrentQueue<KeyboardEvent> _eventQueue;
-        private readonly Dictionary<long, DeviceInfoBase> _knownKeyboards;
+        private readonly Dictionary<long, KeyboardDeviceInfo> _knownKeyboards;
         private readonly Dictionary<long, Dictionary<KeyboardScanCode, int>> _playerButtonMap;
+        private readonly Dictionary<int, List<(long deviceId, KeyboardScanCode key)>> _playerMappingLookup;
         private PropagationMode _propagationMode;
+        private bool _disposedValue;
+        private readonly UdpBroadcastListener _listener;
         #endregion
 
         public InputManager(ConcurrentQueue<KeyboardEvent> eventQueue)
@@ -41,6 +43,8 @@ namespace JeopardyKing.InputRaw
             _eventQueue = eventQueue;
             _knownKeyboards = new();
             _playerButtonMap = new();
+            _playerMappingLookup = new();
+            _listener = new(HandleNewMessage);
             SetPropagationMode(PropagationMode.None);
         }
 
@@ -71,86 +75,95 @@ namespace JeopardyKing.InputRaw
             {
                 _knownKeyboards.Clear();
                 foreach (var device in deviceInfo)
-                    _knownKeyboards.Add(device.Device.DeviceId, device);
+                    _knownKeyboards.Add(device.Device.DeviceId, (KeyboardDeviceInfo)device);
             }
 
             return string.IsNullOrEmpty(errorMessage);
         }
 
-        public bool TryRegisterWindowForKeyboardInput(IntPtr windowHandle, out string errorMessage)
-        {
-            var success = WinApiWrapper.TryRegisterInputDevice(windowHandle,
-                UsagePageAndIdBase.GetGenericDesktopControlUsagePageAndFlag(HidGenericDesktopControls.HID_USAGE_GENERIC_KEYBOARD),
-                out errorMessage,
-                DeviceRegistrationModeFlag.RIDEV_NOLEGACY, DeviceRegistrationModeFlag.RIDEV_INPUTSINK);
+        public bool TryGetInformationForKeyboard(long keyboardId, out KeyboardDeviceInfo? deviceInfo)
+            => _knownKeyboards.TryGetValue(keyboardId, out deviceInfo);
 
-            if (success)
-            {
-                var source = HwndSource.FromHwnd(windowHandle);
-                source.AddHook(InputEventHook);
-                InputHookSet = true;
-            }
-            return success;
-        }
-
-        public bool TryAddPlayerKeyMapping(int playerId, long sourceId, KeyboardScanCode key)
+        public bool TryAddPlayerKeyMapping(int playerId, long deviceId, KeyboardScanCode key)
         {
-            if (!_playerButtonMap.ContainsKey(sourceId))
-                _playerButtonMap.Add(sourceId, new());
+            if (!_playerButtonMap.ContainsKey(deviceId))
+                _playerButtonMap.Add(deviceId, new());
 
 #pragma warning disable CA1854 // This warning is emitted incorrectly
-            if (_playerButtonMap[sourceId].ContainsKey(key))
+            if (_playerButtonMap[deviceId].ContainsKey(key))
 #pragma warning restore CA1854
                 return false;
 
-            _playerButtonMap[sourceId].Add(key, playerId);
+            _playerButtonMap[deviceId].Add(key, playerId);
+            if (!_playerMappingLookup.ContainsKey(playerId))
+                _playerMappingLookup.Add(playerId, new());
+
+            _playerMappingLookup[playerId].Add((deviceId, key));
             return true;
         }
 
-        public void RemovePlayerKeyMappingIfNeeded(int playerId, long sourceId, KeyboardScanCode key)
+        public void RemovePlayerKeyMappingIfNeeded(int playerId, long deviceId, KeyboardScanCode key)
         {
-            if (!_playerButtonMap.ContainsKey(sourceId))
+            if (!_playerButtonMap.ContainsKey(deviceId))
                 return;
 
-            if (_playerButtonMap[sourceId].TryGetValue(key, out var id) && id == playerId)
-                _playerButtonMap[sourceId].Remove(key);
+            if (_playerButtonMap[deviceId].TryGetValue(key, out var id) && id == playerId)
+            {
+                _playerButtonMap[deviceId].Remove(key);
+                if (!_playerButtonMap[deviceId].Any())
+                    _playerButtonMap.Remove(deviceId);
+            }
+
+            _playerMappingLookup[playerId].Remove((deviceId, key));
+            if (!_playerMappingLookup[playerId].Any())
+                _playerMappingLookup.Remove(playerId);
         }
         #endregion
 
         #region Private methods
-        private IntPtr InputEventHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        private void HandleNewMessage(byte[] msg)
         {
-            if (msg == WinApiWrapper.WM_INPUT)
+            if (_propagationMode == PropagationMode.None)
+                return;
+
+            if (msg.Length != 11)
+                return;
+
+            long deviceId = 0;
+            for (var i = 0; i < 8; i++)
+                deviceId |= ((long)msg[i + 1]) << (i * 8);
+            var key = (KeyboardScanCode)((ushort)(msg[9] | (msg[10] << 8)));
+
+            var hasMapping = KeyHasMapping(deviceId, key);
+            var playerId = hasMapping ? _playerButtonMap[deviceId][key] : -1;
+
+            if (_propagationMode == PropagationMode.All || hasMapping)
             {
-                if (_propagationMode == PropagationMode.None)
-                    return IntPtr.Zero;
-
-                if (!WinApiWrapper.TryGetRawInput(lParam, out var input, out _))
-                    return IntPtr.Zero;
-
-                if (input is RawKeyboardInput keyboardInput)
-                {
-                    var hasMapping = KeyHasMapping(keyboardInput.Header.DeviceHandle, keyboardInput.ScanCode);
-                    var playerId = hasMapping ? _playerButtonMap[keyboardInput.Header.DeviceHandle][keyboardInput.ScanCode] : -1;
-
-                    if (_propagationMode == PropagationMode.All || hasMapping)
-                    {
-                        _eventQueue.Enqueue(
-                            new KeyboardEvent(keyboardInput.IsKeyUp ? KeyEvent.KeyUp : KeyEvent.KeyDown,
-                            keyboardInput.Header.DeviceHandle,
-                            keyboardInput.ScanCode,
-                            playerId));
-
-                        if (_propagationMode == PropagationMode.OnlyMappedKeys)
-                            handled = true;
-                    }
-                }
+                KeyboardEvent newEvent = new(msg[0] == 0 ? KeyEvent.KeyUp : KeyEvent.KeyDown, deviceId, key, playerId);
+                _eventQueue.Enqueue(newEvent);
             }
-            return IntPtr.Zero;
         }
 
         private bool KeyHasMapping(long deviceId, KeyboardScanCode scanCode)
             => _playerButtonMap.ContainsKey(deviceId) && _playerButtonMap[deviceId].ContainsKey(scanCode);
+        #endregion
+
+        #region Disposal
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                    _listener.Dispose();
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
         #endregion
     }
 }
