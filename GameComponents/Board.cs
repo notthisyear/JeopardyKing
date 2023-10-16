@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace JeopardyKing.GameComponents
 {
@@ -9,12 +11,20 @@ namespace JeopardyKing.GameComponents
     {
         #region Backing fields
         private string _gameName = string.Empty;
+        private CurrencyType _currency = DefaultCurrencyType;
         #endregion
 
         public string GameName
         {
             get => _gameName;
             set => SetProperty(ref _gameName, value);
+        }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public CurrencyType Currency
+        {
+            get => _currency;
+            set => SetProperty(ref _currency, value);
         }
 
         public ObservableCollection<Category> Categories { get; }
@@ -41,7 +51,7 @@ namespace JeopardyKing.GameComponents
                 {
                     var category = CreateNewCategory();
                     for (var j = 0; j < DefaultNumberOfQuestionPerCategory; j++)
-                        category.AddQuestion(QuestionType.Text, DefaultStartingValue + (j * DefaultIncreasePerQuestion), DefaultCurrencyType);
+                        category.AddQuestion(QuestionType.Text, DefaultStartingValue + (j * DefaultIncreasePerQuestion), Currency);
                     AddCategory(category);
                 }
             }
@@ -86,7 +96,7 @@ namespace JeopardyKing.GameComponents
             {
                 if (string.IsNullOrEmpty(name))
                     name = $"Category {Categories.Count + 1}";
-                c = new(_categoryIdCounter++, this, name, DefaultIncreasePerQuestion, DefaultCurrencyType);
+                c = new(_categoryIdCounter++, this, name, DefaultIncreasePerQuestion);
             }
             return c!;
         }

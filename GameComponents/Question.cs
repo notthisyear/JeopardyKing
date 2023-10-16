@@ -76,7 +76,7 @@ namespace JeopardyKing.GameComponents
             }
         }
 
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonIgnore]
         public CurrencyType Currency
         {
             get => _currency;

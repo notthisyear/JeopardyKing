@@ -151,6 +151,9 @@ namespace JeopardyKing.WpfComponents
             RaiseEvent(eventArgs);
         }
 
+        // TODO: When pressing the same menu item again, the menu should close.
+        //       Right now, it closes and the immediately opens again.
+        //       Figure out fix for that.
         private void FileMenuItemPressed(object sender, RoutedEventArgs e)
         {
             if (sender is not Button b || mainGrid.FindResource("fileMenu") is not ContextMenu menu)

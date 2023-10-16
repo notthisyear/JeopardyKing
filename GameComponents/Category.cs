@@ -47,16 +47,14 @@ namespace JeopardyKing.GameComponents
         private int _questionIdCounter = 0;
         private readonly Board _board;
         private readonly decimal _defaultIncreasePerQuestion;
-        private readonly CurrencyType _defaultCurrencyType;
 
-        public Category(int id, Board board, string title, decimal defaultIncreasePerQuestion, CurrencyType defaultCurrencyType)
+        public Category(int id, Board board, string title, decimal defaultIncreasePerQuestion)
         {
             Id = id;
             _board = board;
             Title = title;
 
             _defaultIncreasePerQuestion = defaultIncreasePerQuestion;
-            _defaultCurrencyType = defaultCurrencyType;
             Questions = new();
             BindingOperations.EnableCollectionSynchronization(Questions, _questionsLock);
         }
@@ -73,7 +71,7 @@ namespace JeopardyKing.GameComponents
             decimal newValue;
             lock (_questionsLock)
                 newValue = Questions.Any() ? Questions.Last().Value + _defaultIncreasePerQuestion : _defaultIncreasePerQuestion;
-            AddQuestion(QuestionType.Text, newValue, _defaultCurrencyType);
+            AddQuestion(QuestionType.Text, newValue, _board.Currency);
         }
 
         public void AddQuestion(QuestionType type, decimal value, CurrencyType currencyType)

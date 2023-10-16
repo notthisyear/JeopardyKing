@@ -19,21 +19,9 @@ namespace JeopardyKing.ViewModels
         #region Public properties
 
         #region Backing fields
-        private string _selectedCurrency = string.Empty;
         private int _startVideoAtMinutes = 0;
         private int _startVideoAtSeconds = 0;
         #endregion
-
-        public string SelectedCurrency
-        {
-            get => _selectedCurrency;
-            set
-            {
-                if (ModeManager.CurrentlySelectedQuestion != default)
-                    ModeManager.CurrentlySelectedQuestion.Currency = _currencyNameMap[value];
-                SetProperty(ref _selectedCurrency, value);
-            }
-        }
 
         public int StartVideoAtMinutes
         {
@@ -172,9 +160,7 @@ namespace JeopardyKing.ViewModels
         }
         #endregion
 
-        #region Private fields        
-        private readonly Dictionary<string, CurrencyType> _currencyNameMap;
-        private readonly Dictionary<CurrencyType, string> _currencyTypeMap;
+        #region Private fields
         private readonly CreateWindowViewModel _createWindowViewModel;
         #endregion
 
@@ -183,24 +169,12 @@ namespace JeopardyKing.ViewModels
             _createWindowViewModel = createWindowViewModel;
             ModeManager = _createWindowViewModel.ModeManager;
 
-            _currencyNameMap = new();
-            _currencyTypeMap = new();
             CurrencyNames = new();
-
-            EnumerationUtilities.ActOnEnumMembersWithAttribute<CurrencyType, CurrencyAttribute>((c, a) =>
-            {
-                var displayName = $"{a.Name} ({a.Code})";
-                CurrencyNames!.Add(displayName);
-                _currencyNameMap.Add(displayName, c);
-                _currencyTypeMap.Add(c, displayName);
-            });
-            SelectedCurrency = CurrencyNames.First();
 
             ModeManager.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)
                 {
-                    SelectedCurrency = _currencyTypeMap[ModeManager.CurrentlySelectedQuestion.Currency];
                     if (ModeManager.CurrentlySelectedQuestion.Type == QuestionType.YoutubeVideo)
                     {
                         StartVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) / 60;

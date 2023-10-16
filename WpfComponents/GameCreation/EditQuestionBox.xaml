@@ -222,22 +222,7 @@
                                 </Style.Triggers>
                             </Style>
                         </TextBox.Style>
-
                     </TextBox>
-                    <ComboBox ItemsSource="{Binding Path=ViewModel.CurrencyNames}"
-                                SelectedItem="{Binding Path=ViewModel.SelectedCurrency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                ToolTip="Choose question value currency">
-                        <ComboBox.Style>
-                            <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource ComboBoxStyle}">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=ValueIsBeingEdited}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ComboBox.Style>
-                    </ComboBox>
                 </StackPanel>
             </StackPanel>
 
