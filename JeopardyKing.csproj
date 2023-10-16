@@ -12,6 +12,13 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="WindowsNativeRawInputWrapper\**" />
+    <EmbeddedResource Remove="WindowsNativeRawInputWrapper\**" />
+    <None Remove="WindowsNativeRawInputWrapper\**" />
+    <Page Remove="WindowsNativeRawInputWrapper\**" />
+  </ItemGroup>
   
   <ItemGroup>
     <EditorConfigFiles Remove="D:\programming\vs\JeopardyKing\.editorconfig" />
@@ -43,6 +50,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.18" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RawInputDataSinkServer\WindowsNativeRawInputWrapper\WindowsNativeRawInputWrapper.csproj" />
   </ItemGroup>
 
   <ItemGroup>

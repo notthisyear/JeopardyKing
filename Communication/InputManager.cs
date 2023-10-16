@@ -2,15 +2,16 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using JeopardyKing.Communication;
-using static JeopardyKing.InputRaw.Enumerations;
+using WindowsNativeRawInputWrapper;
+using WindowsNativeRawInputWrapper.Types;
 
-namespace JeopardyKing.InputRaw
+namespace JeopardyKing.Communication
 {
     internal class InputManager : IDisposable
     {
         public enum KeyEvent
         {
+            None,
             KeyUp,
             KeyDown
         };
@@ -22,7 +23,7 @@ namespace JeopardyKing.InputRaw
             All
         }
 
-        public record KeyboardEvent(KeyEvent Event, long SourceId, KeyboardScanCode Key, int PlayerId);
+        public record KeyboardEvent(KeyEvent Event, long SourceId, RawKeyboardInput.KeyboardScanCode Key, int PlayerId);
 
         #region Public properties
         public bool InputHookSet { get; private set; } = false;
@@ -31,8 +32,8 @@ namespace JeopardyKing.InputRaw
         #region Private fields
         private readonly ConcurrentQueue<KeyboardEvent> _eventQueue;
         private readonly Dictionary<long, KeyboardDeviceInfo> _knownKeyboards;
-        private readonly Dictionary<long, Dictionary<KeyboardScanCode, int>> _playerButtonMap;
-        private readonly Dictionary<int, List<(long deviceId, KeyboardScanCode key)>> _playerMappingLookup;
+        private readonly Dictionary<long, Dictionary<RawKeyboardInput.KeyboardScanCode, int>> _playerButtonMap;
+        private readonly Dictionary<int, List<(long deviceId, RawKeyboardInput.KeyboardScanCode key)>> _playerMappingLookup;
         private PropagationMode _propagationMode;
         private bool _disposedValue;
         private readonly UdpBroadcastListener _listener;
@@ -61,7 +62,7 @@ namespace JeopardyKing.InputRaw
             if (!string.IsNullOrEmpty(errorMessage))
                 return false;
 
-            var keyboards = devices.Where(x => x.Type == Enumerations.RawInputDeviceType.RIM_TYPEKEYBOARD);
+            var keyboards = devices.Where(x => x.Type == DeviceType.Keyboard);
             List<DeviceInfoBase> deviceInfo = new();
             foreach (var keyboard in keyboards)
             {
@@ -84,7 +85,7 @@ namespace JeopardyKing.InputRaw
         public bool TryGetInformationForKeyboard(long keyboardId, out KeyboardDeviceInfo? deviceInfo)
             => _knownKeyboards.TryGetValue(keyboardId, out deviceInfo);
 
-        public bool TryAddPlayerKeyMapping(int playerId, long deviceId, KeyboardScanCode key)
+        public bool TryAddPlayerKeyMapping(int playerId, long deviceId, RawKeyboardInput.KeyboardScanCode key)
         {
             if (!_playerButtonMap.ContainsKey(deviceId))
                 _playerButtonMap.Add(deviceId, new());
@@ -102,7 +103,7 @@ namespace JeopardyKing.InputRaw
             return true;
         }
 
-        public void RemovePlayerKeyMappingIfNeeded(int playerId, long deviceId, KeyboardScanCode key)
+        public void RemovePlayerKeyMappingIfNeeded(int playerId, long deviceId, RawKeyboardInput.KeyboardScanCode key)
         {
             if (!_playerButtonMap.ContainsKey(deviceId))
                 return;
@@ -126,26 +127,37 @@ namespace JeopardyKing.InputRaw
             if (_propagationMode == PropagationMode.None)
                 return;
 
-            if (msg.Length != 11)
+            if (!TryDeserialize(msg, out var keyEvent, out var deviceId, out var key))
                 return;
-
-            long deviceId = 0;
-            for (var i = 0; i < 8; i++)
-                deviceId |= ((long)msg[i + 1]) << (i * 8);
-            var key = (KeyboardScanCode)((ushort)(msg[9] | (msg[10] << 8)));
 
             var hasMapping = KeyHasMapping(deviceId, key);
             var playerId = hasMapping ? _playerButtonMap[deviceId][key] : -1;
 
             if (_propagationMode == PropagationMode.All || hasMapping)
             {
-                KeyboardEvent newEvent = new(msg[0] == 0 ? KeyEvent.KeyUp : KeyEvent.KeyDown, deviceId, key, playerId);
+                KeyboardEvent newEvent = new(keyEvent, deviceId, key, playerId);
                 _eventQueue.Enqueue(newEvent);
             }
         }
 
-        private bool KeyHasMapping(long deviceId, KeyboardScanCode scanCode)
+        private bool KeyHasMapping(long deviceId, RawKeyboardInput.KeyboardScanCode scanCode)
             => _playerButtonMap.ContainsKey(deviceId) && _playerButtonMap[deviceId].ContainsKey(scanCode);
+
+        private static bool TryDeserialize(ReadOnlySpan<byte> msg, out KeyEvent keyEvent, out long deviceId, out RawKeyboardInput.KeyboardScanCode key)
+        {
+            keyEvent = KeyEvent.None;
+            deviceId = 0;
+            key = RawKeyboardInput.KeyboardScanCode.UnknownScanCode;
+
+            if (msg.Length != 11)
+                return false;
+
+            keyEvent = msg[0] == 0x00 ? KeyEvent.KeyUp : KeyEvent.KeyDown;
+            for (var i = 0; i < 8; i++)
+                deviceId |= ((long)msg[i + 1]) << (i * 8);
+            key = (RawKeyboardInput.KeyboardScanCode)((ushort)(msg[9] | (msg[10] << 8)));
+            return true;
+        }
         #endregion
 
         #region Disposal

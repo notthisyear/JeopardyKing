@@ -16,7 +16,7 @@ using Ookii.Dialogs.Wpf;
 
 namespace JeopardyKing.ViewModels
 {
-    using InputManager = JeopardyKing.InputRaw.InputManager;
+    using InputManager = Communication.InputManager;
 
     public class GameManagerViewModel : ObservableObject
     {

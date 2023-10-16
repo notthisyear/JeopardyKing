@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows;
-using JeopardyKing.InputRaw;
+using JeopardyKing.Communication;
 using JeopardyKing.WpfComponents;
-using static JeopardyKing.InputRaw.Enumerations;
+using WindowsNativeRawInputWrapper.Types;
 
 namespace JeopardyKing.Windows
 {
@@ -36,11 +36,11 @@ namespace JeopardyKing.Windows
 
         internal InputManager.KeyboardEvent? LastEvent { get; set; }
 
-        private readonly Action<long, KeyboardScanCode> _windowClosedAction;
+        private readonly Action<long, RawKeyboardInput.KeyboardScanCode> _windowClosedAction;
 
         public SelectButtonPopupModal(Window parentWindow,
                                 string playerName,
-                                Action<long, KeyboardScanCode> windowClosedAction)
+                                Action<long, RawKeyboardInput.KeyboardScanCode> windowClosedAction)
         {
             InitializeComponent();
             Owner = parentWindow;
