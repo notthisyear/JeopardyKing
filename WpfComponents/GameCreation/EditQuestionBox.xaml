@@ -95,11 +95,12 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="5" />
-                <RowDefinition Height="35" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="2*" />
                 <RowDefinition Height="5" />
                 <RowDefinition Height="75" />
             </Grid.RowDefinitions>
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -231,24 +232,58 @@
                        Grid.ColumnSpan="2"
                        Margin="10,0,10,0"/>
            
-            <!-- Question type box bonus check mark -->
-            <StackPanel Orientation="Horizontal"
+            <!-- Question type box -->
+            <StackPanel Orientation="Vertical"
                         Grid.Row="2"
                         Grid.Column="0"
-                        Margin="0,10,5,0"
-                        HorizontalAlignment="Center"
+                        Grid.ColumnSpan="2"
+                        Margin="0,10,0,0"
+                        HorizontalAlignment="Stretch"
                         VerticalAlignment="Top">
 
-                <TextBlock Style="{StaticResource MainTextBlockStyle}"
-                           Text="Question type:"
-                           FontStyle="Italic"
-                           Margin="0,3,10,0"/>
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Margin="20,0,0,0">
+                    <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                               Text="Question type:"
+                               FontStyle="Italic"
+                               Margin="0,3,10,0"/>
+
+                    <ComboBox Style="{StaticResource ComboBoxStyle}"
+                              MinWidth="60"
+                              ItemsSource="{Binding Source={StaticResource questionTypeSource}}"
+                              SelectedItem="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              ToolTip="Select question type"/>
+                </StackPanel>
+
+                <!-- Media flow type -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Margin="20,10,0,0">
+                    <StackPanel.Style>
+                        <Style TargetType="{x:Type StackPanel}">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
                 
-                <ComboBox Style="{StaticResource ComboBoxStyle}"
-                          MinWidth="60"
-                          ItemsSource="{Binding Source={StaticResource questionTypeSource}}"
-                          SelectedItem="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          ToolTip="Select question type"/>
+                    <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                               Text="Media flow type:"
+                               FontStyle="Italic"
+                               Margin="0,3,10,0"/>
+
+                    <ComboBox Style="{StaticResource ComboBoxStyle}"
+                              MinWidth="200"
+                             ItemsSource="{Binding Path=ViewModel.MediaFlowTypes}"
+                             SelectedItem="{Binding Path=ViewModel.SelectedMediaFlow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Choose media flow type" />
+                </StackPanel>
+
+                <Separator Margin="10,10,10,0"/>
             </StackPanel>
 
             <!-- Bonus check mark -->
@@ -265,7 +300,7 @@
                             Margin="0,2,10,0"/>
 
                 <CheckBox IsChecked="{Binding ViewModel.ModeManager.CurrentlySelectedQuestion.IsBonus, Mode=TwoWay}"
-                          ToolTip="Check to make this question be a bonus question. A bonus question is worth twice its advertised value."/>
+                            ToolTip="Check to make this question be a bonus question. A bonus question is worth twice its advertised value."/>
             </StackPanel>
 
             <!-- Text type question -->

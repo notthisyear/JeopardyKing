@@ -21,6 +21,7 @@ namespace JeopardyKing.ViewModels
         #region Backing fields
         private int _startVideoAtMinutes = 0;
         private int _startVideoAtSeconds = 0;
+        private string _selectedMediaFlow = string.Empty;
         #endregion
 
         public int StartVideoAtMinutes
@@ -45,9 +46,20 @@ namespace JeopardyKing.ViewModels
             }
         }
 
+        public string SelectedMediaFlow
+        {
+            get => _selectedMediaFlow;
+            set
+            {
+                if (ModeManager.CurrentlySelectedQuestion != default)
+                    ModeManager.CurrentlySelectedQuestion.MediaQuestionFlow = _mediaFlowMap[value];
+                SetProperty(ref _selectedMediaFlow, value);
+            }
+        }
+
         public QuestionModeManager ModeManager { get; }
 
-        public List<string> CurrencyNames { get; }
+        public List<string> MediaFlowTypes { get; }
         #endregion
 
         #region Events
@@ -161,6 +173,8 @@ namespace JeopardyKing.ViewModels
         #endregion
 
         #region Private fields
+        private readonly Dictionary<string, MediaQuestionFlow> _mediaFlowMap = new();
+        private readonly Dictionary<MediaQuestionFlow, string> _mediaFlowNameMap = new();
         private readonly CreateWindowViewModel _createWindowViewModel;
         #endregion
 
@@ -169,12 +183,33 @@ namespace JeopardyKing.ViewModels
             _createWindowViewModel = createWindowViewModel;
             ModeManager = _createWindowViewModel.ModeManager;
 
-            CurrencyNames = new();
+            MediaFlowTypes = new();
+
+            EnumerationUtilities.ActOnEnumMembersWithAttribute<MediaQuestionFlow, MediaQuestionFlowInfoAttribute>((c, a) =>
+            {
+                if (c != MediaQuestionFlow.None)
+                {
+                    var displayName = a.DisplayText;
+                    MediaFlowTypes!.Add(displayName);
+                    _mediaFlowMap.Add(displayName, c);
+                    _mediaFlowNameMap.Add(c, displayName);
+                }
+            });
+
+            SelectedMediaFlow = MediaFlowTypes.First();
 
             ModeManager.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)
                 {
+                    if (ModeManager.CurrentlySelectedQuestion.Type != QuestionType.Text)
+                    {
+                        if (ModeManager.CurrentlySelectedQuestion.MediaQuestionFlow == MediaQuestionFlow.None)
+                            SelectedMediaFlow = MediaFlowTypes.First();
+                        else
+                            SelectedMediaFlow = _mediaFlowNameMap[ModeManager.CurrentlySelectedQuestion.MediaQuestionFlow];
+                    }
+
                     if (ModeManager.CurrentlySelectedQuestion.Type == QuestionType.YoutubeVideo)
                     {
                         StartVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) / 60;

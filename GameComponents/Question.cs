@@ -17,6 +17,7 @@ namespace JeopardyKing.GameComponents
         private decimal _value;
         private QuestionType _type;
         private CurrencyType _currency;
+        private MediaQuestionFlow _mediaQuestionFlow;
         private bool _isBonus;
 
         private bool _hasMediaLink = false;
@@ -74,6 +75,13 @@ namespace JeopardyKing.GameComponents
                 }
                 SetProperty(ref _type, value);
             }
+        }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public MediaQuestionFlow MediaQuestionFlow
+        {
+            get => _mediaQuestionFlow;
+            set => SetProperty(ref _mediaQuestionFlow, value);
         }
 
         [JsonIgnore]
