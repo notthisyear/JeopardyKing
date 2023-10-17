@@ -6,7 +6,7 @@ using JeopardyKing.ViewModels;
 
 namespace JeopardyKing.WpfComponents
 {
-    public partial class PlayerCard : UserControl
+    public partial class PlayerCardManager : UserControl
     {
         #region Dependency properties
         public Player CurrentPlayer
@@ -17,7 +17,7 @@ namespace JeopardyKing.WpfComponents
         public static readonly DependencyProperty CurrentPlayerProperty = DependencyProperty.Register(
             nameof(CurrentPlayer),
             typeof(Player),
-            typeof(PlayerCard),
+            typeof(PlayerCardManager),
             new FrameworkPropertyMetadata(default));
 
         public GameManagerViewModel ViewModel
@@ -28,7 +28,7 @@ namespace JeopardyKing.WpfComponents
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
             nameof(ViewModel),
             typeof(GameManagerViewModel),
-            typeof(PlayerCard),
+            typeof(PlayerCardManager),
             new FrameworkPropertyMetadata(default));
 
         public bool NameIsBeingEdited
@@ -39,11 +39,11 @@ namespace JeopardyKing.WpfComponents
         public static readonly DependencyProperty NameIsBeingEditedProperty = DependencyProperty.Register(
             nameof(NameIsBeingEdited),
             typeof(bool),
-            typeof(PlayerCard),
+            typeof(PlayerCardManager),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
         #endregion
 
-        public PlayerCard()
+        public PlayerCardManager()
         {
             InitializeComponent();
         }

@@ -125,6 +125,34 @@
                         ToolTip="{Binding Path=SelectedQuestion.MultimediaContentLink}"/>
         </Grid>
 
+        <!-- Media flow type -->
+        <Grid Margin="0,0,0,10">
+            <Grid.Style>
+                <Style TargetType="{x:Type Grid}">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=SelectedQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock  Grid.Column="0"
+                 Style="{StaticResource questionDataLabel}"
+                 Text="Flow:"/>
+            <TextBlock  Grid.Column="1"
+                 Style="{StaticResource questionDataValue}"
+                 Text="{Binding Path=SelectedQuestion.MediaQuestionFlow}"
+                 TextWrapping="Wrap"
+                 ToolTip="The type of media flow">
+            </TextBlock>
+        </Grid>
+
         <!-- Time information -->
         <Grid Margin="0,0,0,10">
             <Grid.Style>
@@ -201,21 +229,5 @@
                         Text="{Binding Path=SelectedQuestion.Content}"
                         TextWrapping="Wrap"/>
         </Grid>
-
-        <Button Margin="0,30,0,0"
-                Content="Start question">
-            <Button.Style>
-                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
-                    <Setter Property="IsEnabled" Value="False" />
-                    <Setter Property="ToolTip" Value="Question already answered" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=SelectedQuestion.IsAnswered}" Value="False">
-                            <Setter Property="IsEnabled" Value="True" />
-                            <Setter Property="ToolTip" Value="Click to start the question" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Button.Style>
-        </Button>
     </StackPanel>
 </UserControl>

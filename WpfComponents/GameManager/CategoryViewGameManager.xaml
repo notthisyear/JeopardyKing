@@ -1,8 +1,6 @@
 ﻿<UserControl x:Class="JeopardyKing.WpfComponents.CategoryViewGameManager"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:game="clr-namespace:JeopardyKing.GameComponents"
-             xmlns:interactive="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:components="clr-namespace:JeopardyKing.WpfComponents">
 
     <Grid DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=.}">

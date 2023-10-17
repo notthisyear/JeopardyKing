@@ -13,8 +13,9 @@ namespace JeopardyKing.Windows
 
         private void PlayButtonClick(object sender, RoutedEventArgs e)
         {
-            var playWindow = new PlayWindow { ViewModel = new() };
-            var gameManagerWindow = new GameManagerWindow(playWindow) { ViewModel = new() };
+            var playWindowViewModel = new ViewModels.PlayWindowViewModel();
+            var playWindow = new PlayWindow { ViewModel = playWindowViewModel };
+            var gameManagerWindow = new GameManagerWindow(playWindow) { ViewModel = new(playWindowViewModel) };
             Application.Current.MainWindow = gameManagerWindow;
 
             gameManagerWindow.Show();

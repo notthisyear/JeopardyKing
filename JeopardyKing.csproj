@@ -36,6 +36,7 @@
     <None Remove="Resources\Fonts\Lato-Regular.ttf" />
     <None Remove="Resources\Fonts\Lato-Thin.ttf" />
     <None Remove="Resources\Fonts\Lato-ThinItalic.ttf" />
+    <None Remove="Resources\jeopardy.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -83,6 +84,9 @@
     <Resource Include="Resources\Fonts\Lato-Regular.ttf" />
     <Resource Include="Resources\Fonts\Lato-Thin.ttf" />
     <Resource Include="Resources\Fonts\Lato-ThinItalic.ttf" />
+    <Resource Include="Resources\jeopardy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

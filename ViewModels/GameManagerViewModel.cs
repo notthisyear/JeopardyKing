@@ -52,6 +52,7 @@ namespace JeopardyKing.ViewModels
 
         public ObservableCollection<Player> Players { get; }
 
+        public PlayWindowViewModel PlayWindowViewModel { get; }
         public string ProgramDescription { get; init; } = "Manage";
 
         public const int MaxNumberOfPlayers = 6;
@@ -62,6 +63,8 @@ namespace JeopardyKing.ViewModels
         private RelayCommand? _addPlayerCommand;
         private RelayCommand<Player>? _assignPlayerCommand;
         private RelayCommand<Player>? _removePlayerCommand;
+        private RelayCommand? _startGameCommand;
+        private RelayCommand? _revealNextCategoryCommand;
 
         public ICommand LoadBoardCommand
         {
@@ -81,7 +84,13 @@ namespace JeopardyKing.ViewModels
                         if (e != default)
                             throw e;
 
+                        foreach (var c in board!.Categories)
+                        {
+                            foreach (var q in c.Questions)
+                                q.Currency = board.Currency;
+                        }
                         GameBoard = board;
+
                     }
                 });
                 return _loadBoardCommand;
@@ -181,6 +190,28 @@ namespace JeopardyKing.ViewModels
                 return _removePlayerCommand;
             }
         }
+
+        public ICommand StartGameCommand
+        {
+            get
+            {
+                _startGameCommand ??= new RelayCommand(() =>
+                {
+                    if (GameBoard != default)
+                        PlayWindowViewModel.StartGame(GameBoard, Players);
+                });
+                return _startGameCommand;
+            }
+        }
+
+        public ICommand RevealNextCategoryCommand
+        {
+            get
+            {
+                _revealNextCategoryCommand ??= new RelayCommand(() => PlayWindowViewModel.RevealNextCategory());
+                return _revealNextCategoryCommand;
+            }
+        }
         #endregion
 
         #region Private fields
@@ -199,8 +230,9 @@ namespace JeopardyKing.ViewModels
         private bool _shouldExit = false;
         #endregion
 
-        public GameManagerViewModel()
+        public GameManagerViewModel(PlayWindowViewModel playWindowViewModel)
         {
+            PlayWindowViewModel = playWindowViewModel;
             QuestionModeManager = new();
             CategoryViewModel = new(QuestionModeManager);
             Players = new();

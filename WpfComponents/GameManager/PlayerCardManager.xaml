@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="JeopardyKing.WpfComponents.PlayerCard"
+﻿<UserControl x:Class="JeopardyKing.WpfComponents.PlayerCardManager"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:validation="clr-namespace:JeopardyKing.WpfComponents.ValidationRules">
@@ -66,10 +66,16 @@
         </TextBox>
 
         <TextBlock Grid.Row="1"
-               Text="{Binding Path=CurrentPlayer.Cash}"
                HorizontalAlignment="Center"
                Style="{StaticResource MainTextBlockStyle}"
-               FontSize="24"/>
+               FontSize="24">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource valueDisplayConverter}">
+                    <Binding Path="CurrentPlayer.Cash" />
+                    <Binding Path="ViewModel.GameBoard.Currency" />
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
 
         <StackPanel Grid.Row="2"
                      HorizontalAlignment="Center"

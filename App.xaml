@@ -11,7 +11,7 @@
         <FontFamily x:Key="Lato">pack://application:,,,/Resources/Fonts/#Lato</FontFamily>
 
         <BitmapImage x:Key="emptyImage" UriSource="/JeopardyKing;component/Resources/empty.png"/>
-
+        <BitmapImage x:Key="jeopardyImage" UriSource="/JeopardyKing;component/Resources/jeopardy.png"/>
         <!-- Converters -->
         <converters:BooleanToVisibleOrCollapsedConverter x:Key="booleanToVisibleOrCollapsedConverter" />
         <converters:ValueDisplayConverter x:Key="valueDisplayConverter" />
@@ -27,6 +27,17 @@
         <SolidColorBrush x:Key="BackgroundColorDarkerShade" Color="{StaticResource BackgroundDarkerShadeRaw}" />
         <SolidColorBrush x:Key="BackgroundColorDarkerShadeWithOpacity" Color="{StaticResource BackgroundDarkerShadeRaw}" Opacity="0.7"/>
 
+        <LinearGradientBrush x:Key="PlayingFieldBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#031A3E" Offset="0.0" />
+            <GradientStop Color="#042962" Offset="0.5" />
+            <GradientStop Color="#040E62" Offset="0.75" />
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="JeopardyLogoBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#D0BE05" Offset="0.0" />
+            <GradientStop Color="#F7E201" Offset="0.5" />
+            <GradientStop Color="#C6B500" Offset="0.75" />
+        </LinearGradientBrush>
         <!-- Foreground colors-->
         <Color x:Key="PrimaryColorRaw" A="255" R="55" G="90" B="127" />
         <Color x:Key="PrimaryColorDisabledRaw" A="166" R="55" G="90" B="127" />

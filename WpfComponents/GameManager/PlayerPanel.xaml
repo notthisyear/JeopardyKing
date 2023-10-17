@@ -44,8 +44,8 @@
                             </Style>
                         </Border.Style>
 
-                        <components:PlayerCard CurrentPlayer="{Binding Path=.}"
-                                               ViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.ViewModel}"/>
+                        <components:PlayerCardManager CurrentPlayer="{Binding Path=.}"
+                                                      ViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.ViewModel}"/>
 
                     </Border>
                 </DataTemplate>
