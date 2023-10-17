@@ -137,24 +137,13 @@ namespace JeopardyKing.GameComponents
         public double StartVideoOrAudioAtSeconds
         {
             get => _startVideoOrAudioAtSeconds;
-            set
-            {
-                // We do not know the length of Youtube videos
-                if (Type != QuestionType.YoutubeVideo && value > EndVideoOrAudioAtSeconds)
-                    return;
-                SetProperty(ref _startVideoOrAudioAtSeconds, value);
-            }
+            set => SetProperty(ref _startVideoOrAudioAtSeconds, value);
         }
 
         public double EndVideoOrAudioAtSeconds
         {
             get => _endVideoOrAudioAtSeconds;
-            set
-            {
-                if (value < StartVideoOrAudioAtSeconds)
-                    return;
-                SetProperty(ref _endVideoOrAudioAtSeconds, value);
-            }
+            set => SetProperty(ref _endVideoOrAudioAtSeconds, value);
         }
 
         public string Content
