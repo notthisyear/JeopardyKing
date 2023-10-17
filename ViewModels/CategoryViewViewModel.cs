@@ -18,6 +18,9 @@ namespace JeopardyKing.ViewModels
             {
                 _mouseEnterQuestionCardCommand ??= new RelayCommand<Question>(q =>
                 {
+                    if (_playWindowViewModel?.WindowState == PlayWindowState.ShowQuestion)
+                        return;
+
                     if (ModeManager.CurrentState != QuestionVisualState.NothingSelected)
                         return;
 
@@ -33,6 +36,9 @@ namespace JeopardyKing.ViewModels
             {
                 _mouseLeaveQuestionCardCommand ??= new RelayCommand(() =>
                 {
+                    if (_playWindowViewModel?.WindowState == PlayWindowState.ShowQuestion)
+                        return;
+
                     if (ModeManager.CurrentState != QuestionVisualState.QuestionSelected)
                         ModeManager.SetQuestionHighlightedStatus(false);
                 });
@@ -46,6 +52,9 @@ namespace JeopardyKing.ViewModels
             {
                 _mouseClickQuestionCardCommand ??= new RelayCommand<Question>(q =>
                 {
+                    if (_playWindowViewModel?.WindowState == PlayWindowState.ShowQuestion)
+                        return;
+
                     if (ModeManager.CurrentState != QuestionVisualState.QuestionSelected)
                     {
                         ModeManager.SetQuestionSelectedStatus(true);
@@ -73,12 +82,17 @@ namespace JeopardyKing.ViewModels
         }
         #endregion
 
-        #region Protected fields        
+        #region Protected properties
         protected QuestionModeManager ModeManager { get; }
         #endregion
 
-        public CategoryViewViewModel(QuestionModeManager modeManager)
+        #region Private fields
+        private readonly PlayWindowViewModel? _playWindowViewModel;
+        #endregion
+
+        public CategoryViewViewModel(QuestionModeManager modeManager, PlayWindowViewModel? playWindowViewModel = default)
         {
+            _playWindowViewModel = playWindowViewModel;
             ModeManager = modeManager;
         }
     }

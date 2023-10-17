@@ -55,6 +55,12 @@ namespace JeopardyKing.Communication
             _propagationMode = mode;
         }
 
+        public bool PlayerHasMapping(int playerId)
+            => _playerMappingLookup.ContainsKey(playerId);
+
+        public bool MappingAvailable(long deviceId, RawKeyboardInput.KeyboardScanCode key)
+            => !(_playerButtonMap.TryGetValue(deviceId, out var keys) && keys.Select(x => x.Key).Contains(key));
+
         public bool TryEnumerateKeyboardDevices(out string errorMessage)
         {
             WinApiWrapper.TryGetAllInputDevices(out var devices, out errorMessage);
@@ -87,15 +93,13 @@ namespace JeopardyKing.Communication
 
         public bool TryAddPlayerKeyMapping(int playerId, long deviceId, RawKeyboardInput.KeyboardScanCode key)
         {
-            if (!_playerButtonMap.ContainsKey(deviceId))
-                _playerButtonMap.Add(deviceId, new());
-
-#pragma warning disable CA1854 // This warning is emitted incorrectly
-            if (_playerButtonMap[deviceId].ContainsKey(key))
-#pragma warning restore CA1854
+            if (!MappingAvailable(deviceId, key))
                 return false;
 
+            if (!_playerButtonMap.ContainsKey(deviceId))
+                _playerButtonMap.Add(deviceId, new());
             _playerButtonMap[deviceId].Add(key, playerId);
+
             if (!_playerMappingLookup.ContainsKey(playerId))
                 _playerMappingLookup.Add(playerId, new());
 
@@ -103,21 +107,22 @@ namespace JeopardyKing.Communication
             return true;
         }
 
-        public void RemovePlayerKeyMappingIfNeeded(int playerId, long deviceId, RawKeyboardInput.KeyboardScanCode key)
+        public void RemovePlayerKeyMappingIfNeeded(int playerId)
         {
-            if (!_playerButtonMap.ContainsKey(deviceId))
+            if (!_playerMappingLookup.ContainsKey(playerId))
                 return;
 
-            if (_playerButtonMap[deviceId].TryGetValue(key, out var id) && id == playerId)
+            var mappings = _playerMappingLookup[playerId];
+            foreach (var (deviceId, key) in mappings)
             {
-                _playerButtonMap[deviceId].Remove(key);
-                if (!_playerButtonMap[deviceId].Any())
-                    _playerButtonMap.Remove(deviceId);
+                if (_playerButtonMap[deviceId].TryGetValue(key, out var id) && id == playerId)
+                {
+                    _playerButtonMap[deviceId].Remove(key);
+                    if (!_playerButtonMap[deviceId].Any())
+                        _playerButtonMap.Remove(deviceId);
+                }
             }
-
-            _playerMappingLookup[playerId].Remove((deviceId, key));
-            if (!_playerMappingLookup[playerId].Any())
-                _playerMappingLookup.Remove(playerId);
+            _playerMappingLookup.Remove(playerId);
         }
         #endregion
 

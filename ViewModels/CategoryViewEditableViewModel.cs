@@ -42,7 +42,7 @@ namespace JeopardyKing.ViewModels
         }
         #endregion
 
-        public CategoryViewEditableViewModel(QuestionModeManager modeManager) : base(modeManager)
+        public CategoryViewEditableViewModel(QuestionModeManager modeManager) : base(modeManager, default)
         { }
     }
 }

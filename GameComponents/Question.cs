@@ -41,7 +41,7 @@ namespace JeopardyKing.GameComponents
         public bool IsAnswered
         {
             get => _isAnswered;
-            private set => SetProperty(ref _isAnswered, value);
+            set => SetProperty(ref _isAnswered, value);
         }
 
         [JsonIgnore]

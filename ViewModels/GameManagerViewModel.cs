@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -24,8 +25,10 @@ namespace JeopardyKing.ViewModels
 
         #region Backing fields
         private Board? _gameBoard;
-        private Question? _selectedQuestion;
-        private bool _buttonAssignmentOngoing;
+        private bool _allPlayersHasMapping;
+        private bool _answersAllowed;
+        private string _gameAnswerMode = string.Empty;
+        private string _gameAnswerModeToolTip = string.Empty;
         #endregion
 
         public Board? GameBoard
@@ -34,16 +37,34 @@ namespace JeopardyKing.ViewModels
             private set => SetProperty(ref _gameBoard, value);
         }
 
-        public Question? SelectedQuestion
+        public bool AllPlayersHasMapping
         {
-            get => _selectedQuestion;
-            private set => SetProperty(ref _selectedQuestion, value);
+            get => _allPlayersHasMapping;
+            private set => SetProperty(ref _allPlayersHasMapping, value);
         }
 
-        public bool ButtonAssignmentOngoing
+
+        public bool AnswersAllowed
         {
-            get => _buttonAssignmentOngoing;
-            private set => SetProperty(ref _buttonAssignmentOngoing, value);
+            get => _answersAllowed;
+            set => SetProperty(ref _answersAllowed, value);
+        }
+
+        public string GameAnswerMode
+        {
+            get => _gameAnswerMode;
+            set
+            {
+                _gameAnswerModeSetting = _gameModeMap[value].mode;
+                GameAnswerModeToolTip = _gameModeMap[value].tooltip;
+                SetProperty(ref _gameAnswerMode, value);
+            }
+        }
+
+        public string GameAnswerModeToolTip
+        {
+            get => _gameAnswerModeToolTip;
+            set => SetProperty(ref _gameAnswerModeToolTip, value);
         }
 
         public QuestionModeManager QuestionModeManager { get; }
@@ -53,18 +74,37 @@ namespace JeopardyKing.ViewModels
         public ObservableCollection<Player> Players { get; }
 
         public PlayWindowViewModel PlayWindowViewModel { get; }
+
+        public List<string> GameModeOptions { get; }
+
         public string ProgramDescription { get; init; } = "Manage";
 
         public const int MaxNumberOfPlayers = 6;
         #endregion
 
         #region Commands
+        private RelayCommand? _toggleAnswerAllowedCommand;
         private RelayCommand? _loadBoardCommand;
         private RelayCommand? _addPlayerCommand;
         private RelayCommand<Player>? _assignPlayerCommand;
         private RelayCommand<Player>? _removePlayerCommand;
         private RelayCommand? _startGameCommand;
         private RelayCommand? _revealNextCategoryCommand;
+        private RelayCommand? _startQuestionCommand;
+        private RelayCommand<bool>? _answerQuestionCommand;
+        private RelayCommand? _abandonQuestionCommand;
+        public ICommand ToggleAnswerAllowedCommand
+        {
+            get
+            {
+                _toggleAnswerAllowedCommand ??= new RelayCommand(() =>
+                {
+                    if (PlayWindowViewModel.WindowState == PlayWindowState.ShowQuestion)
+                        AnswersAllowed = !AnswersAllowed;
+                });
+                return _toggleAnswerAllowedCommand;
+            }
+        }
 
         public ICommand LoadBoardCommand
         {
@@ -86,8 +126,8 @@ namespace JeopardyKing.ViewModels
 
                         foreach (var c in board!.Categories)
                         {
-                            foreach (var q in c.Questions)
-                                q.Currency = board.Currency;
+                            q.Currency = board.Currency;
+                            q.CategoryName = c.Title;
                         }
                         GameBoard = board;
 
@@ -104,13 +144,17 @@ namespace JeopardyKing.ViewModels
             {
                 _addPlayerCommand ??= new RelayCommand(() =>
                 {
-                    lock (_playersAccessLock)
+                    var hasLock = Monitor.TryEnter(_playersAccessLock);
+                    if (!hasLock)
+                        return;
+
+                    if (Players.Count < MaxNumberOfPlayers)
                     {
-                        if (Players.Count == MaxNumberOfPlayers)
-                            return;
                         var playerName = $"Player {Players.Count + 1}";
                         Players.Add(new(_playerIdCounter++, playerName));
+                        AllPlayersHasMapping = false;
                     }
+                    Monitor.Exit(_playersAccessLock);
                 });
                 return _addPlayerCommand;
             }
@@ -129,18 +173,16 @@ namespace JeopardyKing.ViewModels
                     if (!hasLock)
                         return;
 
-                    // Note: This should be impossible as the flag as always set after the lock is acquired
-                    if (ButtonAssignmentOngoing)
-                    {
-                        Monitor.Exit(_playersAccessLock);
-                        return;
-                    }
-
+                    _inputManager.RemovePlayerKeyMappingIfNeeded(p.Id);
                     SelectButtonPopupModal buttonSelectionDialog = new(Application.Current.MainWindow,
                         p.Name,
-                        (deviceId, key) =>
+                        (gotEvent, deviceId, key) =>
                         {
-                            _ = _inputManager.TryAddPlayerKeyMapping(p.Id, deviceId, key);
+                            if (!gotEvent)
+                                return;
+
+                            if (_inputManager.TryAddPlayerKeyMapping(p.Id, deviceId, key))
+                                AllPlayersHasMapping = !Players.Where(x => !_inputManager.PlayerHasMapping(x.Id)).Any();
                         });
 
                     _eventAction = e =>
@@ -155,19 +197,17 @@ namespace JeopardyKing.ViewModels
                                     buttonSelectionDialog.LastPressedSource = $"{info!.DeviceDescription} [{info!.KeyboardType}] ({e.SourceId})";
                                 else
                                     buttonSelectionDialog.LastPressedSource = $"Unknown source ({e.SourceId})";
+                                buttonSelectionDialog.LastKeyAvailable = _inputManager.MappingAvailable(e.SourceId, e.Key);
                             });
                         }
                     };
 
                     _inputManager.SetPropagationMode(InputManager.PropagationMode.All);
-
                     _ = buttonSelectionDialog.ShowDialog();
 
                     _inputManager.SetPropagationMode(InputManager.PropagationMode.OnlyMappedKeys);
                     _eventAction = default;
 
-                    ButtonAssignmentOngoing = true;
-                    ButtonAssignmentOngoing = false;
                     Monitor.Exit(_playersAccessLock);
                 });
                 return _assignPlayerCommand;
@@ -180,12 +220,18 @@ namespace JeopardyKing.ViewModels
             {
                 _removePlayerCommand ??= new RelayCommand<Player>(p =>
                 {
-                    lock (_playersAccessLock)
+                    var hasLock = Monitor.TryEnter(_playersAccessLock);
+                    if (!hasLock)
+                        return;
+
+                    if (p != default && Players.Count > 0)
                     {
-                        if (p == default || Players.Count == 0)
-                            return;
+                        _inputManager.RemovePlayerKeyMappingIfNeeded(p.Id);
                         Players.Remove(p);
+                        AllPlayersHasMapping = !Players.Where(x => !_inputManager.PlayerHasMapping(x.Id)).Any();
                     }
+
+                    Monitor.Exit(_playersAccessLock);
                 });
                 return _removePlayerCommand;
             }
@@ -198,7 +244,11 @@ namespace JeopardyKing.ViewModels
                 _startGameCommand ??= new RelayCommand(() =>
                 {
                     if (GameBoard != default)
-                        PlayWindowViewModel.StartGame(GameBoard, Players);
+                    {
+                        PlayWindowViewModel.StartGame(GameBoard, new ReadOnlyObservableCollection<Player>(Players));
+                        AnswersAllowed = _gameAnswerModeSetting == GameComponents.GameAnswerMode.AllowImmediately;
+                        _inputManager.SetPropagationMode(InputManager.PropagationMode.OnlyMappedKeys);
+                    }
                 });
                 return _startGameCommand;
             }
@@ -210,6 +260,60 @@ namespace JeopardyKing.ViewModels
             {
                 _revealNextCategoryCommand ??= new RelayCommand(() => PlayWindowViewModel.RevealNextCategory());
                 return _revealNextCategoryCommand;
+            }
+        }
+
+        public ICommand StartQuestionCommand
+        {
+            get
+            {
+                _startQuestionCommand ??= new RelayCommand(() =>
+                {
+                    if (QuestionModeManager.CurrentlySelectedQuestion == default)
+                        return;
+                    PlayWindowViewModel.StartQuestion(QuestionModeManager.CurrentlySelectedQuestion);
+                });
+                return _startQuestionCommand;
+            }
+        }
+
+        public ICommand AnswerQuestionCommand
+        {
+            get
+            {
+                _answerQuestionCommand ??= new RelayCommand<bool>(isCorrect =>
+                {
+                    if (PlayWindowViewModel.CurrentlyAnsweringPlayer != default &&
+                        PlayWindowViewModel.CurrentQuestion != default)
+                    {
+                        if (isCorrect)
+                        {
+                            PlayWindowViewModel.CurrentlyAnsweringPlayer.AddCashForQuestion(PlayWindowViewModel.CurrentQuestion);
+                            PlayWindowViewModel.CurrentQuestion.IsAnswered = true;
+                        }
+                        else
+                        {
+                            PlayWindowViewModel.CurrentlyAnsweringPlayer.SubtractCashForQuestion(PlayWindowViewModel.CurrentQuestion);
+                        }
+                    }
+                    PlayWindowViewModel.PlayerHasAnswered(isCorrect);
+
+                });
+                return _answerQuestionCommand;
+            }
+        }
+
+        public ICommand AbandonQuestionCommand
+        {
+            get
+            {
+                _abandonQuestionCommand ??= new RelayCommand(() =>
+                {
+                    if (PlayWindowViewModel.CurrentQuestion != default)
+                        PlayWindowViewModel.CurrentQuestion.IsAnswered = true;
+                    PlayWindowViewModel.AbandonQuestion();
+                });
+                return _abandonQuestionCommand;
             }
         }
         #endregion
@@ -225,16 +329,18 @@ namespace JeopardyKing.ViewModels
         private readonly InputManager _inputManager;
         private readonly ConcurrentQueue<InputManager.KeyboardEvent> _eventQueue = new();
         private readonly Thread _inputThread;
+        private readonly Dictionary<string, (GameAnswerMode mode, string tooltip)> _gameModeMap;
         private Action<InputManager.KeyboardEvent>? _eventAction;
         private int _playerIdCounter = 0;
         private bool _shouldExit = false;
+        private GameAnswerMode _gameAnswerModeSetting;
         #endregion
 
         public GameManagerViewModel(PlayWindowViewModel playWindowViewModel)
         {
             PlayWindowViewModel = playWindowViewModel;
             QuestionModeManager = new();
-            CategoryViewModel = new(QuestionModeManager);
+            CategoryViewModel = new(QuestionModeManager, PlayWindowViewModel);
             Players = new();
 
             _inputThread = new(MonitorInputThread) { IsBackground = true };
@@ -243,6 +349,18 @@ namespace JeopardyKing.ViewModels
             _ = _inputManager.TryEnumerateKeyboardDevices(out _);
 
             BindingOperations.EnableCollectionSynchronization(Players, _playersAccessLock);
+
+            _gameModeMap = new();
+            GameModeOptions = new();
+            EnumerationUtilities.ActOnEnumMembersWithAttribute<GameAnswerMode, GameAnswerModeTypeAttribute>((m, a) =>
+            {
+                _gameModeMap.Add(a.DisplayText, (m, a.ToolTip));
+                GameModeOptions.Add(a.DisplayText);
+            });
+
+            GameAnswerMode = _gameModeMap.First().Key;
+            GameAnswerModeToolTip = _gameModeMap.First().Value.tooltip;
+            _gameAnswerModeSetting = _gameModeMap.First().Value.mode;
         }
 
         public void NotifyWindowClosed()
@@ -259,9 +377,21 @@ namespace JeopardyKing.ViewModels
                     if (_eventAction != default)
                         _eventAction(newKeyEvent);
 
+                    if (PlayWindowViewModel.WindowState == PlayWindowState.ShowQuestion && !AnswersAllowed)
+                        continue;
+
                     var player = Players.FirstOrDefault(x => x.Id == newKeyEvent.PlayerId);
                     if (player != default)
-                        player.IsPressingKey = newKeyEvent.Event == InputManager.KeyEvent.KeyDown;
+                    {
+                        var isKeyDown = newKeyEvent.Event == InputManager.KeyEvent.KeyDown;
+                        player.IsPressingKey = isKeyDown;
+                        if (isKeyDown && PlayWindowViewModel.WindowState == PlayWindowState.ShowQuestion)
+                        {
+                            player.IsPressingKey = false;
+                            AnswersAllowed = false;
+                            PlayWindowViewModel.PlayerHasPressed(player);
+                        }
+                    }
                 }
                 Thread.Sleep(50);
             }

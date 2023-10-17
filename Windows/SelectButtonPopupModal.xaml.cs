@@ -30,28 +30,37 @@ namespace JeopardyKing.Windows
             typeof(string),
             typeof(SelectButtonPopupModal),
             new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.AffectsRender));
+
+        public bool LastKeyAvailable
+        {
+            get { return (bool)GetValue(LastKeyAvailableProperty); }
+            set { SetValue(LastKeyAvailableProperty, value); }
+        }
+        public static readonly DependencyProperty LastKeyAvailableProperty = DependencyProperty.Register(
+            nameof(LastKeyAvailable),
+            typeof(bool),
+            typeof(SelectButtonPopupModal),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsRender));
         #endregion
 
         public string PlayerName { get; }
 
         internal InputManager.KeyboardEvent? LastEvent { get; set; }
 
-        private readonly Action<long, RawKeyboardInput.KeyboardScanCode> _windowClosedAction;
+        private readonly Action<bool, long, RawKeyboardInput.KeyboardScanCode> _okButtonClickAction;
 
-        public SelectButtonPopupModal(Window parentWindow,
-                                string playerName,
-                                Action<long, RawKeyboardInput.KeyboardScanCode> windowClosedAction)
+        public SelectButtonPopupModal(Window parentWindow, string playerName, Action<bool, long, RawKeyboardInput.KeyboardScanCode> okButtonClickAction)
         {
             InitializeComponent();
             Owner = parentWindow;
             PlayerName = playerName;
-            _windowClosedAction = windowClosedAction;
+            _okButtonClickAction = okButtonClickAction;
         }
 
         private void CloseModalWindow(ModalWindowButton buttonClicked)
         {
-            if (buttonClicked == ModalWindowButton.OK && LastEvent != default)
-                _windowClosedAction.Invoke(LastEvent.SourceId, LastEvent.Key);
+            if (buttonClicked == ModalWindowButton.OK)
+                _okButtonClickAction.Invoke(LastEvent != default, LastEvent?.SourceId ?? long.MinValue, LastEvent?.Key ?? RawKeyboardInput.KeyboardScanCode.UnknownScanCode);
             Close();
         }
 

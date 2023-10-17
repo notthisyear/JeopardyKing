@@ -95,7 +95,13 @@
                         Click="OkButtonClick">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
-                            <Setter Property="ToolTip" Value="Click tog accept" />
+                            <Setter Property="ToolTip" Value="Click to accept" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=LastKeyAvailable}" Value="False">
+                                    <Setter Property="ToolTip" Value="Cannot assign this key - already taken!" />
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </Button.Style>
                 </Button>

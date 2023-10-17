@@ -18,6 +18,7 @@
         <converters:StringShortenerConverter x:Key="stringShortenerConverter" />
         <converters:SecondsToTimeStringConverter x:Key="secondsToTimeStringConverter" />
         <converters:QuestionToIconTypeConverter x:Key="questionToIconTypeConverter" />
+        <converters:ToUpperOrLowerConverter x:Key="toUpperOrLowerConverter" />
 
         <!-- Background colors-->
         <Color x:Key="MainBackgroundRaw" A="255" R="59" G="59" B="59" />
@@ -33,15 +34,23 @@
             <GradientStop Color="#040E62" Offset="0.75" />
         </LinearGradientBrush>
 
+        <LinearGradientBrush x:Key="PlayingFieldBackgroundWithOpacity" StartPoint="0,0" EndPoint="1,1" Opacity="0.95">
+            <GradientStop Color="#031A3E" Offset="0.0" />
+            <GradientStop Color="#042962" Offset="0.5" />
+            <GradientStop Color="#040E62" Offset="0.75" />
+
+        </LinearGradientBrush>
         <LinearGradientBrush x:Key="JeopardyLogoBrush" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="#D0BE05" Offset="0.0" />
             <GradientStop Color="#F7E201" Offset="0.5" />
             <GradientStop Color="#C6B500" Offset="0.75" />
         </LinearGradientBrush>
+
         <!-- Foreground colors-->
         <Color x:Key="PrimaryColorRaw" A="255" R="55" G="90" B="127" />
         <Color x:Key="PrimaryColorDisabledRaw" A="166" R="55" G="90" B="127" />
         <Color x:Key="MainTextColorRaw" A="255" R="255" G="255" B="255" />
+        <Color x:Key="MainSuccessColorRaw" A="255" R="31" G="223" B="41" />
         <Color x:Key="MainErrorColorRaw" A="255" R="231" G="76" B="60" />
         <Color x:Key="MainInfoColorRaw" A="255" R="52" G="152" B="219" />
         <Color x:Key="MainHighlightColorRaw" A="255" R="185" G="204" B="152" />
@@ -52,7 +61,9 @@
         <SolidColorBrush x:Key="PrimaryColorHover" Color="#2B4764" />
 
         <SolidColorBrush x:Key="MainButtonPressedBorder" Color="#557392" Opacity="0.5" />
-        <SolidColorBrush x:Key="MainSuccessColor" Color="#1FDF29" />
+        <SolidColorBrush x:Key="MainSuccessColor" Color="{StaticResource MainSuccessColorRaw}" />
+        <SolidColorBrush x:Key="MainSuccessColorMuted" Color="{StaticResource MainSuccessColorRaw}" Opacity="0.65" />
+        <SolidColorBrush x:Key="MainSuccessColorDisabled" Color="{StaticResource MainSuccessColorRaw}" Opacity="0.45" />
         <SolidColorBrush x:Key="MainInfoColor" Color="{StaticResource MainInfoColorRaw}" />
         <SolidColorBrush x:Key="MainWarningColor" Color="#F39C12" />
         <SolidColorBrush x:Key="MainErrorColor" Color="{StaticResource MainErrorColorRaw}" />
@@ -190,7 +201,103 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="CorrectButtonEditBoxWindow" TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyleBase}">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource MainTextColor}" />
+            <Setter Property="Width" Value="120" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="layoutRoot"
+                                CornerRadius="3"
+                                BorderThickness="3"
+                                BorderBrush="{StaticResource MainSuccessColorMuted}"
+                                Background="{StaticResource MainSuccessColorMuted}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
 
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="layoutRoot" Property="Background" Value="{StaticResource MainSuccessColor}" />
+                                <Setter TargetName="layoutRoot" Property="BorderBrush" Value="{StaticResource MainSuccessColor}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
+                                <Setter TargetName="layoutRoot" Property="Background" Value="{StaticResource MainSuccessColorDisabled}" />
+                                <Setter TargetName="layoutRoot" Property="BorderBrush" Value="{StaticResource MainSuccessColorDisabled}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
+                                <Setter TargetName="layoutRoot" Property="Background" Value="{StaticResource MainSuccessColorMuted}"/>
+                                <Setter TargetName="layoutRoot" Property="BorderBrush" Value="{StaticResource MainSuccessColorMuted}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AcceptingAnswersToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="FontFamily" Value="{StaticResource Lato}" />
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
+            <Setter Property="Width" Value="120" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border x:Name="layoutRoot"
+                                CornerRadius="3"
+                                BorderThickness="3"
+                                BorderBrush="{StaticResource MainErrorColorMuted}"
+                                Background="{StaticResource MainErrorColorMuted}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="layoutRoot" Property="Background" Value="{StaticResource MainSuccessColorMuted}" />
+                                <Setter TargetName="layoutRoot" Property="BorderBrush" Value="{StaticResource MainSuccessColorMuted}" />
+                            </Trigger>
+
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                    <Condition Property="IsChecked" Value="False" />
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter TargetName="layoutRoot" Property="Background" Value="{StaticResource MainErrorColor}" />
+                                    <Setter TargetName="layoutRoot" Property="BorderBrush" Value="{StaticResource MainErrorColor}" />
+                                </MultiTrigger.Setters>
+                            </MultiTrigger>
+
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                    <Condition Property="IsChecked" Value="True" />
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter TargetName="layoutRoot" Property="Background" Value="{StaticResource MainSuccessColor}" />
+                                    <Setter TargetName="layoutRoot" Property="BorderBrush" Value="{StaticResource MainSuccessColor}" />
+                                </MultiTrigger.Setters>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <!-- TextBox -->
         <Style x:Key="MainTextBoxStyleBase" TargetType="{x:Type TextBox}">
             <Setter Property="FontFamily" Value="{StaticResource Lato}" />

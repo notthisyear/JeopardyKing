@@ -11,7 +11,9 @@
         Width="1024"
         Height="800"
         WindowStartupLocation="CenterScreen"
-        xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
+        xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+        KeyDown="WindowKeyDown"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="32" 
@@ -59,6 +61,7 @@
                     </Button.Style>
                 </Button>
 
+                <!-- Main grid -->
                 <Grid Grid.Row="1">
                     <Grid.Resources>
 
@@ -75,6 +78,9 @@
                                 <LinearDoubleKeyFrame KeyTime="00:00:0.2" Value="1" />
                             </DoubleAnimationUsingKeyFrames>
                         </Storyboard>
+
+                        <sys:Boolean x:Key="true">True</sys:Boolean>
+                        <sys:Boolean x:Key="false">False</sys:Boolean>
                     </Grid.Resources>
 
                     <Grid.Style>
@@ -100,6 +106,16 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
+                    <!-- Game title -->
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="2"
+                               Text="{Binding Path=ViewModel.GameBoard.GameName, Converter={StaticResource toUpperOrLowerConverter}, ConverterParameter=upper}"
+                               Style="{StaticResource MainTextBlockStyle}"
+                               FontSize="18"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+
                     <!-- Game board -->
                     <ItemsControl Grid.Row="1"
                                   Grid.RowSpan="2"
@@ -109,7 +125,7 @@
                                   VerticalAlignment="Stretch"
                                   VerticalContentAlignment="Stretch"
                                   ItemsSource="{Binding Path=ViewModel.GameBoard.Categories}">
-                            <ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="1"/>
                                 </ItemsPanelTemplate>
@@ -118,8 +134,8 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <components:CategoryViewGameManager Category="{Binding Path=.}"
-                                                                    ViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.ViewModel.CategoryViewModel}"
-                                                                    Padding="5,0"/>
+                                                                        ViewModel="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.ViewModel.CategoryViewModel}"
+                                                                        Padding="5,0"/>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -130,64 +146,204 @@
                             Background="{StaticResource BackgroundColorDarkerShadeWithOpacity}"
                             CornerRadius="5"
                             Margin="0,0,5,0">
+                        <Grid Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
 
-                        <StackPanel Orientation="Vertical"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="2*" />
+                            </Grid.ColumnDefinitions>
 
-                            <Button>
-                                <Button.Style>
-                                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                        <Setter Property="ToolTip" Value="Press to start game" />
-                                        <Setter Property="Content" Value="Start game" />
-                                        <Setter Property="Command" Value="{Binding Path=ViewModel.StartGameCommand}" />
+                            <!-- Play mode -->
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       Style="{StaticResource MainTextBlockStyle}"
+                                       Text="Mode:"
+                                       VerticalAlignment="Center"/>
+                            <ComboBox Grid.Row="0"
+                                      Grid.Column="1"
+                                      ItemsSource="{Binding Path=ViewModel.GameModeOptions}"
+                                      SelectedItem="{Binding Path=ViewModel.GameAnswerMode, Mode=TwoWay}"
+                                      ToolTip="{Binding Path=ViewModel.GameAnswerModeToolTip}"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Center"
+                                      MinWidth="100"
+                                      ToolTipService.ShowOnDisabled="True">
+                                <ComboBox.Style>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource ComboBoxStyle}">
+                                        <Setter Property="IsEnabled" Value="True" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.None}">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.GameStarting}">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                                <Setter Property="ToolTip" Value="Press to reveal next category" />
-                                                <Setter Property="Content" Value="Reveal next category" />
-                                                <Setter Property="Command" Value="{Binding Path=ViewModel.RevealNextCategoryCommand}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.RevealCategories}">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                                <Setter Property="ToolTip" Value="Press to reveal next category" />
-                                                <Setter Property="Content" Value="Reveal next category" />
-                                                <Setter Property="Command" Value="{Binding Path=ViewModel.RevealNextCategoryCommand}" />
+                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                                <Setter Property="ToolTip" Value="Cannot change game mode while question is active" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </Button.Style>
-                            </Button>
+                                </ComboBox.Style>
+                            </ComboBox>
 
-                            <Button Content="Start question">
-                                <Button.Style>
-                                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
-                                        <Setter Property="IsEnabled" Value="False" />
-                                        <Setter Property="ToolTip" Value="Question already answered" />
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.IsAnswered}" Value="False">
-                                                <Setter Property="IsEnabled" Value="True" />
-                                                <Setter Property="ToolTip" Value="Click to start the question" />
-                                            </DataTrigger>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentState}" Value="{x:Static windows:QuestionVisualState.QuestionSelected}" />
-                                                    <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowBoard}" />
-                                                </MultiDataTrigger.Conditions>
-                                                <MultiDataTrigger.Setters>
+                            <!-- Buttons -->
+                            <StackPanel Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Grid.Row="1"
+                                        Orientation="Vertical"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+
+                                <!-- Allow answers -->
+                                <ToggleButton IsChecked="{Binding Path=ViewModel.AnswersAllowed, Mode=TwoWay}">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource AcceptingAnswersToggleButtonStyle}">
+                                            <Setter Property="Content" Value="Answers blocked" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="ToolTip" Value="Click to allow answers [Shortcut: A]" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}">
                                                     <Setter Property="Visibility" Value="Visible" />
-                                                </MultiDataTrigger.Setters>
-                                            </MultiDataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </StackPanel>
+                                                </DataTrigger>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter Property="Content" Value="Answers allowed" />
+                                                    <Setter Property="ToolTip" Value="Click to block answers [Shortcut: A]" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                </ToggleButton>
+
+                                <Button>
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource DeleteButtonEditBoxWindow}">
+                                            <Setter Property="Margin" Value="0,10,0,0" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="ToolTip" Value="Click to abandon this question" />
+                                            <Setter Property="Content" Value="Abandon question" /> q
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Setter Property="Command" Value="{Binding Path=ViewModel.AbandonQuestionCommand}" />
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="False" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerHasAnswered}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- Flow control button -->
+                                <Button>
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="ToolTip" Value="Press to start game" />
+                                            <Setter Property="Content" Value="Start game" />
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Setter Property="Command" Value="{Binding Path=ViewModel.StartGameCommand}" />
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.None}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.AllPlayersHasMapping}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.None}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.AllPlayersHasMapping}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="ToolTip" Value="Cannot start - not all player are assigned a key" />
+                                                        <Setter Property="IsEnabled" Value="False" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.GameStarting}">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Setter Property="ToolTip" Value="Press to reveal next category" />
+                                                    <Setter Property="Content" Value="Reveal next category" />
+                                                    <Setter Property="Command" Value="{Binding Path=ViewModel.RevealNextCategoryCommand}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.RevealCategories}">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Setter Property="ToolTip" Value="Press to reveal next category" />
+                                                    <Setter Property="Content" Value="Reveal next category" />
+                                                    <Setter Property="Command" Value="{Binding Path=ViewModel.RevealNextCategoryCommand}" />
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentState}" Value="{x:Static windows:QuestionVisualState.QuestionSelected}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowBoard}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.IsAnswered}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Content" Value="Start question" />
+                                                        <Setter Property="ToolTip" Value="Click to start the question" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="Command" Value="{Binding Path=ViewModel.StartQuestionCommand}" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentState}" Value="{x:Static windows:QuestionVisualState.QuestionSelected}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowBoard}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.IsAnswered}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Content" Value="Start question" />
+                                                        <Setter Property="ToolTip" Value="Question already answered" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="IsEnabled" Value="False" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- Correct / incorrect buttons -->
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,10,0,0">
+                                    <StackPanel.Style>
+                                        <Style TargetType="{x:Type StackPanel}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <Button Style="{StaticResource CorrectButtonEditBoxWindow}"
+                                            Content="&#xE73E;"
+                                            Width="50"
+                                            FontSize="18"
+                                            FontFamily="Segoe MDL2 Assets"
+                                            Margin="0,0,20,0"
+                                            ToolTip="Answer is correct"
+                                            Command="{Binding Path=ViewModel.AnswerQuestionCommand}"
+                                            CommandParameter="{StaticResource true}"/>
+                                    <Button Style="{StaticResource DeleteButtonEditBoxWindow}"
+                                            Content="&#xE711;"
+                                            Width="50"
+                                            FontSize="18"
+                                            FontFamily="Segoe MDL2 Assets"
+                                            ToolTip="Answer is incorrect"
+                                            Command="{Binding Path=ViewModel.AnswerQuestionCommand}"
+                                            CommandParameter="{StaticResource false}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
                     </Border>
 
                     <!-- Question overview -->

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using JeopardyKing.ViewModels;
 using JeopardyKing.WpfComponents;
 
@@ -51,6 +52,12 @@ namespace JeopardyKing.Windows
                         break;
                 };
             }
+        }
+
+        private void WindowKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.IsDown && e.Key == Key.A)
+                ViewModel.ToggleAnswerAllowedCommand.Execute(default);
         }
     }
 }

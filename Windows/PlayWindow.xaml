@@ -39,6 +39,24 @@
                             <LinearDoubleKeyFrame KeyTime="00:00:0.5" Value="1" />
                         </DoubleAnimationUsingKeyFrames>
                     </Storyboard>
+                    <Storyboard x:Key="animateScaleToZero"
+                                PresentationOptions:Freeze="True">
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)">
+                            <LinearDoubleKeyFrame KeyTime="00:00:0.5" Value="0" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)">
+                            <LinearDoubleKeyFrame KeyTime="00:00:0.5" Value="0" />
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                    <Storyboard x:Key="animateScaleToOne"
+                                PresentationOptions:Freeze="True">
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)">
+                            <LinearDoubleKeyFrame KeyTime="00:00:0.5" Value="1" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)">
+                            <LinearDoubleKeyFrame KeyTime="00:00:0.5" Value="1" />
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
                 </Grid.Resources>
 
                 <Grid.RowDefinitions>
@@ -249,7 +267,7 @@
                         <DataTemplate>
                             <Border Background="{StaticResource BackgroundColorDarkerShadeWithOpacity}"
                                     CornerRadius="5"
-                                    Margin="20,10"
+                                    Margin="20,10,20,20"
                                     HorizontalAlignment="Stretch">
                                 <Border.Style>
                                     <Style TargetType="{x:Type Border}">
@@ -286,6 +304,195 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <!-- Question square -->
+                <Border Grid.Row="0"
+                        Grid.RowSpan="1"
+                        Margin="20,20,20,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="{StaticResource BackgroundColorDarkerShadeWithOpacity}"
+                        CornerRadius="5">
+
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="Opacity" Value="1" />
+                            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                            <Setter Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0"
+                                                    ScaleY="0" />
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=ViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard Storyboard="{StaticResource animateOpacityToOne}" />
+                                        <BeginStoryboard Storyboard="{StaticResource animateScaleToOne}" />
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard Storyboard="{StaticResource animateOpacityToZero}" />
+                                        <BeginStoryboard Storyboard="{StaticResource animateScaleToZero}" />
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <Grid HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Top row -->
+                        <StackPanel Orientation="Vertical"
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                                           Foreground="{StaticResource MainTextColorTransparent}"
+                                           Text="{Binding Path=ViewModel.CurrentQuestion.CategoryName,
+                                                          Converter={StaticResource toUpperOrLowerConverter},
+                                                          ConverterParameter=upper}"
+                                           FontSize="24"/>
+                                <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                                            Foreground="{StaticResource MainTextColorTransparent}"
+                                            Text="|"
+                                           Margin="10,0,10,0 "
+                                           FontSize="24"/>
+                                <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                                           Foreground="{StaticResource MainTextColorTransparent}"
+                                           FontSize="24">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource valueDisplayConverter}">
+                                            <Binding Path="ViewModel.CurrentQuestion.Value" />
+                                            <Binding Path="ViewModel.CurrentQuestion.Currency" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </StackPanel>
+
+                        </StackPanel>
+
+                        <Separator Grid.Row="1"
+                                   Margin="20,0,20,0"/>
+
+                        <StackPanel Grid.Row="2"
+                                    Orientation="Vertical"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Margin="20,0,20,0">
+
+                            <!-- Show question content -->
+                            <TextBlock Text="{Binding Path=ViewModel.CurrentQuestion.Content}"
+                                   FontSize="48"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                        <Setter Property="Opacity" Value="0" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=ViewModel.InShowContent}" Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard Storyboard="{StaticResource animateOpacityToOne}" />
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <BeginStoryboard Storyboard="{StaticResource animateOpacityToZero}" />
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- Player currently answering -->
+                        <Border Grid.Row="2"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{StaticResource PlayingFieldBackgroundWithOpacity}"
+                                CornerRadius="5"
+                                Margin="20">
+                            <Border.Style>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="Opacity" Value="0" />
+                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0"
+                                                            ScaleY="0" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard Storyboard="{StaticResource animateOpacityToOne}" />
+                                                <BeginStoryboard Storyboard="{StaticResource animateScaleToOne}" />
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard Storyboard="{StaticResource animateOpacityToZero}" />
+                                                <BeginStoryboard Storyboard="{StaticResource animateScaleToZero}" />
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <StackPanel Orientation="Vertical"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding Path=ViewModel.CurrentlyAnsweringPlayer.Name}"
+                                           Style="{StaticResource MainTextBlockStyle}"
+                                           FontSize="108" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Correct/incorrect answer -->
+                <TextBlock Grid.Row="0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontWeight="ExtraBold"
+                           FontSize="400">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource SymbolButtonStyle}">
+                            <Setter Property="Opacity" Value="0" />
+                            <Setter Property="Foreground" Value="{StaticResource MainSuccessColorMuted}" />
+                            <Setter Property="Text" Value="" />
+                            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                            <Setter Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0" ScaleY="0" />
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=ViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.AnswerCorrect}">
+                                    <Setter Property="Foreground" Value="{StaticResource MainSuccessColorMuted}" />
+                                    <Setter Property="Text" Value="&#xE73E;" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=ViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.AnswerIncorrect}">
+                                    <Setter Property="Foreground" Value="{StaticResource MainErrorColorMuted}" />
+                                    <Setter Property="Text" Value="&#xE711;" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=ViewModel.InPlayerHasAnswered}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard Storyboard="{StaticResource animateOpacityToOne}" />
+                                        <BeginStoryboard Storyboard="{StaticResource animateScaleToOne}" />
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard Storyboard="{StaticResource animateOpacityToZero}" />
+                                        <BeginStoryboard Storyboard="{StaticResource animateScaleToZero}" />
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
         </Border>
     </Viewbox>

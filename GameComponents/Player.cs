@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace JeopardyKing.GameComponents
 {
@@ -36,6 +37,33 @@ namespace JeopardyKing.GameComponents
         {
             Id = id;
             Name = name;
+        }
+
+
+        public void AddCashForQuestion(Question q)
+        {
+            decimal valueToAdd;
+            if (q.IsBonus)
+                valueToAdd = 2 * q.Value;
+            else if (q.IsGamble)
+                throw new NotImplementedException();
+            else
+                valueToAdd = q.Value;
+
+            Cash += valueToAdd;
+        }
+
+        public void SubtractCashForQuestion(Question q)
+        {
+            decimal valueToSubtract;
+            if (q.IsBonus)
+                valueToSubtract = q.Value;
+            else if (q.IsGamble)
+                throw new NotImplementedException();
+            else
+                valueToSubtract = q.Value;
+
+            Cash -= valueToSubtract;
         }
     }
 }
