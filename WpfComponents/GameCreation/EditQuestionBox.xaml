@@ -14,8 +14,8 @@
             DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=.}"
             Background="{StaticResource BackgroundColorDarkerShade}"
             Opacity="{Binding Path=EditQuestionOpacityValue}"
-            Width="400"
-            Height="650"
+            Width="420"
+            Height="750"
             Margin="10" 
             CornerRadius="5">
         <Border.RenderTransform>
@@ -95,7 +95,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="5" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="60" />
+                <RowDefinition Height="20" />
                 <RowDefinition Height="2*" />
                 <RowDefinition Height="5" />
                 <RowDefinition Height="75" />
@@ -277,35 +278,53 @@
                                Margin="0,3,10,0"/>
 
                     <ComboBox Style="{StaticResource ComboBoxStyle}"
-                              MinWidth="200"
+                              MinWidth="190"
                              ItemsSource="{Binding Path=ViewModel.MediaFlowTypes}"
                              SelectedItem="{Binding Path=ViewModel.SelectedMediaFlow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="Choose media flow type" />
                 </StackPanel>
-
-                <Separator Margin="10,10,10,0"/>
             </StackPanel>
 
-            <!-- Bonus check mark -->
-            <StackPanel Orientation="Horizontal"
+            <!-- Bonus and gamble check mark -->
+            <StackPanel Orientation="Vertical"
                         Grid.Row="2"
                         Grid.Column="1"
-                        Margin="5,10,0,0"
-                        HorizontalAlignment="Center"
+                        Margin="5,10,15,0"
+                        HorizontalAlignment="Right"
                         VerticalAlignment="Top">
-
-                <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,0,8">
+                    <TextBlock Style="{StaticResource MainTextBlockStyle}"
                             Text="Bonus question:"
                             FontStyle="Italic"
                             Margin="0,2,10,0"/>
 
-                <CheckBox IsChecked="{Binding ViewModel.ModeManager.CurrentlySelectedQuestion.IsBonus, Mode=TwoWay}"
+                    <CheckBox IsChecked="{Binding ViewModel.ModeManager.CurrentlySelectedQuestion.IsBonus, Mode=TwoWay}"
                             ToolTip="Check to make this question be a bonus question. A bonus question is worth twice its advertised value."/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                                Margin="0,10,0,0"
+                            HorizontalAlignment="Right">
+                    <TextBlock Style="{StaticResource MainTextBlockStyle}"
+                                Text="Gamble question:"
+                                FontStyle="Italic"
+                                Margin="0,2,10,0"/>
+
+                    <CheckBox IsChecked="{Binding ViewModel.ModeManager.CurrentlySelectedQuestion.IsGamble, Mode=TwoWay}"
+                                ToolTip="Check to make this question be a gamble question. A gamble question lets the players bet their current amount on the question."/>
+                </StackPanel>
             </StackPanel>
+
+            <Separator Grid.Row="3"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2"
+                       Margin="10,0,10,0"/>
 
             <!-- Text type question -->
             <Grid Margin="10"
-                    Grid.Row="3"
+                    Grid.Row="4"
                     Grid.Column="0"
                     Grid.ColumnSpan="2">
 
@@ -365,7 +384,7 @@
 
             <!-- Multimedia type question -->
             <Grid Margin="10"
-                Grid.Row="3"
+                Grid.Row="4"
                 Grid.Column="0"
                 Grid.ColumnSpan="2">
 
@@ -937,14 +956,14 @@
                 </Grid>
             </Grid> 
 
-            <Separator Grid.Row="4"
+            <Separator Grid.Row="5"
                            Grid.Column="0"
                            Grid.ColumnSpan="2"
                            Margin="10,0,10,0" />
 
             <!-- Delete button -->
             <StackPanel Orientation="Horizontal"
-                        Grid.Row="5"
+                        Grid.Row="6"
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         HorizontalAlignment="Center"

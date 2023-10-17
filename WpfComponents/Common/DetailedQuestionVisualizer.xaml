@@ -122,6 +122,31 @@
                                         </Style>
                                     </components:IconBox.Style>
                                 </components:IconBox>
+                                <components:IconBox VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    ToolTip="Gamble question">
+                                    <components:IconBox.Style>
+                                        <Style TargetType="{x:Type components:IconBox}">
+                                            <Setter Property="StrokeColor" Value="Transparent" />
+                                            <Setter Property="FillColor" Value="White" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                            <Setter Property="ScaleFactor" Value="0.8" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="IconType" Value="Dice" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="StrokeColor" Value="{StaticResource MainHighlightColor}" />
+                                                    <Setter Property="FillColor" Value="{StaticResource MainHighlightColor}" />
+                                                    <Setter Property="Opacity" Value="1" />
+                                                    <Setter Property="ScaleFactor" Value="0.9" />
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding Path=IsGamble}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </components:IconBox.Style>
+                                </components:IconBox>
                             </StackPanel>
 
                             <!-- Question value-->

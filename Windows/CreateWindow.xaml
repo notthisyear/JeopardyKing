@@ -11,7 +11,7 @@
         Background="Transparent"
         WindowStyle="None" 
         Width="1366"
-        Height="768"
+        Height="850"
         WindowStartupLocation="CenterScreen">
 
     <WindowChrome.WindowChrome>

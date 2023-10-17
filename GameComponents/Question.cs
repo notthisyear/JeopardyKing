@@ -14,18 +14,19 @@ namespace JeopardyKing.GameComponents
         private bool _isAnswered = false;
         private bool _isSelected = false;
         private string _categoryName = string.Empty;
-        private decimal _value;
+        private decimal _value = 0M;
         private QuestionType _type;
-        private CurrencyType _currency;
-        private MediaQuestionFlow _mediaQuestionFlow;
-        private bool _isBonus;
+        private CurrencyType _currency = CurrencyType.SwedishKrona;
+        private MediaQuestionFlow _mediaQuestionFlow = MediaQuestionFlow.None;
+        private bool _isBonus = false;
+        private bool _isGamble = false;
 
         private bool _hasMediaLink = false;
         private string _mediaName = string.Empty;
         private int _videoOrAudioLengthSeconds = 0;
         private double _startVideoOrAudioAtSeconds = 0.0;
         private double _endVideoOrAudioAtSeconds = 0.0;
-        private bool _isEmbeddedMedia;
+        private bool _isEmbeddedMedia = false;
         private string _content = string.Empty;
         private string _multimediaContentLink = string.Empty;
         private string _youtubeVideoId = string.Empty;
@@ -33,6 +34,7 @@ namespace JeopardyKing.GameComponents
 
         public int Id { get; }
 
+        [JsonIgnore]
         public int CategoryId { get; }
 
         [JsonIgnore]
@@ -49,6 +51,7 @@ namespace JeopardyKing.GameComponents
             set => SetProperty(ref _isSelected, value);
         }
 
+        [JsonIgnore]
         public string CategoryName
         {
             get => _categoryName;
@@ -94,7 +97,23 @@ namespace JeopardyKing.GameComponents
         public bool IsBonus
         {
             get => _isBonus;
-            set => SetProperty(ref _isBonus, value);
+            set
+            {
+                if (value && IsGamble)
+                    IsGamble = false;
+                SetProperty(ref _isBonus, value);
+            }
+        }
+
+        public bool IsGamble
+        {
+            get => _isGamble;
+            set
+            {
+                if (value && IsBonus)
+                    IsBonus = false;
+                SetProperty(ref _isGamble, value);
+            }
         }
 
         public bool HasMediaLink
@@ -177,8 +196,6 @@ namespace JeopardyKing.GameComponents
             Type = type;
             Value = value;
             Currency = currency;
-            IsBonus = false;
-            Content = string.Empty;
         }
 
         #region Public methods
