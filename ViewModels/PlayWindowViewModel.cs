@@ -30,6 +30,7 @@ namespace JeopardyKing.ViewModels
         private bool _inShowPreQuestionContent = false;
         private bool _inShowContent = false;
         private bool _inShowMediaContent = false;
+        private bool _inMediaContentPlaying = false;
         private bool _inPlayerAnswering = false;
         private bool _inPlayerHasAnswered = false;
         private Board? _gameBoard = default;
@@ -73,6 +74,12 @@ namespace JeopardyKing.ViewModels
         {
             get => _inShowMediaContent;
             private set => SetProperty(ref _inShowMediaContent, value);
+        }
+
+        public bool InMediaContentPlaying
+        {
+            get => _inMediaContentPlaying;
+            set => SetProperty(ref _inMediaContentPlaying, value);
         }
 
         public bool InPlayerAnswering
@@ -174,7 +181,7 @@ namespace JeopardyKing.ViewModels
                 {
                     Task.Run(async () =>
                     {
-                        await Task.Delay(1500);
+                        await Task.Delay(2500);
                         SetStateToShowQuestion(currentQuestion);
                     });
                 }
@@ -196,6 +203,7 @@ namespace JeopardyKing.ViewModels
                 else if (InShowContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.TextThenMedia)
                 {
                     InShowMediaContent = true;
+                    InMediaContentPlaying = true;
                 }
                 else if (InShowMediaContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText)
                 {
@@ -203,6 +211,7 @@ namespace JeopardyKing.ViewModels
                 }
             }
         }
+
         public void PlayerHasPressed(Player player)
         {
             if (!InPlayerAnswering)
@@ -225,9 +234,18 @@ namespace JeopardyKing.ViewModels
                     await Task.Delay(1500);
                     InPlayerHasAnswered = false;
                     if (isCorrect)
+                    {
                         ResetGameBoardAfterAnswer();
+                    }
                     else
+                    {
                         WindowState = PlayWindowState.ShowQuestion;
+                        if (CurrentQuestion != default)
+                        {
+                            if (InShowMediaContent && (CurrentQuestion.Type == QuestionType.Audio || CurrentQuestion.Type == QuestionType.Video))
+                                InMediaContentPlaying = true;
+                        }
+                    }
                 });
             }
         }
@@ -259,6 +277,8 @@ namespace JeopardyKing.ViewModels
                         currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
                     InShowMediaContent = currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText
                         || currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
+                    if (InShowMediaContent && (currentQuestion.Type == QuestionType.Audio || currentQuestion.Type == QuestionType.Video))
+                        InMediaContentPlaying = true;
                     break;
                 default:
                     throw new NotSupportedException();
@@ -269,6 +289,7 @@ namespace JeopardyKing.ViewModels
         {
             InShowContent = false;
             InShowMediaContent = false;
+            InMediaContentPlaying = false;
             CurrentQuestion = default;
             CurrentlyAnsweringPlayer = default;
             WindowState = PlayWindowState.ShowBoard;

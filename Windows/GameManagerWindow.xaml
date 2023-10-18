@@ -209,6 +209,10 @@
                                                     <Setter Property="Content" Value="Answers allowed" />
                                                     <Setter Property="ToolTip" Value="Click to block answers [Shortcut: A]" />
                                                 </Trigger>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                    <Setter Property="ToolTip" Value="Cannot change while player is answering" />
+                                                </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </ToggleButton.Style>
@@ -335,6 +339,21 @@
                                                         <Setter Property="ToolTip" Value="Click to show content" />
                                                         <Setter Property="Visibility" Value="Visible" />
                                                         <Setter Property="Command" Value="{Binding Path=ViewModel.ProgressQuestionCommand}" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowMediaContent}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InMediaContentPlaying}" Value="False" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Content" Value="Play media" />
+                                                        <Setter Property="ToolTip" Value="Click to play the media again" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="Command" Value="{Binding Path=ViewModel.PlayMediaAgainCommand}" />
                                                     </MultiDataTrigger.Setters>
                                                 </MultiDataTrigger>
                                             </Style.Triggers>

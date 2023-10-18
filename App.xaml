@@ -65,12 +65,12 @@
         <SolidColorBrush x:Key="MainButtonPressedBorder" Color="#557392" Opacity="0.5" />
         <SolidColorBrush x:Key="MainSuccessColor" Color="{StaticResource MainSuccessColorRaw}" />
         <SolidColorBrush x:Key="MainSuccessColorMuted" Color="{StaticResource MainSuccessColorRaw}" Opacity="0.65" />
-        <SolidColorBrush x:Key="MainSuccessColorDisabled" Color="{StaticResource MainSuccessColorRaw}" Opacity="0.45" />
+        <SolidColorBrush x:Key="MainSuccessColorDisabled" Color="{StaticResource MainSuccessColorRaw}" Opacity="0.35" />
         <SolidColorBrush x:Key="MainInfoColor" Color="{StaticResource MainInfoColorRaw}" />
         <SolidColorBrush x:Key="MainWarningColor" Color="#F39C12" />
         <SolidColorBrush x:Key="MainErrorColor" Color="{StaticResource MainErrorColorRaw}" />
         <SolidColorBrush x:Key="MainErrorColorMuted" Color="{StaticResource MainErrorColorRaw}" Opacity="0.65"/>
-        <SolidColorBrush x:Key="MainErrorColorDisabled" Color="{StaticResource MainErrorColorRaw}" Opacity="0.45"/>
+        <SolidColorBrush x:Key="MainErrorColorDisabled" Color="{StaticResource MainErrorColorRaw}" Opacity="0.35"/>
         
         <SolidColorBrush x:Key="MainTextColor" Color="{StaticResource MainTextColorRaw}" />
         <SolidColorBrush x:Key="MainTextDisabledColor" Color="{StaticResource MainTextColorRaw}" Opacity="0.65"/>

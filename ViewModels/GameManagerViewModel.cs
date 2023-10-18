@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -42,7 +43,6 @@ namespace JeopardyKing.ViewModels
             get => _allPlayersHasMapping;
             private set => SetProperty(ref _allPlayersHasMapping, value);
         }
-
 
         public bool AnswersAllowed
         {
@@ -94,6 +94,8 @@ namespace JeopardyKing.ViewModels
         private RelayCommand? _progressQuestionCommand;
         private RelayCommand<bool>? _answerQuestionCommand;
         private RelayCommand? _abandonQuestionCommand;
+        private RelayCommand? _playMediaAgainCommand;
+
         public ICommand ToggleAnswerAllowedCommand
         {
             get
@@ -247,7 +249,6 @@ namespace JeopardyKing.ViewModels
                     if (GameBoard != default)
                     {
                         PlayWindowViewModel.StartGame(GameBoard, new ReadOnlyObservableCollection<Player>(Players));
-                        AnswersAllowed = _gameAnswerModeSetting == GameComponents.GameAnswerMode.AllowImmediately;
                         _inputManager.SetPropagationMode(InputManager.PropagationMode.OnlyMappedKeys);
                     }
                 });
@@ -272,7 +273,9 @@ namespace JeopardyKing.ViewModels
                 {
                     if (QuestionModeManager.CurrentlySelectedQuestion == default)
                         return;
+
                     PlayWindowViewModel.StartQuestion(QuestionModeManager.CurrentlySelectedQuestion);
+                    AnswersAllowed = _gameAnswerModeSetting == GameComponents.GameAnswerMode.AllowImmediately;
                 });
                 return _startQuestionCommand;
             }
@@ -292,6 +295,7 @@ namespace JeopardyKing.ViewModels
             }
 
         }
+
         public ICommand AnswerQuestionCommand
         {
             get
@@ -313,6 +317,9 @@ namespace JeopardyKing.ViewModels
                     }
                     PlayWindowViewModel.PlayerHasAnswered(isCorrect);
 
+                    // Automatically allow answers after failed attempt
+                    if (!isCorrect)
+                        PlayWindowViewModel.PropertyChanged += SetAllowAnswerOnStateChange;
                 });
                 return _answerQuestionCommand;
             }
@@ -326,9 +333,23 @@ namespace JeopardyKing.ViewModels
                 {
                     if (PlayWindowViewModel.CurrentQuestion != default)
                         PlayWindowViewModel.CurrentQuestion.IsAnswered = true;
+
                     PlayWindowViewModel.AbandonQuestion();
+                    AnswersAllowed = false;
                 });
                 return _abandonQuestionCommand;
+            }
+        }
+
+        public ICommand PlayMediaAgainCommand
+        {
+            get
+            {
+                _playMediaAgainCommand ??= new RelayCommand(() =>
+                {
+                    PlayWindowViewModel.InMediaContentPlaying = true;
+                });
+                return _playMediaAgainCommand;
             }
         }
         #endregion
@@ -381,6 +402,15 @@ namespace JeopardyKing.ViewModels
         public void NotifyWindowClosed()
         {
             _shouldExit = true;
+        }
+
+        private void SetAllowAnswerOnStateChange(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PlayWindowViewModel.WindowState) && PlayWindowViewModel.WindowState == PlayWindowState.ShowQuestion)
+            {
+                AnswersAllowed = true;
+                PlayWindowViewModel.PropertyChanged -= SetAllowAnswerOnStateChange;
+            }
         }
 
         private void MonitorInputThread(object? state)

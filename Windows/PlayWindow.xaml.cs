@@ -1,9 +1,15 @@
-﻿using System.Windows;
+﻿using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows;
+using JeopardyKing.GameComponents;
 using JeopardyKing.ViewModels;
-using JeopardyKing.WpfComponents;
+using LibVLCSharp.Shared;
 
 namespace JeopardyKing.Windows
 {
+    using VlcMediaPlayer = LibVLCSharp.Shared.MediaPlayer;
+
     public partial class PlayWindow : Window
     {
         public PlayWindowViewModel ViewModel
@@ -17,6 +23,7 @@ namespace JeopardyKing.Windows
             typeof(PlayWindow),
             new FrameworkPropertyMetadata(null));
 
+        private readonly LibVLC _libVlc;
 
         public PlayWindow()
         {
@@ -24,29 +31,109 @@ namespace JeopardyKing.Windows
 
             MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
             MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
+
+            _libVlc = new LibVLC();
+            Loaded += PlayWindowLoaded;
         }
 
-        private void TitleBarButtonPressed(object sender, RoutedEventArgs e)
+        private long _startAudioOrVideoAtMs = long.MinValue;
+        private long _endAudioOrVideoAtMs = long.MaxValue;
+        private bool _currentClipHasCustomEnd = false;
+
+        private void PlayWindowLoaded(object sender, RoutedEventArgs e)
         {
-            if (e is TitleBarButtonClickedEventArgs eventArgs)
+            Loaded -= PlayWindowLoaded;
+            var mediaPlayer = new VlcMediaPlayer(_libVlc);
+            audioVideoPlayer.MediaPlayer = mediaPlayer;
+            audioVideoPlayer.MediaPlayer.EndReached += MediaPlayerEndReached;
+            audioVideoPlayer.MediaPlayer.PositionChanged += MediaPlayerPositionChanged;
+            ViewModel.PropertyChanged += ViewModelPropertyChanged;
+        }
+
+        private void ViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                switch (eventArgs.ButtonClicked)
+                if (ViewModel.CurrentQuestion == default)
+                    return;
+
+                if (e.PropertyName == nameof(ViewModel.CurrentQuestion))
                 {
-                    case TitleBarButton.Minimize:
-                        WindowState = WindowState.Minimized;
-                        break;
-                    case TitleBarButton.Maximize:
-                        WindowState = WindowState.Maximized;
-                        break;
-                    case TitleBarButton.Restore:
-                        WindowState = WindowState.Normal;
-                        break;
-                    case TitleBarButton.Close:
-                        ViewModel.NotifyWindowClosed();
-                        Close();
-                        break;
-                };
+                    if (ViewModel.CurrentQuestion.Type == QuestionType.Audio || ViewModel.CurrentQuestion.Type == QuestionType.Video)
+                        LoadNewMedia(ViewModel.CurrentQuestion);
+                    return;
+                }
+
+                if (ViewModel.CurrentQuestion.Type != QuestionType.Audio && ViewModel.CurrentQuestion.Type != QuestionType.Video)
+                    return;
+
+                if (e.PropertyName == nameof(ViewModel.InMediaContentPlaying) && ViewModel.InMediaContentPlaying)
+                {
+                    if (audioVideoPlayer.MediaPlayer!.Media == default)
+                        LoadNewMedia(ViewModel.CurrentQuestion);
+
+                    if (!audioVideoPlayer.MediaPlayer!.IsPlaying)
+                    {
+                        audioVideoPlayer.MediaPlayer!.Play();
+                        audioVideoPlayer.MediaPlayer!.Time = _startAudioOrVideoAtMs;
+                    }
+                }
+                else if (e.PropertyName == nameof(ViewModel.InPlayerAnswering) && ViewModel.InPlayerAnswering)
+                {
+                    if (audioVideoPlayer.MediaPlayer!.IsPlaying)
+                    {
+                        _startAudioOrVideoAtMs = audioVideoPlayer.MediaPlayer!.Time;
+                        audioVideoPlayer.MediaPlayer!.Stop();
+                        ViewModel.InMediaContentPlaying = false;
+                    }
+                }
+                else if (e.PropertyName == nameof(ViewModel.InShowMediaContent) && !ViewModel.InShowMediaContent)
+                {
+                    ClearMediaPlayerMedia();
+                }
+            });
+        }
+
+        private void MediaPlayerEndReached(object? sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ViewModel.InMediaContentPlaying = false;
+                ClearMediaPlayerMedia();
+            });
+        }
+
+        private void MediaPlayerPositionChanged(object? sender, MediaPlayerPositionChangedEventArgs e)
+        {
+            if (!_currentClipHasCustomEnd)
+                return;
+
+            if (_endAudioOrVideoAtMs >= audioVideoPlayer.MediaPlayer!.Time)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    audioVideoPlayer.MediaPlayer!.Stop();
+                    ViewModel.InMediaContentPlaying = false;
+                });
             }
+        }
+
+        private void LoadNewMedia(Question q)
+        {
+            using var media = new Media(_libVlc, q.MultimediaContentLink);
+            audioVideoPlayer.MediaPlayer!.Media = media;
+            audioVideoPlayer.MediaPlayer.Stop();
+            _startAudioOrVideoAtMs = (long)q.StartVideoOrAudioAtSeconds * 1000;
+            _endAudioOrVideoAtMs = (long)q.EndVideoOrAudioAtSeconds * 1000;
+            _currentClipHasCustomEnd = _endAudioOrVideoAtMs < q.VideoOrAudioLengthSeconds;
+        }
+
+        private void ClearMediaPlayerMedia()
+        {
+            if (audioVideoPlayer.MediaPlayer!.IsPlaying)
+                audioVideoPlayer.MediaPlayer!.Stop();
+            audioVideoPlayer.MediaPlayer!.Media?.Dispose();
+            Application.Current.Dispatcher.Invoke(() => { audioVideoPlayer.MediaPlayer!.Media = default; });
         }
     }
 }
