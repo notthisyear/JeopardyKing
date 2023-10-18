@@ -89,9 +89,10 @@
                         </DoubleAnimation.EasingFunction>
                     </DoubleAnimation>
                 </Storyboard>
-                <converters:BitmapCreatorConverter x:Key="bitmapCreatorConverter" />
+
                 <converters:ClipLengthToTimeConverter x:Key="clipLengthToTimeConverter" />
             </Grid.Resources>
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="5" />

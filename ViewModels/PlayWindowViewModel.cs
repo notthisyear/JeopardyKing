@@ -236,7 +236,8 @@ namespace JeopardyKing.ViewModels
                 case QuestionType.YoutubeVideo:
                     InShowContent = currentQuestion.MediaQuestionFlow == MediaQuestionFlow.TextThenMedia ||
                         currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
-                    InShowMediaContent = !InShowContent || currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText;
+                    InShowMediaContent = currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText
+                        || currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText;
                     break;
                 default:
                     throw new NotSupportedException();

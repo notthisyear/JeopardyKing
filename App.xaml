@@ -12,6 +12,7 @@
 
         <BitmapImage x:Key="emptyImage" UriSource="/JeopardyKing;component/Resources/empty.png"/>
         <BitmapImage x:Key="jeopardyImage" UriSource="/JeopardyKing;component/Resources/jeopardy.png"/>
+
         <!-- Converters -->
         <converters:BooleanToVisibleOrCollapsedConverter x:Key="booleanToVisibleOrCollapsedConverter" />
         <converters:ValueDisplayConverter x:Key="valueDisplayConverter" />
@@ -19,6 +20,7 @@
         <converters:SecondsToTimeStringConverter x:Key="secondsToTimeStringConverter" />
         <converters:QuestionToIconTypeConverter x:Key="questionToIconTypeConverter" />
         <converters:ToUpperOrLowerConverter x:Key="toUpperOrLowerConverter" />
+        <converters:BitmapCreatorConverter x:Key="bitmapCreatorConverter" />
 
         <!-- Background colors-->
         <Color x:Key="MainBackgroundRaw" A="255" R="59" G="59" B="59" />
