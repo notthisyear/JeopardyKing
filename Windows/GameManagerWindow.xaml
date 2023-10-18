@@ -219,7 +219,7 @@
                                             <Setter Property="Margin" Value="0,10,0,0" />
                                             <Setter Property="Visibility" Value="Collapsed" />
                                             <Setter Property="ToolTip" Value="Click to abandon this question" />
-                                            <Setter Property="Content" Value="Abandon question" /> q
+                                            <Setter Property="Content" Value="Abandon question" />
                                             <Setter Property="IsEnabled" Value="True" />
                                             <Setter Property="Command" Value="{Binding Path=ViewModel.AbandonQuestionCommand}" />
                                             <Style.Triggers>

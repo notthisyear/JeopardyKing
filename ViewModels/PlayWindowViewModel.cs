@@ -1,6 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using JeopardyKing.GameComponents;
@@ -27,6 +27,7 @@ namespace JeopardyKing.ViewModels
         private PlayWindowState _windowState = PlayWindowState.None;
         private Category? _categoryBeingRevealed = default;
         private bool _categoryChanging = true;
+        private bool _inShowPreQuestionContent = false;
         private bool _inShowContent = false;
         private bool _inShowMediaContent = false;
         private bool _inPlayerAnswering = false;
@@ -55,6 +56,12 @@ namespace JeopardyKing.ViewModels
             private set => SetProperty(ref _categoryChanging, value);
         }
 
+        public bool InShowPreQuestionContent
+        {
+            get => _inShowPreQuestionContent;
+            private set => SetProperty(ref _inShowPreQuestionContent, value);
+
+        }
         public bool InShowContent
         {
             get => _inShowContent;
@@ -138,7 +145,7 @@ namespace JeopardyKing.ViewModels
                 Task.Run(() =>
                 {
                     // Give eventual animations some time to run
-                    Thread.Sleep(750);
+                    Task.Delay(750);
                     if (_currentCategoryIdx < GameBoard.Categories.Count)
                     {
                         CategoryBeingRevealed = GameBoard.Categories[_currentCategoryIdx];
@@ -158,8 +165,21 @@ namespace JeopardyKing.ViewModels
             if (WindowState == PlayWindowState.ShowBoard)
             {
                 CurrentQuestion = currentQuestion;
-                InShowContent = true;
+                InShowPreQuestionContent = CurrentQuestion.IsBonus || CurrentQuestion.IsGamble;
                 WindowState = PlayWindowState.ShowQuestion;
+
+                if (InShowPreQuestionContent && CurrentQuestion.IsBonus)
+                {
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(1500);
+                        SetStateToShowQuestion(currentQuestion);
+                    });
+                }
+                else if (!InShowPreQuestionContent)
+                {
+                    SetStateToShowQuestion(currentQuestion);
+                }
             }
         }
 
@@ -179,10 +199,10 @@ namespace JeopardyKing.ViewModels
                 InPlayerHasAnswered = true;
                 WindowState = isCorrect ? PlayWindowState.AnswerCorrect : PlayWindowState.AnswerIncorrect;
                 InPlayerAnswering = false;
-                Task.Run(() =>
+                Task.Run(async () =>
                 {
                     // Give eventual animations some time to run
-                    Thread.Sleep(1500);
+                    await Task.Delay(1500);
                     InPlayerHasAnswered = false;
                     if (isCorrect)
                         ResetGameBoardAfterAnswer();
@@ -202,6 +222,26 @@ namespace JeopardyKing.ViewModels
 
         }
 
+        private void SetStateToShowQuestion(Question currentQuestion)
+        {
+            InShowPreQuestionContent = false;
+            switch (currentQuestion.Type)
+            {
+                case QuestionType.Text:
+                    InShowContent = true;
+                    break;
+                case QuestionType.Image:
+                case QuestionType.Audio:
+                case QuestionType.Video:
+                case QuestionType.YoutubeVideo:
+                    InShowContent = currentQuestion.MediaQuestionFlow == MediaQuestionFlow.TextThenMedia ||
+                        currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
+                    InShowMediaContent = !InShowContent || currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText;
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
         private void ResetGameBoardAfterAnswer()
         {
             InShowContent = false;
