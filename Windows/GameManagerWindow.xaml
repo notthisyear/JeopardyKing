@@ -4,6 +4,7 @@
         xmlns:components="clr-namespace:JeopardyKing.WpfComponents"
         xmlns:windows="clr-namespace:JeopardyKing.Windows"
         xmlns:viewmodels="clr-namespace:JeopardyKing.ViewModels"
+        xmlns:game="clr-namespace:JeopardyKing.GameComponents"
         Title="JeopardyKing"
         AllowsTransparency="True"
         Background="Transparent"
@@ -96,7 +97,7 @@
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="50" />
-                        <RowDefinition Height="150" />
+                        <RowDefinition Height="200" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="150" />
                     </Grid.RowDefinitions>
@@ -216,7 +217,7 @@
                                 <Button>
                                     <Button.Style>
                                         <Style TargetType="{x:Type Button}" BasedOn="{StaticResource DeleteButtonEditBoxWindow}">
-                                            <Setter Property="Margin" Value="0,10,0,0" />
+                                            <Setter Property="Margin" Value="0,10,0,10" />
                                             <Setter Property="Visibility" Value="Collapsed" />
                                             <Setter Property="ToolTip" Value="Click to abandon this question" />
                                             <Setter Property="Content" Value="Abandon question" />
@@ -304,6 +305,36 @@
                                                         <Setter Property="ToolTip" Value="Question already answered" />
                                                         <Setter Property="Visibility" Value="Visible" />
                                                         <Setter Property="IsEnabled" Value="False" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.MediaQuestionFlow}" Value="{x:Static game:MediaQuestionFlow.TextThenMedia}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowContent}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowMediaContent}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Content" Value="Show media" />
+                                                        <Setter Property="ToolTip" Value="Click to show media" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="Command" Value="{Binding Path=ViewModel.ProgressQuestionCommand}" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.MediaQuestionFlow}" Value="{x:Static game:MediaQuestionFlow.MediaThenText}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowMediaContent}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowContent}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Content" Value="Show content" />
+                                                        <Setter Property="ToolTip" Value="Click to show content" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="Command" Value="{Binding Path=ViewModel.ProgressQuestionCommand}" />
                                                     </MultiDataTrigger.Setters>
                                                 </MultiDataTrigger>
                                             </Style.Triggers>

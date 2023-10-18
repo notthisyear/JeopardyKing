@@ -62,6 +62,7 @@ namespace JeopardyKing.ViewModels
             private set => SetProperty(ref _inShowPreQuestionContent, value);
 
         }
+
         public bool InShowContent
         {
             get => _inShowContent;
@@ -115,6 +116,7 @@ namespace JeopardyKing.ViewModels
         private int _currentCategoryIdx = 0;
         #endregion
 
+        #region Public methods
         public void StartGame(Board board, ReadOnlyObservableCollection<Player> players)
         {
             if (WindowState == PlayWindowState.None)
@@ -183,6 +185,24 @@ namespace JeopardyKing.ViewModels
             }
         }
 
+        public void ProgressQuestion(Question currentQuestion)
+        {
+            if (WindowState == PlayWindowState.ShowQuestion)
+            {
+                if (InShowPreQuestionContent)
+                {
+                    SetStateToShowQuestion(currentQuestion);
+                }
+                else if (InShowContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.TextThenMedia)
+                {
+                    InShowMediaContent = true;
+                }
+                else if (InShowMediaContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText)
+                {
+                    InShowContent = true;
+                }
+            }
+        }
         public void PlayerHasPressed(Player player)
         {
             if (!InPlayerAnswering)
@@ -221,6 +241,7 @@ namespace JeopardyKing.ViewModels
         {
 
         }
+        #endregion
 
         private void SetStateToShowQuestion(Question currentQuestion)
         {
@@ -237,12 +258,13 @@ namespace JeopardyKing.ViewModels
                     InShowContent = currentQuestion.MediaQuestionFlow == MediaQuestionFlow.TextThenMedia ||
                         currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
                     InShowMediaContent = currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText
-                        || currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText;
+                        || currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
                     break;
                 default:
                     throw new NotSupportedException();
             }
         }
+
         private void ResetGameBoardAfterAnswer()
         {
             InShowContent = false;

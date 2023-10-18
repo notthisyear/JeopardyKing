@@ -91,6 +91,7 @@ namespace JeopardyKing.ViewModels
         private RelayCommand? _startGameCommand;
         private RelayCommand? _revealNextCategoryCommand;
         private RelayCommand? _startQuestionCommand;
+        private RelayCommand? _progressQuestionCommand;
         private RelayCommand<bool>? _answerQuestionCommand;
         private RelayCommand? _abandonQuestionCommand;
         public ICommand ToggleAnswerAllowedCommand
@@ -277,6 +278,20 @@ namespace JeopardyKing.ViewModels
             }
         }
 
+        public ICommand ProgressQuestionCommand
+        {
+            get
+            {
+                _progressQuestionCommand ??= new RelayCommand(() =>
+                {
+                    if (QuestionModeManager.CurrentlySelectedQuestion == default)
+                        return;
+                    PlayWindowViewModel.ProgressQuestion(QuestionModeManager.CurrentlySelectedQuestion);
+                });
+                return _progressQuestionCommand;
+            }
+
+        }
         public ICommand AnswerQuestionCommand
         {
             get
