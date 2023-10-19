@@ -344,7 +344,22 @@
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
-                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.HasMediaLink}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Audio}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowMediaContent}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InMediaContentPlaying}" Value="False" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Content" Value="Play media" />
+                                                        <Setter Property="ToolTip" Value="Click to play the media again" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="Command" Value="{Binding Path=ViewModel.PlayMediaAgainCommand}" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Video}" />
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowMediaContent}" Value="True" />
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InMediaContentPlaying}" Value="False" />
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="False" />

@@ -474,8 +474,7 @@
                             </TextBlock>
 
                             <!-- Show media question content -->
-                            <Border CornerRadius="5"
-                                    HorizontalAlignment="Stretch"
+                            <Border HorizontalAlignment="Stretch"
                                     VerticalAlignment="Stretch">
                                 <Border.Style>
                                     <Style TargetType="{x:Type Border}">

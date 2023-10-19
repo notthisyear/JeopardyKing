@@ -74,6 +74,7 @@ namespace JeopardyKing.Windows
 
                     if (!audioVideoPlayer.MediaPlayer!.IsPlaying)
                     {
+                        audioVideoPlayer.MediaPlayer!.Stop();
                         audioVideoPlayer.MediaPlayer!.Play();
                         audioVideoPlayer.MediaPlayer!.Time = _startAudioOrVideoAtMs;
                     }
@@ -99,7 +100,12 @@ namespace JeopardyKing.Windows
             Application.Current.Dispatcher.Invoke(() =>
             {
                 ViewModel.InMediaContentPlaying = false;
-                ClearMediaPlayerMedia();
+                var mediaPlayer = audioVideoPlayer.MediaPlayer!;
+
+                Task.Run(() =>
+                {
+                    mediaPlayer.Pause();
+                });
             });
         }
 
@@ -108,14 +114,18 @@ namespace JeopardyKing.Windows
             if (!_currentClipHasCustomEnd)
                 return;
 
-            if (_endAudioOrVideoAtMs >= audioVideoPlayer.MediaPlayer!.Time)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                var mediaPlayer = audioVideoPlayer.MediaPlayer!;
+                Task.Run(() =>
                 {
-                    audioVideoPlayer.MediaPlayer!.Stop();
-                    ViewModel.InMediaContentPlaying = false;
+                    if (_endAudioOrVideoAtMs >= mediaPlayer.Time)
+                    {
+                        mediaPlayer.Pause();
+                        ViewModel.InMediaContentPlaying = false;
+                    }
                 });
-            }
+            });
         }
 
         private void LoadNewMedia(Question q)
