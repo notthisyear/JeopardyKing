@@ -36,7 +36,8 @@ namespace JeopardyKing.Windows
             Loaded += PlayWindowLoaded;
         }
 
-        private long _startAudioOrVideoAtMs = long.MinValue;
+        private long _currentAudioOrVideoMs = 0;
+        private long _startAudioOrVideoAtMs = 0;
         private long _endAudioOrVideoAtMs = long.MaxValue;
         private bool _currentClipHasCustomEnd = false;
 
@@ -74,20 +75,20 @@ namespace JeopardyKing.Windows
 
                     if (!audioVideoPlayer.MediaPlayer!.IsPlaying)
                     {
-                        ViewModel.CurrentPlayingMediaPositionSeconds = 0;
                         audioVideoPlayer.MediaPlayer!.Stop();
                         audioVideoPlayer.MediaPlayer!.Play();
-                        audioVideoPlayer.MediaPlayer!.Time = _startAudioOrVideoAtMs;
+                        audioVideoPlayer.MediaPlayer!.Time = _currentAudioOrVideoMs;
+                        ViewModel.CurrentPlayingMediaPositionSeconds = Math.Max((int)(_currentAudioOrVideoMs - _startAudioOrVideoAtMs), 0);
                     }
                 }
                 else if (e.PropertyName == nameof(ViewModel.InPlayerAnswering) && ViewModel.InPlayerAnswering)
                 {
                     if (audioVideoPlayer.MediaPlayer!.IsPlaying)
                     {
-                        _startAudioOrVideoAtMs = audioVideoPlayer.MediaPlayer!.Time;
-                        audioVideoPlayer.MediaPlayer!.Stop();
-                        ViewModel.InMediaContentPlaying = false;
+                        _currentAudioOrVideoMs = audioVideoPlayer.MediaPlayer!.Time;
+                        ViewModel.SetMediaContentPlaybackStatus(PlayWindowViewModel.MediaPlaybackStatus.Paused);
                     }
+                    audioVideoPlayer.MediaPlayer!.Stop();
                 }
                 else if (e.PropertyName == nameof(ViewModel.InShowMediaContent) && !ViewModel.InShowMediaContent)
                 {
@@ -100,36 +101,42 @@ namespace JeopardyKing.Windows
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                ViewModel.InMediaContentPlaying = false;
-                var mediaPlayer = audioVideoPlayer.MediaPlayer!;
+                if (ViewModel.CurrentQuestion == default)
+                    return;
 
+                var vm = ViewModel;
+                var mediaPlayer = audioVideoPlayer.MediaPlayer!;
                 Task.Run(() =>
                 {
-                    mediaPlayer.Pause();
+                    StopMediaPlayerAndPrimeForRestart(vm, mediaPlayer);
                 });
             });
         }
 
         private void MediaPlayerPositionChanged(object? sender, MediaPlayerPositionChangedEventArgs e)
         {
-            if (!_currentClipHasCustomEnd)
-                return;
-
             Application.Current.Dispatcher.Invoke(() =>
             {
+                if (ViewModel.CurrentQuestion == default)
+                    return;
+
                 var mediaPlayer = audioVideoPlayer.MediaPlayer!;
                 var vm = ViewModel;
                 _ = Task.Run(() =>
                 {
                     var t = mediaPlayer.Time;
                     vm.CurrentPlayingMediaPositionSeconds = (int)((t - _startAudioOrVideoAtMs) / 1000);
-                    if (t >= _endAudioOrVideoAtMs)
-                    {
-                        mediaPlayer.Pause();
-                        vm.InMediaContentPlaying = false;
-                    }
+                    if (_currentClipHasCustomEnd && t >= _endAudioOrVideoAtMs)
+                        StopMediaPlayerAndPrimeForRestart(vm, mediaPlayer);
                 });
             });
+        }
+
+        private void StopMediaPlayerAndPrimeForRestart(PlayWindowViewModel viewModel, VlcMediaPlayer mediaPlayer)
+        {
+            mediaPlayer.Pause();
+            viewModel.SetMediaContentPlaybackStatus(PlayWindowViewModel.MediaPlaybackStatus.Stopped);
+            _currentAudioOrVideoMs = _startAudioOrVideoAtMs;
         }
 
         private void LoadNewMedia(Question q)
@@ -137,8 +144,9 @@ namespace JeopardyKing.Windows
             using var media = new Media(_libVlc, q.MultimediaContentLink);
             audioVideoPlayer.MediaPlayer!.Media = media;
             audioVideoPlayer.MediaPlayer.Stop();
-            _startAudioOrVideoAtMs = (long)q.StartVideoOrAudioAtSeconds * 1000;
-            _endAudioOrVideoAtMs = (long)q.EndVideoOrAudioAtSeconds * 1000;
+            _startAudioOrVideoAtMs = Convert.ToInt64(q.StartVideoOrAudioAtSeconds * 1000.0);
+            _endAudioOrVideoAtMs = Convert.ToInt64(q.EndVideoOrAudioAtSeconds * 1000.0);
+            _currentAudioOrVideoMs = _startAudioOrVideoAtMs;
             _currentClipHasCustomEnd = _endAudioOrVideoAtMs < (1000 * q.VideoOrAudioLengthSeconds);
         }
 

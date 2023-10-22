@@ -356,7 +356,7 @@ namespace JeopardyKing.ViewModels
                     }
                     else
                     {
-                        PlayWindowViewModel.InMediaContentPlaying = true;
+                        PlayWindowViewModel.SetMediaContentPlaybackStatus(PlayWindowViewModel.MediaPlaybackStatus.Playing);
                     }
                 });
                 return _playMediaAgainCommand;

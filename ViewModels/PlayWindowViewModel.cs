@@ -21,6 +21,13 @@ namespace JeopardyKing.ViewModels
 
     public class PlayWindowViewModel : ObservableObject
     {
+        public enum MediaPlaybackStatus
+        {
+            Stopped,
+            Paused,
+            Playing
+        }
+
         #region Public properties
 
         #region Private fields
@@ -80,7 +87,7 @@ namespace JeopardyKing.ViewModels
         public bool InMediaContentPlaying
         {
             get => _inMediaContentPlaying;
-            set => SetProperty(ref _inMediaContentPlaying, value);
+            private set => SetProperty(ref _inMediaContentPlaying, value);
         }
 
         public int CurrentPlayingMediaPositionSeconds
@@ -128,6 +135,7 @@ namespace JeopardyKing.ViewModels
 
         #region Private fields
         private int _currentCategoryIdx = 0;
+        private MediaPlaybackStatus _mediaPlaybackStatus = MediaPlaybackStatus.Stopped;
         #endregion
 
         #region Public methods
@@ -257,12 +265,17 @@ namespace JeopardyKing.ViewModels
                         WindowState = PlayWindowState.ShowQuestion;
                         if (CurrentQuestion != default)
                         {
-                            var audioOrVideoMedia = CurrentQuestion.Type == QuestionType.Audio || CurrentQuestion.Type == QuestionType.Video || CurrentQuestion.Type == QuestionType.YoutubeVideo;
+                            var isYoutubeQuestion = CurrentQuestion.Type == QuestionType.YoutubeVideo;
+                            var audioOrVideoMedia = CurrentQuestion.Type == QuestionType.Audio || CurrentQuestion.Type == QuestionType.Video || isYoutubeQuestion;
                             if (InShowMediaContent && audioOrVideoMedia)
                             {
-                                InMediaContentPlaying = true;
-                                if (CurrentQuestion.Type == QuestionType.YoutubeVideo)
-                                    CurrentQuestion.RefreshYoutubeVideoUrl(true, false);
+                                if (_mediaPlaybackStatus == MediaPlaybackStatus.Paused || isYoutubeQuestion)
+                                {
+                                    InMediaContentPlaying = true;
+                                    if (isYoutubeQuestion)
+                                        CurrentQuestion.RefreshYoutubeVideoUrl(true, false);
+                                    _mediaPlaybackStatus = MediaPlaybackStatus.Playing;
+                                }
                             }
                         }
                     }
@@ -273,6 +286,12 @@ namespace JeopardyKing.ViewModels
         public void AbandonQuestion()
         {
             ResetGameBoardAfterAnswer();
+        }
+
+        public void SetMediaContentPlaybackStatus(MediaPlaybackStatus newStatus)
+        {
+            _mediaPlaybackStatus = newStatus;
+            InMediaContentPlaying = _mediaPlaybackStatus == MediaPlaybackStatus.Playing;
         }
 
         public void NotifyWindowClosed()
