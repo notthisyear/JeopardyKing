@@ -94,6 +94,7 @@ namespace JeopardyKing.ViewModels
                         if (!_loadDialog.FileName.TryLoadGameFromJsonFile(out var board, out var e))
                             throw e!;
                         GameBoard.CopyFromExisting(board!);
+                        LastLoadedGamePath = _loadDialog.FileName;
                     }
                     break;
                 case MenuItemButton.SetName:

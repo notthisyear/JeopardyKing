@@ -5,6 +5,8 @@ using JeopardyKing.GameComponents;
 
 namespace JeopardyKing.WpfComponents.Converters
 {
+    // Note: This converter is currently not in use (we constrain the image or video with a parent element instead).
+    //       It might be useful at some point however, so we'll leave it here for now.
     public class CalculateImageOrVideoHeightConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)

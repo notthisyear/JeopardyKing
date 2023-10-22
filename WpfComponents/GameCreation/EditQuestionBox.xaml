@@ -697,7 +697,7 @@
                         <TextBlock.Style>
                             <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
                                 <Setter Property="FontStyle" Value="Italic" />
-                                <Setter Property="Text" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MediaName, Converter={StaticResource stringShortenerConverter}, ConverterParameter=24}" />
+                                <Setter Property="Text" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MediaName, Converter={StaticResource stringShortenerConverter}, ConverterParameter=36}" />
                                 <Setter Property="ToolTip" Value="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.MultimediaContentLink}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Path=ViewModel.ModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}">

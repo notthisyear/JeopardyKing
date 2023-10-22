@@ -503,15 +503,9 @@
                                 </Border.Style>
 
                                 <Grid>
+
                                     <!-- Image -->
                                     <Image Margin="10">
-                                        <!--<Image.Height>
-                                            <MultiBinding Converter="{StaticResource calculateImageOrVideoHeightConverter}">
-                                                <Binding Path="ViewModel.CurrentQuestion" />
-                                                <Binding RelativeSource="{RelativeSource AncestorType={x:Type Border}}" Path="ActualWidth" />
-                                                <Binding RelativeSource="{RelativeSource AncestorType={x:Type Border}}" Path="ActualHeight" />
-                                            </MultiBinding>
-                                        </Image.Height>-->
                                         <Image.Style>
                                             <Style TargetType="{x:Type Image}">
                                                 <Setter Property="Visibility" Value="Collapsed" />
