@@ -10,8 +10,8 @@
         AllowsTransparency="True"
         Background="Transparent"
         WindowStyle="None" 
-        Width="1366"
-        Height="850"
+        Width="1600"
+        Height="900"
         WindowStartupLocation="CenterScreen">
 
     <WindowChrome.WindowChrome>
