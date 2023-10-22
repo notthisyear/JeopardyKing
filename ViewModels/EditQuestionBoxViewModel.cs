@@ -18,30 +18,68 @@ namespace JeopardyKing.ViewModels
         #region Public properties
 
         #region Backing fields
-        private int _startVideoAtMinutes = 0;
-        private int _startVideoAtSeconds = 0;
+        private bool _useStartAtForYoutubeVideo = false;
+        private bool _useEndAtForYoutubeVideo = false;
+        private int _startYoutubeVideoAtMinutes = 0;
+        private int _startYoutubeVideoAtSeconds = 0;
+        private int _endYoutubeVideoAtMinutes = 0;
+        private int _endYoutubeVideoAtSeconds = 0;
         private string _selectedMediaFlow = string.Empty;
         #endregion
 
-        public int StartVideoAtMinutes
+        public bool UseStartAtForYoutubeVideo
         {
-            get => _startVideoAtMinutes;
+            get => _useStartAtForYoutubeVideo;
+            set => SetProperty(ref _useStartAtForYoutubeVideo, value);
+        }
+
+        public bool UseEndAtForYoutubeVideo
+        {
+            get => _useEndAtForYoutubeVideo;
+            set => SetProperty(ref _useEndAtForYoutubeVideo, value);
+        }
+
+        public int StartYoutubeVideoAtMinutes
+        {
+            get => _startYoutubeVideoAtMinutes;
             set
             {
                 if (ModeManager.CurrentlySelectedQuestion != default)
-                    ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds = value * 60 + StartVideoAtSeconds;
-                SetProperty(ref _startVideoAtMinutes, value);
+                    ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds = UseStartAtForYoutubeVideo ? value * 60 + StartYoutubeVideoAtSeconds : 0;
+                SetProperty(ref _startYoutubeVideoAtMinutes, value);
             }
         }
 
-        public int StartVideoAtSeconds
+        public int StartYoutubeVideoAtSeconds
         {
-            get => _startVideoAtSeconds;
+            get => _startYoutubeVideoAtSeconds;
             set
             {
                 if (ModeManager.CurrentlySelectedQuestion != default)
-                    ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds = StartVideoAtMinutes * 60 + value;
-                SetProperty(ref _startVideoAtSeconds, value);
+                    ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds = UseStartAtForYoutubeVideo ? StartYoutubeVideoAtMinutes * 60 + value : 0;
+                SetProperty(ref _startYoutubeVideoAtSeconds, value);
+            }
+        }
+
+        public int EndYoutubeVideoAtMinutes
+        {
+            get => _endYoutubeVideoAtMinutes;
+            set
+            {
+                if (ModeManager.CurrentlySelectedQuestion != default)
+                    ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds = UseEndAtForYoutubeVideo ? value * 60 + EndYoutubeVideoAtSeconds : 0;
+                SetProperty(ref _endYoutubeVideoAtMinutes, value);
+            }
+        }
+
+        public int EndYoutubeVideoAtSeconds
+        {
+            get => _endYoutubeVideoAtSeconds;
+            set
+            {
+                if (ModeManager.CurrentlySelectedQuestion != default)
+                    ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds = UseEndAtForYoutubeVideo ? EndYoutubeVideoAtMinutes * 60 + value : 0;
+                SetProperty(ref _endYoutubeVideoAtSeconds, value);
             }
         }
 
@@ -209,8 +247,8 @@ namespace JeopardyKing.ViewModels
 
                     if (ModeManager.CurrentlySelectedQuestion.Type == QuestionType.YoutubeVideo)
                     {
-                        StartVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) / 60;
-                        StartVideoAtSeconds = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) - (StartVideoAtMinutes * 60);
+                        StartYoutubeVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) / 60;
+                        StartYoutubeVideoAtSeconds = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) - (StartYoutubeVideoAtMinutes * 60);
                     }
                     ModeManager.CurrentlySelectedQuestion.PropertyChanged += CurrentlySelectedQuestionPropertyChanged;
                 }

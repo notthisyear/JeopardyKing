@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -113,6 +114,16 @@ namespace JeopardyKing.GameComponents
             {
                 foreach (var q in Questions)
                     q.CategoryName = Title;
+            }
+        }
+
+        public void SetParametersForAllYoutubeQuestions(bool autoplay, bool showControls)
+        {
+            lock (_questionsLock)
+            {
+                var youtubeQuestions = Questions.Where(x => x.Type == QuestionType.YoutubeVideo);
+                foreach (var youtubeQuestion in youtubeQuestions)
+                    youtubeQuestion.RefreshYoutubeVideoUrl(autoplay, showControls);
             }
         }
         #endregion

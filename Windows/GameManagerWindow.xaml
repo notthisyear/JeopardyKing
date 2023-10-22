@@ -383,6 +383,7 @@
                                             <Setter Property="Visibility" Value="Collapsed" />
                                             <Setter Property="ToolTip" Value="Press to allow question to be answered again" />
                                             <Setter Property="Content" Value="Set to unanswered" />
+                                            <Setter Property="Margin" Value="0,10,0,0" />
                                             <Setter Property="Command" Value="{Binding Path=ViewModel.SetQuestionToUnansweredCommand}" />
                                             <Style.Triggers>
                                                 <MultiDataTrigger>

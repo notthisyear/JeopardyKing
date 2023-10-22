@@ -7,6 +7,7 @@
         xmlns:game="clr-namespace:JeopardyKing.GameComponents"
         xmlns:converters="clr-namespace:JeopardyKing.WpfComponents.Converters"
         xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+        xmlns:cefsharpwpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
         Title="JeopardyKing"
         AllowsTransparency="True"
         Background="Transparent"
@@ -434,6 +435,7 @@
                         <Separator Grid.Row="1"
                                    Margin="20,0,20,0"/>
 
+                        <!-- Main content -->
                         <Grid Grid.Row="2"
                               Margin="20,0,20,0">
 
@@ -442,7 +444,6 @@
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
@@ -543,7 +544,6 @@
                                                    Margin="10">
                                         <Style TargetType="{x:Type vlc:VideoView}">
                                             <Setter Property="Visibility" Value="Collapsed" />
-                                            <Setter Property="Opacity" Value="1" />
                                             <Style.Triggers>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
@@ -565,13 +565,37 @@
                                                         <Setter Property="Visibility" Value="Visible" />
                                                     </MultiDataTrigger.Setters>
                                                 </MultiDataTrigger>
-                                                <DataTrigger Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True">
-                                                    <Setter Property="Opacity" Value="0.2" />
-                                                </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </vlc:VideoView>
 
+                                    <!-- Youtube question -->
+                                    <cefsharpwpf:ChromiumWebBrowser>
+                                        <cefsharpwpf:ChromiumWebBrowser.Style>
+                                            <Style TargetType="{x:Type cefsharpwpf:ChromiumWebBrowser}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Setter Property="Opacity" Value="1" />
+                                                <Setter Property="Address" Value="" />
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=ViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                            <Condition Binding="{Binding Path=ViewModel.CurrentQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}" />
+                                                            <Condition Binding="{Binding Path=ViewModel.InShowMediaContent}" Value="True" />
+                                                            <Condition Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="False" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <MultiDataTrigger.Setters>
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                            <Setter Property="Address" Value="{Binding Path=ViewModel.CurrentQuestion.MultimediaContentLink}" />
+                                                        </MultiDataTrigger.Setters>
+                                                    </MultiDataTrigger>
+                                                    <DataTrigger Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True">
+                                                        <Setter Property="Opacity" Value="0.2" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </cefsharpwpf:ChromiumWebBrowser.Style>
+                                    </cefsharpwpf:ChromiumWebBrowser>
                                     <!-- Audio icon -->
                                     <components:IconBox IconType="Audio"
                                                         ScaleFactor="10"

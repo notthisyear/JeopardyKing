@@ -243,17 +243,18 @@ namespace JeopardyKing.GameComponents
 
             YoutubeVideoId = youtubeVideoId;
             OriginalYoutubeUrl = originalUrl;
-            MultimediaContentLink = GetYoutubeVideoUrl(youtubeVideoId, autoplay, showControls, 0);
+            MultimediaContentLink = GetYoutubeVideoUrl(youtubeVideoId, autoplay, showControls, 0, 0);
             HasMediaLink = true;
             StartVideoOrAudioAtSeconds = 0;
+            EndVideoOrAudioAtSeconds = 0;
         }
 
         public void RefreshYoutubeVideoUrl(bool autoplay, bool showControls)
         {
-            if (Type != QuestionType.Video || string.IsNullOrEmpty(YoutubeVideoId))
+            if (Type != QuestionType.YoutubeVideo || string.IsNullOrEmpty(YoutubeVideoId))
                 return;
 
-            MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, (int)StartVideoOrAudioAtSeconds);
+            MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, (int)StartVideoOrAudioAtSeconds, (int)EndVideoOrAudioAtSeconds);
         }
         #endregion
 
@@ -271,11 +272,12 @@ namespace JeopardyKing.GameComponents
             VideoOrAudioLengthSeconds = 0;
         }
 
-        private static string GetYoutubeVideoUrl(string videoId, bool autoplay, bool showControls, int startAtSeconds)
+        private static string GetYoutubeVideoUrl(string videoId, bool autoplay, bool showControls, int startAtSeconds, int endAtSeconds)
             => $"{YoutubeEmbeddedRootUrl}/{videoId}?" +
             $"autoplay={GetValueForBooleanInLink(autoplay)}" +
             $"&amp;controls={GetValueForBooleanInLink(showControls)}" +
-            $"{(startAtSeconds > 0 ? $"&amp;start={startAtSeconds}" : string.Empty)}";
+            $"{(startAtSeconds > 0 ? $"&amp;start={startAtSeconds}" : string.Empty)}" +
+            $"{(endAtSeconds > 0 ? $"&amp;end={endAtSeconds}" : string.Empty)}";
 
         private static string GetValueForBooleanInLink(bool b)
             => b ? "1" : "0";

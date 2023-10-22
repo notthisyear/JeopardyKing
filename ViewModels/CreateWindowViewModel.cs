@@ -93,7 +93,9 @@ namespace JeopardyKing.ViewModels
                     {
                         if (!_loadDialog.FileName.TryLoadGameFromJsonFile(out var board, out var e))
                             throw e!;
+
                         GameBoard.CopyFromExisting(board!);
+                        GameBoard.SetParametersForAllYoutubeQuestions(false, true);
                         LastLoadedGamePath = _loadDialog.FileName;
                     }
                     break;

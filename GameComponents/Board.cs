@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -57,21 +58,7 @@ namespace JeopardyKing.GameComponents
             }
         }
 
-        public void CopyFromExisting(Board existingBoard)
-        {
-            lock (_categoriesLock)
-            {
-                Categories.Clear();
-                _categoryIdCounter = 0;
-            }
-
-            Currency = existingBoard.Currency;
-            GameName = existingBoard.GameName;
-
-            foreach (var category in existingBoard.Categories)
-                AddCategory(category);
-        }
-
+        #region Public methods
         public void AddNewCategory()
             => AddCategory(CreateNewCategory());
 
@@ -103,6 +90,31 @@ namespace JeopardyKing.GameComponents
                     c.DeleteQuestion(id);
             }
         }
+
+        public void CopyFromExisting(Board existingBoard)
+        {
+            lock (_categoriesLock)
+            {
+                Categories.Clear();
+                _categoryIdCounter = 0;
+            }
+
+            Currency = existingBoard.Currency;
+            GameName = existingBoard.GameName;
+
+            foreach (var category in existingBoard.Categories)
+                AddCategory(category);
+        }
+
+        public void SetParametersForAllYoutubeQuestions(bool autoplay, bool showControls)
+        {
+            lock (_categoriesLock)
+            {
+                foreach (var category in Categories)
+                    category.SetParametersForAllYoutubeQuestions(autoplay, showControls);
+            }
+        }
+        #endregion
 
         private Category CreateNewCategory(string name = "")
         {
