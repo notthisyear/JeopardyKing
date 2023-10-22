@@ -254,6 +254,9 @@ namespace JeopardyKing.GameComponents
             if (Type != QuestionType.YoutubeVideo || string.IsNullOrEmpty(YoutubeVideoId))
                 return;
 
+            if (EndVideoOrAudioAtSeconds > StartVideoOrAudioAtSeconds)
+                VideoOrAudioLengthSeconds = (int)(EndVideoOrAudioAtSeconds - StartVideoOrAudioAtSeconds);
+
             MultimediaContentLink = GetYoutubeVideoUrl(YoutubeVideoId, autoplay, showControls, (int)StartVideoOrAudioAtSeconds, (int)EndVideoOrAudioAtSeconds);
         }
         #endregion

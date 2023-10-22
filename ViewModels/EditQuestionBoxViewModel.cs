@@ -238,17 +238,14 @@ namespace JeopardyKing.ViewModels
                 if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)
                 {
                     if (ModeManager.CurrentlySelectedQuestion.Type != QuestionType.Text)
-                    {
-                        if (ModeManager.CurrentlySelectedQuestion.MediaQuestionFlow == MediaQuestionFlow.None)
-                            SelectedMediaFlow = MediaFlowTypes.First();
-                        else
-                            SelectedMediaFlow = _mediaFlowNameMap[ModeManager.CurrentlySelectedQuestion.MediaQuestionFlow];
-                    }
+                        SetMediaFlowForQuestion(ModeManager.CurrentlySelectedQuestion);
 
                     if (ModeManager.CurrentlySelectedQuestion.Type == QuestionType.YoutubeVideo)
                     {
                         StartYoutubeVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) / 60;
                         StartYoutubeVideoAtSeconds = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) - (StartYoutubeVideoAtMinutes * 60);
+                        EndYoutubeVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds) / 60;
+                        EndYoutubeVideoAtSeconds = (int)(ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds) - (EndYoutubeVideoAtMinutes * 60);
                     }
                     ModeManager.CurrentlySelectedQuestion.PropertyChanged += CurrentlySelectedQuestionPropertyChanged;
                 }
@@ -261,16 +258,30 @@ namespace JeopardyKing.ViewModels
             };
         }
 
+
+
+        #region Private methods
         private void CurrentlySelectedQuestionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not Question q)
                 return;
 
             if (e.PropertyName == nameof(q.Type))
+            {
+                if (q.Type != QuestionType.Text)
+                    SetMediaFlowForQuestion(q);
                 QuestionTypeChangedEvent?.Invoke(this, q.Type);
+            }
         }
 
-        #region Private methods
+        private void SetMediaFlowForQuestion(Question question)
+        {
+            if (question.MediaQuestionFlow == MediaQuestionFlow.None)
+                SelectedMediaFlow = MediaFlowTypes.First();
+            else
+                SelectedMediaFlow = _mediaFlowNameMap[question.MediaQuestionFlow];
+        }
+
         private static string GetFileExtensionsForType(QuestionType type)
            => type switch
            {
