@@ -180,6 +180,9 @@ namespace JeopardyKing.ViewModels
         {
             if (WindowState == PlayWindowState.ShowBoard)
             {
+                if (currentQuestion.Type == QuestionType.YoutubeVideo)
+                    currentQuestion.MultimediaContentLink = string.Empty;
+
                 CurrentQuestion = currentQuestion;
                 InShowPreQuestionContent = CurrentQuestion.IsBonus || CurrentQuestion.IsGamble;
                 WindowState = PlayWindowState.ShowQuestion;
@@ -211,6 +214,8 @@ namespace JeopardyKing.ViewModels
                 {
                     InShowMediaContent = true;
                     InMediaContentPlaying = true;
+                    if (currentQuestion.Type == QuestionType.YoutubeVideo)
+                        currentQuestion.RefreshYoutubeVideoUrl(true, false);
                 }
                 else if (InShowMediaContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText)
                 {
@@ -225,6 +230,9 @@ namespace JeopardyKing.ViewModels
             {
                 CurrentlyAnsweringPlayer = player;
                 InPlayerAnswering = true;
+
+                if (CurrentQuestion != default && CurrentQuestion.Type == QuestionType.YoutubeVideo)
+                    CurrentQuestion.RefreshYoutubeVideoUrl(false, false);
             }
         }
 
@@ -249,8 +257,13 @@ namespace JeopardyKing.ViewModels
                         WindowState = PlayWindowState.ShowQuestion;
                         if (CurrentQuestion != default)
                         {
-                            if (InShowMediaContent && (CurrentQuestion.Type == QuestionType.Audio || CurrentQuestion.Type == QuestionType.Video))
+                            var audioOrVideoMedia = CurrentQuestion.Type == QuestionType.Audio || CurrentQuestion.Type == QuestionType.Video || CurrentQuestion.Type == QuestionType.YoutubeVideo;
+                            if (InShowMediaContent && audioOrVideoMedia)
+                            {
                                 InMediaContentPlaying = true;
+                                if (CurrentQuestion.Type == QuestionType.YoutubeVideo)
+                                    CurrentQuestion.RefreshYoutubeVideoUrl(true, false);
+                            }
                         }
                     }
                 });

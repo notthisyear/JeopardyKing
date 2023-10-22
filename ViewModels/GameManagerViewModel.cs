@@ -346,7 +346,18 @@ namespace JeopardyKing.ViewModels
             {
                 _playMediaAgainCommand ??= new RelayCommand(() =>
                 {
-                    PlayWindowViewModel.InMediaContentPlaying = true;
+                    if (PlayWindowViewModel.CurrentQuestion == default)
+                        return;
+
+                    if (PlayWindowViewModel.CurrentQuestion.Type == QuestionType.YoutubeVideo)
+                    {
+                        PlayWindowViewModel.CurrentQuestion.MultimediaContentLink = string.Empty;
+                        PlayWindowViewModel.CurrentQuestion.RefreshYoutubeVideoUrl(true, false);
+                    }
+                    else
+                    {
+                        PlayWindowViewModel.InMediaContentPlaying = true;
+                    }
                 });
                 return _playMediaAgainCommand;
             }

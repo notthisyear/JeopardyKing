@@ -371,6 +371,21 @@
                                                         <Setter Property="Command" Value="{Binding Path=ViewModel.PlayMediaAgainCommand}" />
                                                     </MultiDataTrigger.Setters>
                                                 </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowMediaContent}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InMediaContentPlaying}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Content" Value="Restart media" />
+                                                        <Setter Property="ToolTip" Value="Click to restart the Youtube clip" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="Command" Value="{Binding Path=ViewModel.PlayMediaAgainCommand}" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Button.Style>

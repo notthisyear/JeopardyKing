@@ -902,7 +902,7 @@
                                             <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)/ErrorContent}"/>
                                         </Trigger>
                                         <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="ToolTip" Value="Check the box to enable custom start time for YouTube videos" />
+                                            <Setter Property="ToolTip" Value="Check the box to enable custom start time for Youtube videos" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -935,7 +935,7 @@
                                             <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)/ErrorContent}"/>
                                         </Trigger>
                                         <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="ToolTip" Value="Check the box to enable custom start time for YouTube videos" />
+                                            <Setter Property="ToolTip" Value="Check the box to enable custom start time for Youtube videos" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -1003,7 +1003,7 @@
                                             <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)/ErrorContent}"/>
                                         </Trigger>
                                         <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="ToolTip" Value="Check the box to enable custom end time for YouTube videos" />
+                                            <Setter Property="ToolTip" Value="Check the box to enable custom end time for Youtube videos" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -1036,7 +1036,7 @@
                                             <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)/ErrorContent}"/>
                                         </Trigger>
                                         <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="ToolTip" Value="Check the box to enable custom end time for YouTube videos" />
+                                            <Setter Property="ToolTip" Value="Check the box to enable custom end time for Youtube videos" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>

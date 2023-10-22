@@ -570,13 +570,15 @@
                                     </vlc:VideoView>
 
                                     <!-- Youtube question -->
-                                    <cefsharpwpf:ChromiumWebBrowser>
+                                    <cefsharpwpf:ChromiumWebBrowser Margin="50,0,50,10">
                                         <cefsharpwpf:ChromiumWebBrowser.Style>
                                             <Style TargetType="{x:Type cefsharpwpf:ChromiumWebBrowser}">
                                                 <Setter Property="Visibility" Value="Collapsed" />
-                                                <Setter Property="Opacity" Value="1" />
                                                 <Setter Property="Address" Value="" />
                                                 <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=ViewModel.CurrentQuestion.Type}" Value="{x:Static game:QuestionType.YoutubeVideo}">
+                                                        <Setter Property="Address" Value="{Binding Path=ViewModel.CurrentQuestion.MultimediaContentLink}" />
+                                                    </DataTrigger>
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
                                                             <Condition Binding="{Binding Path=ViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
@@ -586,16 +588,13 @@
                                                         </MultiDataTrigger.Conditions>
                                                         <MultiDataTrigger.Setters>
                                                             <Setter Property="Visibility" Value="Visible" />
-                                                            <Setter Property="Address" Value="{Binding Path=ViewModel.CurrentQuestion.MultimediaContentLink}" />
                                                         </MultiDataTrigger.Setters>
                                                     </MultiDataTrigger>
-                                                    <DataTrigger Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True">
-                                                        <Setter Property="Opacity" Value="0.2" />
-                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </cefsharpwpf:ChromiumWebBrowser.Style>
                                     </cefsharpwpf:ChromiumWebBrowser>
+
                                     <!-- Audio icon -->
                                     <components:IconBox IconType="Audio"
                                                         ScaleFactor="10"

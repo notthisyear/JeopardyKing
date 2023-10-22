@@ -217,6 +217,23 @@
                        Text="{Binding Path=SelectedQuestion.StartVideoOrAudioAtSeconds, Converter={StaticResource secondsToTimeStringConverter}}"/>
         </StackPanel>
 
+        <!-- Youtube clip end -->
+        <StackPanel Margin="0,10,0,0">
+            <StackPanel.Style>
+                <Style TargetType="{x:Type StackPanel}" BasedOn="{StaticResource youtubeQuestionEntries}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=SelectedQuestion.EndVideoOrAudioAtSeconds}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+            <TextBlock Style="{StaticResource questionDataLabel}"
+                       Text="End at"/>
+            <TextBlock Style="{StaticResource questionDataValueSmall}"
+                       Text="{Binding Path=SelectedQuestion.EndVideoOrAudioAtSeconds, Converter={StaticResource secondsToTimeStringConverter}}"/>
+        </StackPanel>
+
         <!-- Content -->
         <TextBlock Margin="0,10,0,0"
                    Style="{StaticResource questionDataLabel}"
