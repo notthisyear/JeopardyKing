@@ -52,7 +52,7 @@ namespace JeopardyKing.WpfComponents
             nameof(AreaStart),
             typeof(double),
             typeof(ProgressSliderWithMarkedArea),
-            new FrameworkPropertyMetadata(0.2, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AreaStartChangedCallback, ClampLowerToRange));
+            new FrameworkPropertyMetadata(0.2, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AreaStartChangedCallback));
 
         public double AreaEnd
         {
@@ -63,7 +63,7 @@ namespace JeopardyKing.WpfComponents
             nameof(AreaEnd),
             typeof(double),
             typeof(ProgressSliderWithMarkedArea),
-            new FrameworkPropertyMetadata(0.8, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AreaEndChangedCallback, ClampUpperToRange));
+            new FrameworkPropertyMetadata(0.8, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AreaEndChangedCallback));
 
         public SolidColorBrush MainBackgroundColor
         {
@@ -135,23 +135,11 @@ namespace JeopardyKing.WpfComponents
             return baseValue;
         }
 
-        private static object ClampUpperToRange(DependencyObject d, object baseValue)
-        {
-            if (d is ProgressSliderWithMarkedArea p && baseValue is double val)
-                return Math.Clamp(val, p.AreaStart >= p.Maximum ? p.Minimum : p.AreaStart, p.Maximum);
-            return baseValue;
-        }
-
-        private static object ClampLowerToRange(DependencyObject d, object baseValue)
-        {
-            if (d is ProgressSliderWithMarkedArea p && baseValue is double val)
-                return Math.Clamp(val, p.Minimum, p.AreaEnd <= p.Minimum ? p.Maximum : p.AreaEnd);
-            return baseValue;
-        }
         private static void AreaStartChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is not ProgressSliderWithMarkedArea p || e.NewValue is not double val)
                 return;
+
 
             if (val > p.AreaEnd)
                 return;
@@ -159,8 +147,8 @@ namespace JeopardyKing.WpfComponents
             var range = p.Maximum - p.Minimum;
             if (range > 0)
             {
-                p.MarkedAreaWidth = (p.AreaEnd - val) / (range) * p.Width;
-                p.MarkedAreaCanvasLeft = p.Width * val / (range);
+                p.MarkedAreaWidth = (p.AreaEnd - val) / range * p.Width;
+                p.MarkedAreaCanvasLeft = p.Width * val / range;
             }
         }
 
@@ -175,8 +163,8 @@ namespace JeopardyKing.WpfComponents
             var range = p.Maximum - p.Minimum;
             if (range > 0)
             {
-                p.MarkedAreaWidth = (val - p.AreaStart) / (range) * p.Width;
-                p.MarkedAreaCanvasLeft = p.Width * p.AreaStart / (range);
+                p.MarkedAreaWidth = (val - p.AreaStart) / range * p.Width;
+                p.MarkedAreaCanvasLeft = p.Width * p.AreaStart / range;
             }
         }
 
