@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -83,7 +84,7 @@ namespace JeopardyKing.WpfComponents
 
         private const string LibVlcWindowTitle = "LibVLCSharp.WPF";
         private Window? _libVlcWindow;
-        private bool _isClearingMediaQuestion = false;
+        private readonly object _mediaPlayerAccessLock = new();
 
         public EditQuestionBox()
         {
@@ -115,32 +116,64 @@ namespace JeopardyKing.WpfComponents
                 if (ViewModel != default)
                 {
                     ViewModel.ModeManager.PropertyChanged += ModeManagerPropertyChanged;
-                    ViewModel.NewMediaLoadedEvent += NewMediaLoaded;
+                    ViewModel.NewMediaLoadedEvent += (s, e) =>
+                    {
+                        var question = ViewModel.ModeManager.CurrentlySelectedQuestion;
+                        var mediaPlayer = audioVideoPlayer.MediaPlayer;
+
+                        if (question == default || mediaPlayer == default)
+                            return;
+
+                        if (question.Type != QuestionType.Audio && question.Type != QuestionType.Video)
+                            return;
+
+                        if (mediaPlayer.Media != default)
+                            ResetMediaPlayer();
+
+                        Task.Run(() => NewVideoOrAudioMediaLoaded(question));
+                    };
                     ViewModel.QuestionTypeChangedEvent += (s, e) => ResetMediaPlayer();
                 }
 
                 playPauseIcon.IconType = IconType.Play;
+
                 var mediaPlayer = new VlcMediaPlayer(_libVlc);
                 audioVideoPlayer.MediaPlayer = mediaPlayer;
                 audioVideoPlayer.MediaPlayer.Playing += MediaPlayerPlayingChanged;
-                audioVideoPlayer.MediaPlayer.EndReached += MediaPlayerEndReached;
                 audioVideoPlayer.MediaPlayer.PositionChanged += MediaPlayerPositionChanged;
+                audioVideoPlayer.MediaPlayer.EndReached += MediaPlayerEndReached;
             }
         }
 
-        private void NewMediaLoaded(object? sender, EventArgs e)
+        private void NewVideoOrAudioMediaLoaded(Question question)
         {
-            if (ViewModel == default || ViewModel.ModeManager.CurrentlySelectedQuestion == default)
-                return;
+            var media = new Media(_libVlc, question.MultimediaContentLink);
+            media.Parse(MediaParseOptions.ParseLocal).Wait();
+            question.VideoOrAudioLengthSeconds = (int)(media.Duration / 1000.0);
+            question.EndVideoOrAudioAtSeconds = question.VideoOrAudioLengthSeconds;
 
-            if (audioVideoPlayer.MediaPlayer!.Media != default)
-                ResetMediaPlayer();
-
-            if (ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Video ||
-                ViewModel.ModeManager.CurrentlySelectedQuestion.Type == QuestionType.Audio)
+            if (question.Type == QuestionType.Video)
             {
-                SetMediaPlayerMediaForQuestion(ViewModel.ModeManager.CurrentlySelectedQuestion, true);
+                var videoTrackFound = false;
+                MediaTrack videoTrack = default;
+                foreach (var track in media.Tracks)
+                {
+                    if (track.TrackType == TrackType.Video)
+                    {
+                        videoTrackFound = true;
+                        videoTrack = track;
+                        break;
+                    }
+                }
+
+                if (!videoTrackFound)
+                    return;
+
+                question.SetImageOrVideoWidthAndHeight((int)videoTrack.Data.Video.Width, (int)videoTrack.Data.Video.Height);
             }
+            media.Dispose();
+
+            Application.Current.Dispatcher.Invoke(() => SetMediaPlayerForMediaQuestion(question));
         }
 
         private void ModeManagerPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -150,39 +183,38 @@ namespace JeopardyKing.WpfComponents
 
             if (e.PropertyName == nameof(modeManager.CurrentState))
             {
-                if (modeManager.CurrentState == QuestionVisualState.NothingSelected)
+                switch (modeManager.CurrentState)
                 {
-                    BeginAnimation(EditQuestionOpacityValueProperty, GetOpacityAnimation(EditQuestionOpacityValue, 0.0));
-                    return;
-                }
+                    case QuestionVisualState.NothingSelected:
+                        if (audioVideoPlayer.MediaPlayer != default)
+                            ResetMediaPlayer();
+                        BeginAnimation(EditQuestionOpacityValueProperty, GetOpacityAnimation(EditQuestionOpacityValue, 0.0));
+                        break;
 
-                if (modeManager.CurrentState == QuestionVisualState.QuestionHighlighted)
-                {
-                    BeginAnimation(EditQuestionOpacityValueProperty, GetOpacityAnimation(EditQuestionOpacityValue, 0.95));
-                    var shouldBeToTheLeft = EditQuestionBoxShouldBeToTheLeft(Application.Current.MainWindow.ActualWidth);
-                    if (_editQuestionBoxIsToTheLeft == shouldBeToTheLeft)
-                        return;
+                    case QuestionVisualState.QuestionHighlighted:
+                        BeginAnimation(EditQuestionOpacityValueProperty, GetOpacityAnimation(EditQuestionOpacityValue, 0.95));
+                        var shouldBeToTheLeft = EditQuestionBoxShouldBeToTheLeft(Application.Current.MainWindow.ActualWidth);
+                        if (_editQuestionBoxIsToTheLeft == shouldBeToTheLeft)
+                            return;
 
-                    var leftPosition = GetEditQuestionBoxLeft(editQuestionBox.Margin);
-                    var rightPosition = GetEditQuestionBoxRight(Application.Current.MainWindow.ActualWidth, editQuestionBox.ActualWidth, editQuestionBox.Margin);
+                        var leftPosition = GetEditQuestionBoxLeft(editQuestionBox.Margin);
+                        var rightPosition = GetEditQuestionBoxRight(Application.Current.MainWindow.ActualWidth, editQuestionBox.ActualWidth, editQuestionBox.Margin);
 
-                    BeginAnimation(EditQuestionBoxXValueProperty,
-                        GetEditQuestionXValueAnimation(
-                            shouldBeToTheLeft ? leftPosition : rightPosition,
-                            shouldBeToTheLeft ? rightPosition : leftPosition));
+                        BeginAnimation(EditQuestionBoxXValueProperty,
+                            GetEditQuestionXValueAnimation(
+                                shouldBeToTheLeft ? leftPosition : rightPosition,
+                                shouldBeToTheLeft ? rightPosition : leftPosition));
 
-                    _editQuestionBoxIsToTheLeft = shouldBeToTheLeft;
-                }
-            }
-            else if (e.PropertyName == nameof(modeManager.CurrentlySelectedQuestion))
-            {
-                if (audioVideoPlayer.MediaPlayer != default)
-                    ResetMediaPlayer();
+                        _editQuestionBoxIsToTheLeft = shouldBeToTheLeft;
+                        break;
 
-                if (modeManager.CurrentlySelectedQuestion != default)
-                {
-                    if (modeManager.CurrentlySelectedQuestion.Type == QuestionType.Video || modeManager.CurrentlySelectedQuestion.Type == QuestionType.Audio)
-                        SetMediaPlayerMediaForQuestion(modeManager.CurrentlySelectedQuestion);
+                    case QuestionVisualState.QuestionSelected:
+                        if (modeManager.CurrentlySelectedQuestion == default)
+                            return;
+
+                        if (modeManager.CurrentlySelectedQuestion.Type == QuestionType.Video || modeManager.CurrentlySelectedQuestion.Type == QuestionType.Audio)
+                            SetMediaPlayerForMediaQuestion(modeManager.CurrentlySelectedQuestion);
+                        break;
                 }
             }
         }
@@ -212,17 +244,17 @@ namespace JeopardyKing.WpfComponents
                 return;
 
             iconBox.IconType = audioVideoPlayer.MediaPlayer.IsPlaying ? IconType.Play : IconType.Pause;
-            if (!audioVideoPlayer.MediaPlayer.IsPlaying)
-                audioVideoPlayer.MediaPlayer.Play();
-            else
-                audioVideoPlayer.MediaPlayer.Pause();
+            lock (_mediaPlayerAccessLock)
+            {
+                if (!audioVideoPlayer.MediaPlayer.IsPlaying)
+                    audioVideoPlayer.MediaPlayer.Play();
+                else
+                    audioVideoPlayer.MediaPlayer.Pause();
+            }
         }
 
         private void MediaPlayerPlayingChanged(object? sender, EventArgs e)
         {
-            if (_isClearingMediaQuestion)
-                return;
-
             Application.Current.Dispatcher.Invoke(() =>
             {
                 if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
@@ -237,42 +269,39 @@ namespace JeopardyKing.WpfComponents
             });
         }
 
-        private void MediaPlayerEndReached(object? sender, EventArgs e)
-        {
-            if (_isClearingMediaQuestion)
-                return;
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
-                    return;
-
-                playPauseIcon.IconType = IconType.Play;
-                var mediaPlayer = audioVideoPlayer.MediaPlayer;
-                var clipRangeStart = progressSlider.AreaStart;
-                if (!progressSlider.DragActive)
-                    progressSlider.ProgressMarkerValue = clipRangeStart;
-
-                Task.Run(() =>
-                {
-                    mediaPlayer.Stop();
-                    SetAudioTime(mediaPlayer, mediaPlayer.Media.Duration, (long)(1000 * clipRangeStart));
-                });
-            });
-        }
-
         private void MediaPlayerPositionChanged(object? sender, MediaPlayerPositionChangedEventArgs e)
         {
-            if (_isClearingMediaQuestion)
-                return;
-
             Application.Current.Dispatcher.Invoke(() =>
             {
                 if (!progressSlider.DragActive)
                     progressSlider.ProgressMarkerValue = progressSlider.Maximum * e.Position;
 
                 if (progressSlider.ProgressMarkerValue >= progressSlider.AreaEnd)
-                    MediaPlayerEndReached(this, EventArgs.Empty);
+                    MediaPlayerEndReached(default, EventArgs.Empty);
+            });
+        }
+
+        private void MediaPlayerEndReached(object? sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (audioVideoPlayer.MediaPlayer == default || audioVideoPlayer.MediaPlayer.Media == default)
+                    return;
+
+                playPauseIcon.IconType = IconType.Play;
+                var clipRangeStart = progressSlider.AreaStart;
+                if (!progressSlider.DragActive)
+                    progressSlider.ProgressMarkerValue = clipRangeStart;
+
+                var mediaPlayer = audioVideoPlayer.MediaPlayer;
+                Task.Run(() =>
+                {
+                    lock (_mediaPlayerAccessLock)
+                    {
+                        mediaPlayer.Stop();
+                        SetAudioTime(mediaPlayer, mediaPlayer.Media.Duration, (long)(1000 * clipRangeStart));
+                    }
+                });
             });
         }
 
@@ -298,43 +327,31 @@ namespace JeopardyKing.WpfComponents
                 return;
 
             if (audioVideoPlayer.MediaPlayer.IsPlaying)
-                SetAudioTime(audioVideoPlayer.MediaPlayer, audioVideoPlayer.MediaPlayer.Media.Duration, (long)(1000 * position));
+            {
+                lock (_mediaPlayerAccessLock)
+                    SetAudioTime(audioVideoPlayer.MediaPlayer, audioVideoPlayer.MediaPlayer.Media.Duration, (long)(1000 * position));
+            }
             else
+            {
                 progressSlider.ProgressMarkerValue = position;
+            }
         }
 
-        private void SetMediaPlayerMediaForQuestion(Question q, bool isFirstTimeLoaded = false)
+        private void SetMediaPlayerForMediaQuestion(Question question)
         {
-            if (ViewModel == default || audioVideoPlayer.MediaPlayer == default || string.IsNullOrEmpty(q.MultimediaContentLink))
+            if (audioVideoPlayer.MediaPlayer == default || string.IsNullOrEmpty(question.MultimediaContentLink))
                 return;
 
-            var media = new Media(_libVlc, q.MultimediaContentLink);
-            audioVideoPlayer.MediaPlayer!.Media = media;
-            audioVideoPlayer.MediaPlayer.Stop();
-            q.VideoOrAudioLengthSeconds = -1;
-            Task.Run(async () =>
+            lock (_mediaPlayerAccessLock)
             {
-                await media.Parse(MediaParseOptions.ParseLocal);
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    if (ViewModel.ModeManager.CurrentlySelectedQuestion != default)
-                    {
-                        ViewModel.ModeManager.CurrentlySelectedQuestion.VideoOrAudioLengthSeconds = (int)(media.Duration / 1000.0);
-                        if (isFirstTimeLoaded)
-                            ViewModel.ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds = ViewModel.ModeManager.CurrentlySelectedQuestion.VideoOrAudioLengthSeconds;
-                    }
-
-                    if (_libVlcWindow == default)
-                        TrySetVlcWindow();
-
-                    if (_libVlcWindow != default)
-                        _libVlcWindow.Visibility = Visibility.Visible;
-
-                    playPauseIcon.IconType = IconType.Play;
-                    playPauseIcon.Visibility = Visibility.Visible;
-                });
+                var media = new Media(_libVlc, question.MultimediaContentLink);
+                audioVideoPlayer.MediaPlayer.Media = media;
                 media.Dispose();
-            });
+            }
+
+            SetVlcWindowVisibility(Visibility.Visible);
+            playPauseIcon.IconType = IconType.Play;
+            playPauseIcon.Visibility = Visibility.Visible;
         }
 
         private void ResetMediaPlayer()
@@ -342,35 +359,34 @@ namespace JeopardyKing.WpfComponents
             if (audioVideoPlayer.MediaPlayer == default)
                 return;
 
-            _isClearingMediaQuestion = true;
-
-            if (audioVideoPlayer.MediaPlayer.IsPlaying)
+            lock (_mediaPlayerAccessLock)
+            {
                 audioVideoPlayer.MediaPlayer.Stop();
+                if (audioVideoPlayer.MediaPlayer.Media != default)
+                    audioVideoPlayer.MediaPlayer.Media?.Dispose();
+            }
 
-            audioVideoPlayer.MediaPlayer.Media?.Dispose();
-            audioVideoPlayer.MediaPlayer.Media = default;
             ProgressBarMarkerPosition = 0.0;
-
-            if (_libVlcWindow == default)
-                TrySetVlcWindow();
-
-            if (_libVlcWindow != default)
-                _libVlcWindow.Visibility = Visibility.Collapsed;
+            SetVlcWindowVisibility(Visibility.Collapsed);
             playPauseIcon.Visibility = Visibility.Collapsed;
-
-            _isClearingMediaQuestion = false;
         }
 
-        private void TrySetVlcWindow()
+        private void SetVlcWindowVisibility(Visibility visibility)
         {
-            foreach (Window w in Application.Current.Windows)
+            if (_libVlcWindow == default)
             {
-                if (LibVlcWindowTitle.Equals(w.Title))
+                foreach (Window w in Application.Current.Windows)
                 {
-                    _libVlcWindow = w;
-                    break;
+                    if (LibVlcWindowTitle.Equals(w.Title))
+                    {
+                        _libVlcWindow = w;
+                        break;
+                    }
                 }
             }
+
+            if (_libVlcWindow != default)
+                _libVlcWindow.Visibility = visibility;
         }
 
         #region Static methods

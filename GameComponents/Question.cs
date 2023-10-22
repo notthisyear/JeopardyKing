@@ -222,6 +222,12 @@ namespace JeopardyKing.GameComponents
             }
         }
 
+        public void SetImageOrVideoWidthAndHeight(int width, int height)
+        {
+            ImageOrVideoWidth = width;
+            ImageOrVideoHeight = height;
+        }
+
         public void SetYoutubeVideoParameters(string originalUrl, string youtubeVideoId, bool autoplay, bool showControls)
         {
             if (youtubeVideoId.Equals(YoutubeVideoId, StringComparison.Ordinal))
