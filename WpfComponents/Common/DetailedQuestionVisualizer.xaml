@@ -58,6 +58,17 @@
                                 </Style>
                             </StackPanel.Resources>
 
+                            <StackPanel.Style>
+                                <Style TargetType="{x:Type StackPanel}">
+                                    <Setter Property="Opacity" Value="1" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsAnswered}" Value="True">
+                                            <Setter Property="Opacity" Value="0.4" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
                             <!-- Icons -->
                             <StackPanel Orientation="Horizontal"
                                          HorizontalAlignment="Center"

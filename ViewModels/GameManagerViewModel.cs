@@ -293,7 +293,7 @@ namespace JeopardyKing.ViewModels
                         if (isCorrect)
                         {
                             PlayWindowViewModel.CurrentlyAnsweringPlayer.AddCashForQuestion(PlayWindowViewModel.CurrentQuestion);
-                            PlayWindowViewModel.CurrentQuestion.IsAnswered = true;
+                            SetQuestionToAnswered(PlayWindowViewModel.CurrentQuestion);
                         }
                         else
                         {
@@ -317,8 +317,7 @@ namespace JeopardyKing.ViewModels
                 _abandonQuestionCommand ??= new RelayCommand(() =>
                 {
                     if (PlayWindowViewModel.CurrentQuestion != default)
-                        PlayWindowViewModel.CurrentQuestion.IsAnswered = true;
-
+                        SetQuestionToAnswered(PlayWindowViewModel.CurrentQuestion);
                     PlayWindowViewModel.AbandonQuestion();
                     AnswersAllowed = false;
                 });
@@ -389,6 +388,7 @@ namespace JeopardyKing.ViewModels
             _shouldExit = true;
         }
 
+        #region Private methods
         private void SetAllowAnswerOnStateChange(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(PlayWindowViewModel.WindowState) && PlayWindowViewModel.WindowState == PlayWindowState.ShowQuestion)
@@ -396,6 +396,14 @@ namespace JeopardyKing.ViewModels
                 AnswersAllowed = true;
                 PlayWindowViewModel.PropertyChanged -= SetAllowAnswerOnStateChange;
             }
+        }
+
+        private void SetQuestionToAnswered(Question question)
+        {
+            question.IsAnswered = true;
+            var matchingCategory = GameBoard?.Categories.FirstOrDefault(x => x.Id == question.CategoryId);
+            if (matchingCategory != default)
+                matchingCategory.CheckIfAllQuestionsAnswered();
         }
 
         private void MonitorInputThread(object? state)
@@ -426,5 +434,6 @@ namespace JeopardyKing.ViewModels
                 Thread.Sleep(50);
             }
         }
+        #endregion
     }
 }

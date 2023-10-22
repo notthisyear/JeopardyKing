@@ -14,12 +14,19 @@ namespace JeopardyKing.GameComponents
 
         #region Backing fields
         private string _title = string.Empty;
+        private bool _allQuestionsAnswered = false;
         #endregion
 
         public string Title
         {
             get => _title;
             set => SetProperty(ref _title, value);
+        }
+
+        public bool AllQuestionsAnswered
+        {
+            get => _allQuestionsAnswered;
+            private set => SetProperty(ref _allQuestionsAnswered, value);
         }
 
         public int Id { get; }
@@ -57,6 +64,13 @@ namespace JeopardyKing.GameComponents
             _defaultIncreasePerQuestion = defaultIncreasePerQuestion;
             Questions = new();
             BindingOperations.EnableCollectionSynchronization(Questions, _questionsLock);
+        }
+
+        #region Public methods
+        public void CheckIfAllQuestionsAnswered()
+        {
+            lock (_questionsLock)
+                AllQuestionsAnswered = !Questions.Where(x => !x.IsAnswered).Any();
         }
 
         public void DeleteCategory()
@@ -101,5 +115,6 @@ namespace JeopardyKing.GameComponents
                     q.CategoryName = Title;
             }
         }
+        #endregion
     }
 }

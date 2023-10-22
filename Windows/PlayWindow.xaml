@@ -174,8 +174,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Category title-->
-                                <TextBlock Style="{StaticResource MainTextBlockStyle}"
-                                            Text="{Binding Path=Title}"
+                                <TextBlock  Text="{Binding Path=Title}"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Bottom"
                                             TextAlignment="Center"
@@ -183,7 +182,18 @@
                                             FontSize="20"
                                             Margin="0,0,0,10"
                                             FontWeight="Bold"
-                                           Opacity="0.8"/>
+                                            Opacity="0.8">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                            <Setter Property="Foreground" Value="{StaticResource MainTextColor}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=AllQuestionsAnswered}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
 
                                 <!-- Questions -->
                                 <ItemsControl ItemsSource="{Binding Path=Questions}"

@@ -39,7 +39,7 @@ namespace JeopardyKing.GameComponents
         public int Id { get; }
 
         [JsonIgnore]
-        public int CategoryId { get; }
+        public int CategoryId { get; set; }
 
         [JsonIgnore]
         public bool IsAnswered

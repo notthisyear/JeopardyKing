@@ -15,16 +15,25 @@
 
             <!-- Display name -->
             <TextBlock Grid.Row="0"
-                       Style="{StaticResource MainTextBlockStyle}"
                        Text="{Binding Path=Category.Title}"
-                       HorizontalAlignment="Center"
                        VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
                        TextAlignment="Center"
                        TextWrapping="Wrap"
                        Padding="5"
-                       FontSize="10" />
+                       FontSize="10">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Category.AllQuestionsAnswered}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </Border>
-            
+
         <!-- Questions -->
         <components:DetailedQuestionVisualizer Grid.Row="1"
                                                 Questions="{Binding Path=Category.Questions}" 

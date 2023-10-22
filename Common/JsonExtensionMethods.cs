@@ -46,6 +46,7 @@ namespace JeopardyKing.Common
                 {
                     q.Currency = gameBoard.Currency;
                     q.CategoryName = c.Title;
+                    q.CategoryId = c.Id;
                 }
             }
             return true;
