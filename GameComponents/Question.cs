@@ -29,6 +29,7 @@ namespace JeopardyKing.GameComponents
         private double _endVideoOrAudioAtSeconds = 0.0;
         private int _imageOrVideoWidth = 0;
         private int _imageOrVideoHeight = 0;
+        private bool _imageOrVideoTallerThanWide = false;
         private bool _isEmbeddedMedia = false;
         private string _content = string.Empty;
         private string _multimediaContentLink = string.Empty;
@@ -161,6 +162,12 @@ namespace JeopardyKing.GameComponents
             set => SetProperty(ref _imageOrVideoHeight, value);
         }
 
+        public bool ImageOrVideoTallerThanWide
+        {
+            get => _imageOrVideoTallerThanWide;
+            set => SetProperty(ref _imageOrVideoTallerThanWide, value);
+        }
+
         public string Content
         {
             get => _content;
@@ -226,6 +233,7 @@ namespace JeopardyKing.GameComponents
         {
             ImageOrVideoWidth = width;
             ImageOrVideoHeight = height;
+            ImageOrVideoTallerThanWide = ImageOrVideoHeight > ImageOrVideoWidth;
         }
 
         public void SetYoutubeVideoParameters(string originalUrl, string youtubeVideoId, bool autoplay, bool showControls)
