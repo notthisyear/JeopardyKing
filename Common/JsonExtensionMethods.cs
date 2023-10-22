@@ -1,4 +1,6 @@
 ﻿using System;
+using JeopardyKing.Common.FileUtilities;
+using JeopardyKing.GameComponents;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -13,6 +15,41 @@ namespace JeopardyKing.Common
                 NamingStrategy = new SnakeCaseNamingStrategy()
             }
         };
+
+        public static bool TrySaveGameToJsonFile(this Board gameBoard, string path, out Exception? e)
+        {
+            string? s;
+            (s, e) = gameBoard.SerializeToJsonString(convertPascalCaseToSnakeCase: true, indent: true);
+            if (e != default)
+                return false;
+
+            FileTextWriter writer = new(s!, path);
+            e = writer.WriteException;
+            return writer.SuccessfulWrite;
+        }
+
+        public static bool TryLoadGameFromJsonFile(this string path, out Board? gameBoard, out Exception? e)
+        {
+            gameBoard = default;
+            var reader = new FileTextReader(path);
+            e = reader.ReadException;
+            if (!reader.SuccessfulRead)
+                return false;
+
+            (gameBoard, e) = reader.AllText.DeserializeJsonString<Board>(convertSnakeCaseToPascalCase: true);
+            if (e != default)
+                return false;
+
+            foreach (var c in gameBoard!.Categories)
+            {
+                foreach (var q in c.Questions)
+                {
+                    q.Currency = gameBoard.Currency;
+                    q.CategoryName = c.Title;
+                }
+            }
+            return true;
+        }
 
         public static (T?, Exception?) DeserializeJsonString<T>(this string serializedString, bool convertSnakeCaseToPascalCase = false)
         {

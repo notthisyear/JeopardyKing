@@ -7,7 +7,8 @@ namespace JeopardyKing.WpfComponents
         Save,
         SaveAs,
         Open,
-        AddCategory
+        SetName,
+        AddCategory,
     }
     internal class MenuItemButtonClickedEventArgs : RoutedEventArgs
     {

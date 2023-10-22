@@ -11,7 +11,6 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using JeopardyKing.Common;
-using JeopardyKing.Common.FileUtilities;
 using JeopardyKing.GameComponents;
 using JeopardyKing.Windows;
 using Ookii.Dialogs.Wpf;
@@ -117,27 +116,13 @@ namespace JeopardyKing.ViewModels
                 {
                     if (_loadDialog.ShowDialog() == true)
                     {
-                        var reader = new FileTextReader(_loadDialog.FileName);
                         // TODO: Make error handling nicer
-                        if (!reader.SuccessfulRead)
-                            throw reader.ReadException!;
-
-                        var (board, e) = reader.AllText.DeserializeJsonString<Board>(convertSnakeCaseToPascalCase: true);
-                        // TODO: Make error handling nicer
-                        if (e != default)
-                            throw e;
-
-                        foreach (var c in board!.Categories)
-                        {
-                            q.Currency = board.Currency;
-                            q.CategoryName = c.Title;
-                        }
-                        GameBoard = board;
-
+                        if (!_loadDialog.FileName.TryLoadGameFromJsonFile(out var board, out var e))
+                            throw e!;
+                        GameBoard = board!;
                     }
                 });
                 return _loadBoardCommand;
-
             }
         }
 

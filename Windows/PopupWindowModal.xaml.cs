@@ -50,15 +50,15 @@ namespace JeopardyKing.Windows
         private readonly Action<ModalWindowButton>? _windowClosedActionWithoutReturn;
         private readonly Action<ModalWindowButton, string>? _windowClosedActionWithReturn;
 
-        public PopupWindowModal(Window parentWindow,
-                                string windowTitle,
+        public PopupWindowModal(string windowTitle,
                                 string windowHeadline,
                                 Action<ModalWindowButton, string> windowClosedAction,
                                 string preFilledInput = "",
-                                Func<string, (bool isValid, string errorMessage)>? inputValidator = null)
+                                Func<string, (bool isValid, string errorMessage)>? inputValidator = null,
+                                Window? parentWindow = default)
         {
             InitializeComponent();
-            Owner = parentWindow;
+            Owner = parentWindow ?? Application.Current.MainWindow;
             Title = windowTitle;
             WindowHeadline = windowHeadline;
             HasInputField = true;
@@ -74,14 +74,14 @@ namespace JeopardyKing.Windows
             inputField.Focus();
         }
 
-        public PopupWindowModal(Window parentWindow,
-                                string windowTitle,
+        public PopupWindowModal(string windowTitle,
                                 string windowHeadline,
                                 Action<ModalWindowButton> windowClosedAction,
-                                string windowInstruction = "")
+                                string windowInstruction = "",
+                                Window? parentWindow = default)
         {
             InitializeComponent();
-            Owner = parentWindow;
+            Owner = parentWindow ?? Application.Current.MainWindow;
             Title = windowTitle;
             WindowHeadline = windowHeadline;
             HasInputField = false;

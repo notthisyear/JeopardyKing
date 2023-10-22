@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -80,7 +79,6 @@ namespace JeopardyKing.ViewModels
                 _deleteQuestionCommand ??= new RelayCommand(() =>
                 {
                     PopupWindowModal confirmationDialog = new(
-                        Application.Current.MainWindow,
                         "Are you sure?",
                         "Delete question",
                         x =>
@@ -139,8 +137,7 @@ namespace JeopardyKing.ViewModels
                     if (ModeManager.CurrentlySelectedQuestion == default)
                         return;
 
-                    PopupWindowModal confirmationDialog =
-                    new(Application.Current.MainWindow,
+                    PopupWindowModal confirmationDialog = new(
                         "Add YouTube link",
                         string.Empty,
                         (response, link) =>

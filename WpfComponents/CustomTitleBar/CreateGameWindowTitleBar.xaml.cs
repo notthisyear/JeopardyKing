@@ -84,6 +84,17 @@ namespace JeopardyKing.WpfComponents
             typeof(CreateGameWindowTitleBar),
             new FrameworkPropertyMetadata(WindowState.Normal, WindowStateChangedCallback));
 
+        public string CurrentSavePath
+        {
+            get => (string)GetValue(CurrentSavePathProperty);
+            set => SetValue(CurrentSavePathProperty, value);
+        }
+        public static readonly DependencyProperty CurrentSavePathProperty = DependencyProperty.Register(
+            nameof(CurrentSavePath),
+            typeof(string),
+            typeof(CreateGameWindowTitleBar),
+            new FrameworkPropertyMetadata(string.Empty));
+
         private static void WindowStateChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is CreateGameWindowTitleBar titleBar && e.NewValue is WindowState state)
@@ -151,9 +162,9 @@ namespace JeopardyKing.WpfComponents
             RaiseEvent(eventArgs);
         }
 
-        // TODO: When pressing the same menu item again, the menu should close.
-        //       Right now, it closes and the immediately opens again.
-        //       Figure out fix for that.
+        // FIXME: When pressing the same menu item again, the menu should close.
+        //        Right now, it closes and the immediately opens again.
+        //        Figure out fix for that.
         private void FileMenuItemPressed(object sender, RoutedEventArgs e)
         {
             if (sender is not Button b || mainGrid.FindResource("fileMenu") is not ContextMenu menu)
@@ -195,10 +206,18 @@ namespace JeopardyKing.WpfComponents
         private void ExitMenuItemPressed(object sender, RoutedEventArgs e)
             => CloseButtonPressed(sender, e);
 
+
+        private void ChangeGameNameButtonPressed(object sender, RoutedEventArgs e)
+        {
+            var eventArgs = new MenuItemButtonClickedEventArgs(MenuItemButtonPressedEvent, MenuItemButton.SetName);
+            RaiseEvent(eventArgs);
+        }
+
         private void AddCategoryMenuItemPressed(object sender, RoutedEventArgs e)
         {
             var eventArgs = new MenuItemButtonClickedEventArgs(MenuItemButtonPressedEvent, MenuItemButton.AddCategory);
             RaiseEvent(eventArgs);
         }
+
     }
 }

@@ -259,9 +259,32 @@
                             <Button Grid.Column="1"
                                     Grid.Row="0"
                                     Content="Save"
-                                    ToolTip="Click to save game (Ctrl+S)"
-                                    Click="SaveMenuItemPressed"
-                                    Style="{StaticResource contentMenuButtonStyle}" />
+                                    Click="SaveMenuItemPressed">
+
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource contentMenuButtonStyle}">
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Click to save game to " />
+                                                    <TextBlock Text="{Binding Path=CurrentSavePath}"
+                                                               FontStyle="Italic"
+                                                               FontWeight="DemiBold"/>
+                                                </StackPanel>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=CurrentSavePath}" Value="">
+                                                <Setter Property="ToolTip">
+                                                    <Setter.Value>
+                                                        <TextBlock Text="Click to save game" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
 
                             <TextBlock Grid.Row="1"
                                        Grid.Column="0" 
@@ -274,7 +297,7 @@
                                      Grid.Row="1"
                                      Content="Save As"
                                      ToolTip="Click to save game as"
-                                     Click="SaveMenuItemPressed"
+                                     Click="SaveAsMenuItemPressed"
                                      Style="{StaticResource contentMenuButtonStyle}" />
 
                             <TextBlock Grid.Row="2"
@@ -286,13 +309,13 @@
                             <Button Grid.Row="2"
                                     Grid.Column="2"
                                     Content="Open"
-                                    ToolTip="Click to open existing game (Ctrl+L)"
+                                    ToolTip="Click to open existing game"
                                     Click="OpenMenuItemPressed"
                                     Style="{StaticResource contentMenuButtonStyle}" />
 
                             <Separator Grid.Row="3"
                                        Grid.Column="1" />
-                            
+
                             <Button Grid.Column="1"
                                     Grid.Row="4"
                                     Content="Exit"
@@ -318,6 +341,7 @@
 
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
                                 <RowDefinition Height="5" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
@@ -325,6 +349,20 @@
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       Style="{StaticResource SymbolButtonStyle}"
+                                       Text="&#xE70F;"
+                                       FontSize="10"
+                                       Margin="0,5"/>
+
+                            <Button Grid.Column="1"
+                                    Grid.Row="0"
+                                    Content="Set game name"
+                                    ToolTip="Click to set the name of the current game"
+                                    Click="ChangeGameNameButtonPressed"
+                                    Style="{StaticResource contentMenuButtonStyle}" />
+
+                            <TextBlock Grid.Row="1"
                                        Grid.Column="0" 
                                        Text="&#xE710;"
                                        FontSize="10">
@@ -341,7 +379,7 @@
                             </TextBlock>
 
                             <Button x:Name="addCategoryButton"
-                                    Grid.Row="0"
+                                    Grid.Row="1"
                                     Grid.Column="1"
                                     Content="Add category"
                                     Click="AddCategoryMenuItemPressed"
@@ -360,32 +398,32 @@
                                 </Button.Style>
                             </Button>
 
-                            <Separator Grid.Row="1"
-                                        Grid.Column="1"
+                            <Separator Grid.Row="2"
+                                       Grid.Column="1"
                                        Margin="0,0,10,0 "/>
 
                             <TextBlock Style="{StaticResource MainTextBlockStyle}"
-                                       Grid.Row="2"
+                                       Grid.Row="3"
                                        Grid.Column="1"
                                        FontWeight="Bold"
                                        Text="Currency"
                                        Margin="0,5"/>
 
-                            <TextBlock Grid.Row="3"
+                            <TextBlock Grid.Row="4"
                                        Grid.Column="0"
                                        Style="{StaticResource SymbolButtonStyle}"
                                        Text="&#xE73E;"
                                        FontSize="10"
                                        Margin="0,5"/>
 
-                            <Button Grid.Row="3"
-                                       Grid.Column="1"
-                                       Style="{StaticResource contentMenuButtonStyle}"
-                                       ToolTip="More currencies coming soon!"
-                                       Content="SEK"
-                                       Margin="0,0,0,5"/>
+                            <Button Grid.Row="4"
+                                    Grid.Column="1"
+                                    Style="{StaticResource contentMenuButtonStyle}"
+                                    ToolTip="More currencies coming soon!"
+                                    Content="SEK"
+                                    Margin="0,0,0,5"/>
 
-                            <Separator Grid.Row="4"
+                            <Separator Grid.Row="5"
                                        Grid.Column="1"
                                        Margin="0,0,10,10"/>
 

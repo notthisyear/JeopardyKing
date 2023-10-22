@@ -57,6 +57,21 @@ namespace JeopardyKing.GameComponents
             }
         }
 
+        public void CopyFromExisting(Board existingBoard)
+        {
+            lock (_categoriesLock)
+            {
+                Categories.Clear();
+                _categoryIdCounter = 0;
+            }
+
+            Currency = existingBoard.Currency;
+            GameName = existingBoard.GameName;
+
+            foreach (var category in existingBoard.Categories)
+                AddCategory(category);
+        }
+
         public void AddNewCategory()
             => AddCategory(CreateNewCategory());
 

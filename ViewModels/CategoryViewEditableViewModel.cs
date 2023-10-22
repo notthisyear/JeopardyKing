@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using JeopardyKing.GameComponents;
 using JeopardyKing.Windows;
@@ -18,7 +17,6 @@ namespace JeopardyKing.ViewModels
                 _deleteCategoryCommand ??= new RelayCommand<Category>(c =>
                 {
                     PopupWindowModal confirmationDialog = new(
-                        Application.Current.MainWindow,
                         "Are you sure?",
                         "Delete category",
                         x =>

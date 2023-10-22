@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using JeopardyKing.Common;
 using JeopardyKing.Common.FileUtilities;
@@ -12,6 +14,14 @@ namespace JeopardyKing.ViewModels
     public class CreateWindowViewModel : ObservableObject
     {
         #region Public properties
+        private string _lastLoadedGamePath = string.Empty;
+
+        public string LastLoadedGamePath
+        {
+            get => _lastLoadedGamePath;
+            private set => SetProperty(ref _lastLoadedGamePath, value);
+        }
+
         public Board GameBoard { get; }
 
         public QuestionModeManager ModeManager { get; }
@@ -25,14 +35,18 @@ namespace JeopardyKing.ViewModels
 
         private readonly VistaSaveFileDialog _saveDialog = new()
         {
-            Title = "Save current board",
+            Title = "Save current board as",
             Filter = "JSON file (*.json)|*.json",
             DefaultExt = "json",
             ValidateNames = true
         };
 
-        private string _lastLoadedGamePath = string.Empty;
-
+        private readonly VistaOpenFileDialog _loadDialog = new()
+        {
+            Title = "Load game board",
+            Filter = "JSON file (*.json)|*.json",
+            Multiselect = false,
+        };
         public CreateWindowViewModel()
         {
             ModeManager = new();
@@ -47,30 +61,43 @@ namespace JeopardyKing.ViewModels
 
         internal void MenuItemPressed(MenuItemButton button)
         {
+            if (button == MenuItemButton.Save || button == MenuItemButton.SaveAs)
+            {
+                if (string.IsNullOrEmpty(GameBoard.GameName))
+                {
+                    SetGameName(() => Application.Current.Dispatcher.Invoke(() => MenuItemPressed(button)));
+                    return;
+                }
+
+                if (button == MenuItemButton.SaveAs || string.IsNullOrEmpty(LastLoadedGamePath))
+                {
+                    if (_saveDialog.ShowDialog() == true)
+                        LastLoadedGamePath = _saveDialog.FileName;
+                    else
+                        return;
+                }
+            }
+
+            // TODO: Handle exceptions in a nicer way
             switch (button)
             {
                 case MenuItemButton.Save:
-                    if (string.IsNullOrEmpty(_lastLoadedGamePath))
-                    {
-                        if (_saveDialog.ShowDialog() == true)
-                            _lastLoadedGamePath = _saveDialog.FileName;
-                        else
-                            return;
-                    }
-
-                    GameBoard.GameName = Path.GetFileNameWithoutExtension(_lastLoadedGamePath);
-                    var (s, e) = GameBoard.SerializeToJsonString(convertPascalCaseToSnakeCase: true, indent: true);
-                    if (e != default)
-                        throw e;
-
-                    FileTextWriter writer = new(s!, _lastLoadedGamePath);
-                    if (writer.SuccessfulWrite && writer.WriteException != default)
-                        throw writer.WriteException;
-
-                    break;
                 case MenuItemButton.SaveAs:
+                    {
+                        if (!GameBoard.TrySaveGameToJsonFile(LastLoadedGamePath, out var e))
+                            throw e!;
+                    }
                     break;
                 case MenuItemButton.Open:
+                    if (_loadDialog.ShowDialog() == true)
+                    {
+                        if (!_loadDialog.FileName.TryLoadGameFromJsonFile(out var board, out var e))
+                            throw e!;
+                        GameBoard.CopyFromExisting(board!);
+                    }
+                    break;
+                case MenuItemButton.SetName:
+                    SetGameName();
                     break;
                 case MenuItemButton.AddCategory:
                     GameBoard.AddNewCategory();
@@ -78,6 +105,25 @@ namespace JeopardyKing.ViewModels
                 default:
                     break;
             }
+        }
+
+        private void SetGameName(Action? extraActionOnSuccess = default)
+        {
+            PopupWindowModal setNameWindow = new(
+                "Set game name",
+                string.Empty,
+                (x, s) =>
+                {
+                    if (x == ModalWindowButton.OK && !string.IsNullOrEmpty(s))
+                    {
+                        GameBoard.GameName = s;
+                        if (extraActionOnSuccess != default)
+                            extraActionOnSuccess.Invoke();
+                    }
+                },
+                GameBoard.GameName,
+                s => (!string.IsNullOrEmpty(s), "Game name cannot be empty"));
+            _ = setNameWindow.ShowDialog();
         }
     }
 }

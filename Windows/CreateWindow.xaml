@@ -41,6 +41,7 @@
                                                      ApplicationDescription="{x:Static viewmodels:CreateWindowViewModel.ProgramDescription}"
                                                      Title="{Binding Path=ViewModel.GameBoard.GameName}"
                                                      CurrentWindowState="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}, Path=WindowState}"
+                                                     CurrentSavePath="{Binding Path=ViewModel.LastLoadedGamePath}"
                                                      ShowMaximizeButton="True"
                                                      TitleBarButtonPressed="TitleBarButtonPressed"
                                                      MenuItemButtonPressed="MenuItemButtonPressed">
