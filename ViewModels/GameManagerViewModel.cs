@@ -90,6 +90,7 @@ namespace JeopardyKing.ViewModels
         private RelayCommand? _startGameCommand;
         private RelayCommand? _revealNextCategoryCommand;
         private RelayCommand? _startQuestionCommand;
+        private RelayCommand? _setQuestionToUnansweredCommand;
         private RelayCommand? _progressQuestionCommand;
         private RelayCommand<bool>? _answerQuestionCommand;
         private RelayCommand? _abandonQuestionCommand;
@@ -266,6 +267,20 @@ namespace JeopardyKing.ViewModels
             }
         }
 
+        public ICommand SetQuestionToUnansweredCommand
+        {
+            get
+            {
+                _setQuestionToUnansweredCommand ??= new RelayCommand(() =>
+                {
+                    if (QuestionModeManager.CurrentlySelectedQuestion == default)
+                        return;
+                    SetQuestionAnswerStatus(QuestionModeManager.CurrentlySelectedQuestion, false);
+                });
+                return _setQuestionToUnansweredCommand;
+            }
+        }
+
         public ICommand ProgressQuestionCommand
         {
             get
@@ -293,7 +308,7 @@ namespace JeopardyKing.ViewModels
                         if (isCorrect)
                         {
                             PlayWindowViewModel.CurrentlyAnsweringPlayer.AddCashForQuestion(PlayWindowViewModel.CurrentQuestion);
-                            SetQuestionToAnswered(PlayWindowViewModel.CurrentQuestion);
+                            SetQuestionAnswerStatus(PlayWindowViewModel.CurrentQuestion, true);
                         }
                         else
                         {
@@ -317,7 +332,7 @@ namespace JeopardyKing.ViewModels
                 _abandonQuestionCommand ??= new RelayCommand(() =>
                 {
                     if (PlayWindowViewModel.CurrentQuestion != default)
-                        SetQuestionToAnswered(PlayWindowViewModel.CurrentQuestion);
+                        SetQuestionAnswerStatus(PlayWindowViewModel.CurrentQuestion, true);
                     PlayWindowViewModel.AbandonQuestion();
                     AnswersAllowed = false;
                 });
@@ -398,9 +413,9 @@ namespace JeopardyKing.ViewModels
             }
         }
 
-        private void SetQuestionToAnswered(Question question)
+        private void SetQuestionAnswerStatus(Question question, bool isAnswered)
         {
-            question.IsAnswered = true;
+            question.IsAnswered = isAnswered;
             var matchingCategory = GameBoard?.Categories.FirstOrDefault(x => x.Id == question.CategoryId);
             if (matchingCategory != default)
                 matchingCategory.CheckIfAllQuestionsAnswered();

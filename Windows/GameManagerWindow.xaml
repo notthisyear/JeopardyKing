@@ -376,6 +376,30 @@
                                     </Button.Style>
                                 </Button>
 
+                                <!-- Re-enable question -->
+                                <Button>
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="ToolTip" Value="Press to allow question to be answered again" />
+                                            <Setter Property="Content" Value="Set to unanswered" />
+                                            <Setter Property="Command" Value="{Binding Path=ViewModel.SetQuestionToUnansweredCommand}" />
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentState}" Value="{x:Static windows:QuestionVisualState.QuestionSelected}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowBoard}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.IsAnswered}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
                                 <!-- Playback information text -->
                                 <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Center">
