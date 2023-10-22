@@ -31,6 +31,7 @@ namespace JeopardyKing.ViewModels
         private bool _inShowContent = false;
         private bool _inShowMediaContent = false;
         private bool _inMediaContentPlaying = false;
+        private int _currentPlayingMediaPositionSeconds = 0;
         private bool _inPlayerAnswering = false;
         private bool _inPlayerHasAnswered = false;
         private Board? _gameBoard = default;
@@ -80,6 +81,12 @@ namespace JeopardyKing.ViewModels
         {
             get => _inMediaContentPlaying;
             set => SetProperty(ref _inMediaContentPlaying, value);
+        }
+
+        public int CurrentPlayingMediaPositionSeconds
+        {
+            get => _currentPlayingMediaPositionSeconds;
+            set => SetProperty(ref _currentPlayingMediaPositionSeconds, value);
         }
 
         public bool InPlayerAnswering
@@ -151,10 +158,10 @@ namespace JeopardyKing.ViewModels
                 _currentCategoryIdx++;
                 CategoryChanging = true;
 
-                Task.Run(() =>
+                Task.Run(async () =>
                 {
                     // Give eventual animations some time to run
-                    Task.Delay(750);
+                    await Task.Delay(750);
                     if (_currentCategoryIdx < GameBoard.Categories.Count)
                     {
                         CategoryBeingRevealed = GameBoard.Categories[_currentCategoryIdx];

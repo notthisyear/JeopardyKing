@@ -501,7 +501,6 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-
                                 <Grid>
 
                                     <!-- Image -->
@@ -562,6 +561,31 @@
                                             </Style.Triggers>
                                         </Style>
                                     </vlc:VideoView>
+
+                                    <!-- Audio icon -->
+                                    <components:IconBox IconType="Audio"
+                                                        ScaleFactor="10"
+                                                        StrokeThickness="0">
+                                        <components:IconBox.Style>
+                                            <Style TargetType="{x:Type components:IconBox}">
+                                                <Setter Property="FillColor" Value="{StaticResource MainTextMutedColor}" />
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=ViewModel.CurrentQuestion.Type}" Value="{x:Static game:QuestionType.Audio}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Path=ViewModel.InMediaContentPlaying}" Value="True">
+                                                        <Setter Property="FillColor" Value="{StaticResource MainTextColor}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </components:IconBox.Style>
+
+                                        <components:IconBox.RenderTransform>
+                                            <TranslateTransform X="-160"
+                                                                Y="-180"/>
+                                        </components:IconBox.RenderTransform>
+                                    </components:IconBox>
                                 </Grid>
                             </Border>
                         </Grid>

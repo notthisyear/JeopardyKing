@@ -3,8 +3,7 @@
              xmlns:game="clr-namespace:JeopardyKing.GameComponents"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <StackPanel VerticalAlignment="Center"
-                DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=.}"
+    <StackPanel DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=.}"
                 Orientation="Vertical">
         <StackPanel.Resources>
             <Style x:Key="questionDataLabel" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
@@ -19,6 +18,15 @@
             <Style x:Key="questionDataValue" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
                 <Setter Property="FontWeight" Value="Bold" />
                 <Setter Property="FontSize" Value="18" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=SelectedQuestion.IsAnswered}" Value="True">
+                        <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="questionDataValueSmall" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource questionDataValue}">
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="FontSize" Value="14" />
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Path=SelectedQuestion.IsAnswered}" Value="True">
                         <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
@@ -49,67 +57,91 @@
             </Style>
         </StackPanel.Resources>
 
-        <!-- Question value -->
-        <TextBlock  Style="{StaticResource questionDataLabel}"
+        <Grid HorizontalAlignment="Stretch">
+
+            <!-- Question value -->
+            <StackPanel Orientation="Vertical"
+                        HorizontalAlignment="Left">
+                <TextBlock  Style="{StaticResource questionDataLabel}"
                     Text="Value"/>
-        <TextBlock  Style="{StaticResource questionDataValue}">
-            <TextBlock.Text>
-                <MultiBinding Converter="{StaticResource valueDisplayConverter}">
-                    <Binding Path="SelectedQuestion.Value" />
-                    <Binding Path="SelectedQuestion.Currency" />
-                </MultiBinding>
-            </TextBlock.Text>
-        </TextBlock>
+                <TextBlock  Style="{StaticResource questionDataValue}">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource valueDisplayConverter}">
+                            <Binding Path="SelectedQuestion.Value" />
+                            <Binding Path="SelectedQuestion.Currency" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </StackPanel>
 
-        <!-- Question type -->
-        <TextBlock Style="{StaticResource questionDataLabel}"
-                   Text="Type"
-                   Margin="0,10,0,0"/>
-        <TextBlock  Style="{StaticResource questionDataValue}"
-                    Text="{Binding Path=SelectedQuestion.Type}"/>
+            <!-- Question type -->
+            <StackPanel Orientation="Vertical"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,10,0">
+                <TextBlock Style="{StaticResource questionDataLabel}"
+                           HorizontalAlignment="Right"
+                           Text="Type"/>
+                <TextBlock  Style="{StaticResource questionDataValue}"
+                            Text="{Binding Path=SelectedQuestion.Type}"
+                            HorizontalAlignment="Right"/>
+            </StackPanel>
+        </Grid>
 
-        <!-- Is bonus -->
-        <TextBlock Style="{StaticResource questionDataLabel}"
-                   Text="Is bonus"
-                   Margin="0,10,0,0"/>
-        <TextBlock  Grid.Column="1">
-            <TextBlock.Style>
-                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource questionDataValue}">
-                    <Setter Property="Text" Value="No" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=SelectedQuestion.IsBonus}" Value="True">
-                            <Setter Property="Text" Value="Yes" />
-                            <Setter Property="Foreground" Value="{StaticResource MainSuccessColor}" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
+        <Grid>
+            <!-- Is bonus -->
+            <StackPanel Orientation="Vertical"
+                        HorizontalAlignment="Left"
+                        Margin="0,10,0,0">
+                <TextBlock Style="{StaticResource questionDataLabel}"
+                   Text="Is bonus"/>
+                <TextBlock  Grid.Column="1">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource questionDataValue}">
+                            <Setter Property="Text" Value="No" />
+                            <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=SelectedQuestion.IsBonus}" Value="True">
+                                    <Setter Property="Text" Value="Yes" />
+                                    <Setter Property="Foreground" Value="{StaticResource MainHighlightColor}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
 
-        <!-- Is gamble -->
-        <TextBlock Style="{StaticResource questionDataLabel}"
-                   Text="Is gamble"
-                   Margin="0,10,0,0"/>
-        <TextBlock>
-            <TextBlock.Style>
-                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource questionDataValue}">
-                    <Setter Property="Text" Value="No" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=SelectedQuestion.IsGamble}" Value="True">
-                            <Setter Property="Text" Value="Yes" />
-                            <Setter Property="Foreground" Value="{StaticResource MainSuccessColor}" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
+            <!-- Is gamble -->
+            <StackPanel Orientation="Vertical"
+                HorizontalAlignment="Right"
+                Margin="0,10,10,0">
+            <TextBlock Style="{StaticResource questionDataLabel}"
+                       Text="Is gamble"
+                       HorizontalAlignment="Right"/>
+                <TextBlock HorizontalAlignment="Right">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource questionDataValue}">
+                            <Setter Property="Text" Value="No" />
+                            <Setter Property="Foreground" Value="{StaticResource MainTextMutedColor}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=SelectedQuestion.IsGamble}" Value="True">
+                                    <Setter Property="Text" Value="Yes" />
+                                    <Setter Property="Foreground" Value="{StaticResource MainHighlightColor}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Separator Margin="0,10,0,0"/>
 
         <!-- Media link -->
         <StackPanel Margin="0,10,0,0"
                     Style="{StaticResource mediaQuestionEntries}">
             <TextBlock  Style="{StaticResource questionDataLabel}"
                         Text="File name"/>
-            <TextBlock  Style="{StaticResource questionDataValue}"
+            <TextBlock  Style="{StaticResource questionDataValueSmall}"
                         Text="{Binding Path=SelectedQuestion.MediaName}"
                         TextWrapping="Wrap"
                         ToolTip="{Binding Path=SelectedQuestion.MultimediaContentLink}"/>
@@ -133,7 +165,7 @@
             </StackPanel.Style>
             <TextBlock  Style="{StaticResource questionDataLabel}"
                         Text="Flow"/>
-            <TextBlock  Style="{StaticResource questionDataValue}"
+            <TextBlock  Style="{StaticResource questionDataValueSmall}"
                         Text="{Binding Path=SelectedQuestion.MediaQuestionFlow}"
                         TextWrapping="Wrap"
                         ToolTip="The type of media flow">
@@ -157,11 +189,11 @@
             <TextBlock  Style="{StaticResource questionDataLabel}"
                         Text="Media clip"/>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Style="{StaticResource questionDataValue}"
+                <TextBlock Style="{StaticResource questionDataValueSmall}"
                            Text="{Binding Path=SelectedQuestion.StartVideoOrAudioAtSeconds, Converter={StaticResource secondsToTimeStringConverter}}" />
-                <TextBlock Style="{StaticResource questionDataValue}"
+                <TextBlock Style="{StaticResource questionDataValueSmall}"
                            Text=" - "/>
-                <TextBlock Style="{StaticResource questionDataValue}"
+                <TextBlock Style="{StaticResource questionDataValueSmall}"
                            Text="{Binding Path=SelectedQuestion.EndVideoOrAudioAtSeconds, Converter={StaticResource secondsToTimeStringConverter}}" />
             </StackPanel>
         </StackPanel>
@@ -171,7 +203,7 @@
                     Style="{StaticResource youtubeQuestionEntries}">
             <TextBlock  Style="{StaticResource questionDataLabel}"
                         Text="YouTube ID"/>
-            <TextBlock Style="{StaticResource questionDataValue}"
+            <TextBlock Style="{StaticResource questionDataValueSmall}"
                        Text="{Binding Path=SelectedQuestion.YoutubeVideoId}"
                        ToolTip="{Binding Path=SelectedQuestion.OriginalYoutubeUrl}"/>
         </StackPanel>
@@ -181,7 +213,7 @@
                     Style="{StaticResource youtubeQuestionEntries}">
             <TextBlock Style="{StaticResource questionDataLabel}"
                        Text="Start at"/>
-            <TextBlock Style="{StaticResource questionDataValue}"
+            <TextBlock Style="{StaticResource questionDataValueSmall}"
                        Text="{Binding Path=SelectedQuestion.StartVideoOrAudioAtSeconds, Converter={StaticResource secondsToTimeStringConverter}}"/>
         </StackPanel>
 
@@ -189,10 +221,9 @@
         <TextBlock Margin="0,10,0,0"
                    Style="{StaticResource questionDataLabel}"
                    Text="Content"/>
-        <TextBlock  Style="{StaticResource questionDataValue}"
-                    FontSize="14"
-                    FontWeight="Regular"
+        <TextBlock  Style="{StaticResource questionDataValueSmall}"
                     Text="{Binding Path=SelectedQuestion.Content}"
+                    FontWeight="Regular"
                     TextWrapping="Wrap"/>
     </StackPanel>
 </UserControl>

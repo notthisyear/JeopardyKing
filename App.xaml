@@ -21,6 +21,7 @@
         <converters:QuestionToIconTypeConverter x:Key="questionToIconTypeConverter" />
         <converters:ToUpperOrLowerConverter x:Key="toUpperOrLowerConverter" />
         <converters:BitmapCreatorConverter x:Key="bitmapCreatorConverter" />
+        <converters:ClipLengthToTimeConverter x:Key="clipLengthToTimeConverter" />
 
         <!-- Background colors-->
         <Color x:Key="MainBackgroundRaw" A="255" R="59" G="59" B="59" />

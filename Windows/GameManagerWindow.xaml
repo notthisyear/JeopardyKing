@@ -320,8 +320,8 @@
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowMediaContent}" Value="False" />
                                                     </MultiDataTrigger.Conditions>
                                                     <MultiDataTrigger.Setters>
-                                                        <Setter Property="Content" Value="Show media" />
-                                                        <Setter Property="ToolTip" Value="Click to show media" />
+                                                        <Setter Property="Content" Value="Show/play media" />
+                                                        <Setter Property="ToolTip" Value="Click to show or play the question media" />
                                                         <Setter Property="Visibility" Value="Visible" />
                                                         <Setter Property="Command" Value="{Binding Path=ViewModel.ProgressQuestionCommand}" />
                                                     </MultiDataTrigger.Setters>
@@ -376,6 +376,42 @@
                                     </Button.Style>
                                 </Button>
 
+                                <!-- Playback information text -->
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <StackPanel.Style>
+                                        <Style TargetType="{x:Type StackPanel}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.Type}" Value="{x:Static game:QuestionType.Audio}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowMediaContent}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InMediaContentPlaying}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+
+                                    <TextBlock Text="{Binding Path=ViewModel.PlayWindowViewModel.CurrentPlayingMediaPositionSeconds, Converter={StaticResource secondsToTimeStringConverter}}"
+                                                Style="{StaticResource MainTextBlockStyle}" />
+                                    <TextBlock Text=" / "
+                                                Style="{StaticResource MainTextBlockStyle}" />
+                                    <TextBlock Style="{StaticResource MainTextBlockStyle}">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource clipLengthToTimeConverter}">
+                                                <Binding Path="ViewModel.QuestionModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds" />
+                                                <Binding Path="ViewModel.QuestionModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </StackPanel>
+
                                 <!-- Correct / incorrect buttons -->
                                 <StackPanel Orientation="Horizontal"
                                             Margin="0,10,0,0">
@@ -414,8 +450,9 @@
                     <!-- Question overview -->
                     <components:QuestionOverview  Grid.Row="2"
                                                   Grid.Column="1"
-                                                  Margin="10,0,10,0"
-                                                  SelectedQuestion="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion}">
+                                                  Margin="10,20,10,0"
+                                                  SelectedQuestion="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion}"
+                                                  VerticalAlignment="Top">
                         <components:QuestionOverview.Style>
                             <Style TargetType="{x:Type components:QuestionOverview}">
                                 <Setter Property="Opacity" Value="1" />

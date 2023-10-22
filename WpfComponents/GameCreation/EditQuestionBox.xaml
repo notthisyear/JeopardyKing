@@ -78,19 +78,17 @@
                                      From="2.5"
                                      To="2">
                         <DoubleAnimation.EasingFunction>
-                             <CircleEase EasingMode="EaseOut"/>
+                            <CircleEase EasingMode="EaseOut"/>
                         </DoubleAnimation.EasingFunction>
                     </DoubleAnimation>
                     <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
                                      From="2.5"
                                      To="2">
                         <DoubleAnimation.EasingFunction>
-                             <CircleEase EasingMode="EaseOut"/>
+                            <CircleEase EasingMode="EaseOut"/>
                         </DoubleAnimation.EasingFunction>
                     </DoubleAnimation>
                 </Storyboard>
-
-                <converters:ClipLengthToTimeConverter x:Key="clipLengthToTimeConverter" />
             </Grid.Resources>
 
             <Grid.RowDefinitions>

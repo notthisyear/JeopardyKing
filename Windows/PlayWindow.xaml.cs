@@ -74,6 +74,7 @@ namespace JeopardyKing.Windows
 
                     if (!audioVideoPlayer.MediaPlayer!.IsPlaying)
                     {
+                        ViewModel.CurrentPlayingMediaPositionSeconds = 0;
                         audioVideoPlayer.MediaPlayer!.Stop();
                         audioVideoPlayer.MediaPlayer!.Play();
                         audioVideoPlayer.MediaPlayer!.Time = _startAudioOrVideoAtMs;
@@ -117,12 +118,15 @@ namespace JeopardyKing.Windows
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var mediaPlayer = audioVideoPlayer.MediaPlayer!;
-                Task.Run(() =>
+                var vm = ViewModel;
+                _ = Task.Run(() =>
                 {
-                    if (_endAudioOrVideoAtMs >= mediaPlayer.Time)
+                    var t = mediaPlayer.Time;
+                    vm.CurrentPlayingMediaPositionSeconds = (int)((t - _startAudioOrVideoAtMs) / 1000);
+                    if (t >= _endAudioOrVideoAtMs)
                     {
                         mediaPlayer.Pause();
-                        ViewModel.InMediaContentPlaying = false;
+                        vm.InMediaContentPlaying = false;
                     }
                 });
             });
@@ -135,7 +139,7 @@ namespace JeopardyKing.Windows
             audioVideoPlayer.MediaPlayer.Stop();
             _startAudioOrVideoAtMs = (long)q.StartVideoOrAudioAtSeconds * 1000;
             _endAudioOrVideoAtMs = (long)q.EndVideoOrAudioAtSeconds * 1000;
-            _currentClipHasCustomEnd = _endAudioOrVideoAtMs < q.VideoOrAudioLengthSeconds;
+            _currentClipHasCustomEnd = _endAudioOrVideoAtMs < (1000 * q.VideoOrAudioLengthSeconds);
         }
 
         private void ClearMediaPlayerMedia()
