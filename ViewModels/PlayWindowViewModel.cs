@@ -33,6 +33,7 @@ namespace JeopardyKing.ViewModels
         #region Private fields
         private PlayWindowState _windowState = PlayWindowState.None;
         private Category? _categoryBeingRevealed = default;
+        private Player? _playerCurrentlyBetting = default;
         private bool _categoryChanging = true;
         private bool _inShowPreQuestionContent = false;
         private bool _inShowContent = false;
@@ -59,6 +60,11 @@ namespace JeopardyKing.ViewModels
             private set => SetProperty(ref _categoryBeingRevealed, value);
         }
 
+        public Player? PlayerCurrentlyBetting
+        {
+            get => _playerCurrentlyBetting;
+            private set => SetProperty(ref _playerCurrentlyBetting, value);
+        }
         public bool CategoryChanging
         {
             get => _categoryChanging;
@@ -135,6 +141,7 @@ namespace JeopardyKing.ViewModels
 
         #region Private fields
         private int _currentCategoryIdx = 0;
+        private int _currentPlayerIdx = 0;
         private MediaPlaybackStatus _mediaPlaybackStatus = MediaPlaybackStatus.Stopped;
         #endregion
 
@@ -203,6 +210,16 @@ namespace JeopardyKing.ViewModels
                         SetStateToShowQuestion(currentQuestion);
                     });
                 }
+                else if (InShowPreQuestionContent && CurrentQuestion.IsGamble)
+                {
+                    _currentPlayerIdx = 0;
+                    PlayerCurrentlyBetting = default;
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(2500);
+                        IncrementPlayerCurrentlyBetting();
+                    });
+                }
                 else if (!InShowPreQuestionContent)
                 {
                     SetStateToShowQuestion(currentQuestion);
@@ -216,7 +233,10 @@ namespace JeopardyKing.ViewModels
             {
                 if (InShowPreQuestionContent)
                 {
-                    SetStateToShowQuestion(currentQuestion);
+                    if (currentQuestion.IsGamble)
+                        IncrementPlayerCurrentlyBetting();
+                    else
+                        SetStateToShowQuestion(currentQuestion);
                 }
                 else if (InShowContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.TextThenMedia)
                 {
@@ -316,12 +336,33 @@ namespace JeopardyKing.ViewModels
                         currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
                     InShowMediaContent = currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText
                         || currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
+
                     if (InShowMediaContent && (currentQuestion.Type == QuestionType.Audio || currentQuestion.Type == QuestionType.Video))
-                        InMediaContentPlaying = true;
+                        SetMediaContentPlaybackStatus(MediaPlaybackStatus.Playing);
                     break;
                 default:
                     throw new NotSupportedException();
             }
+        }
+
+        private void IncrementPlayerCurrentlyBetting()
+        {
+            if (Players == default || CurrentQuestion == default)
+                return;
+
+            if (PlayerCurrentlyBetting != default)
+                PlayerCurrentlyBetting.IsBetting = false;
+
+            if (_currentPlayerIdx == Players.Count)
+            {
+                _currentPlayerIdx = 0;
+                PlayerCurrentlyBetting = default;
+                SetStateToShowQuestion(CurrentQuestion);
+                return;
+            }
+
+            PlayerCurrentlyBetting = Players[_currentPlayerIdx++];
+            PlayerCurrentlyBetting.IsBetting = true;
         }
 
         private void ResetGameBoardAfterAnswer()

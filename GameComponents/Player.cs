@@ -10,10 +10,13 @@ namespace JeopardyKing.GameComponents
         #region Backing fields
         private string _name = string.Empty;
         private decimal _cash = decimal.Zero;
+        private decimal _currentBet = decimal.Zero;
         private bool _isPressingKey = false;
+        private bool _isBetting = false;
         #endregion
 
         public int Id { get; }
+
         public string Name
         {
             get => _name;
@@ -26,10 +29,22 @@ namespace JeopardyKing.GameComponents
             set => SetProperty(ref _cash, value);
         }
 
+        public decimal CurrentBet
+        {
+            get => _currentBet;
+            set => SetProperty(ref _currentBet, decimal.Round(value));
+        }
+
         public bool IsPressingKey
         {
             get => _isPressingKey;
             set => SetProperty(ref _isPressingKey, value);
+        }
+
+        public bool IsBetting
+        {
+            get => _isBetting;
+            set => SetProperty(ref _isBetting, value);
         }
         #endregion
 
@@ -46,11 +61,12 @@ namespace JeopardyKing.GameComponents
             if (q.IsBonus)
                 valueToAdd = 2 * q.Value;
             else if (q.IsGamble)
-                throw new NotImplementedException();
+                valueToAdd = CurrentBet;
             else
                 valueToAdd = q.Value;
 
             Cash += valueToAdd;
+            CurrentBet = 0;
         }
 
         public void SubtractCashForQuestion(Question q)
@@ -59,11 +75,12 @@ namespace JeopardyKing.GameComponents
             if (q.IsBonus)
                 valueToSubtract = q.Value;
             else if (q.IsGamble)
-                throw new NotImplementedException();
+                valueToSubtract = CurrentBet;
             else
                 valueToSubtract = q.Value;
 
             Cash -= valueToSubtract;
+            CurrentBet = 0;
         }
     }
 }

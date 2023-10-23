@@ -59,5 +59,19 @@ namespace JeopardyKing.Windows
             if (e.IsDown && e.Key == Key.A)
                 ViewModel.ToggleAnswerAllowedCommand.Execute(default);
         }
+
+        private void EditBetAmountButtonClick(object sender, RoutedEventArgs e)
+        {
+            ViewModel.SettingBetAmountForPlayer = true;
+        }
+
+        private void BetAmountBoxPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Escape)
+            {
+                ViewModel.SettingBetAmountForPlayer = false;
+                e.Handled = true;
+            }
+        }
     }
 }

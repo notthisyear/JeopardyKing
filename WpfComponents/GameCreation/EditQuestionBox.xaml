@@ -1082,7 +1082,7 @@
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Setter Property="Content" Value="Refresh preview" />
-                                <Setter Property="ToolTip" Value="Cannot refresh preview - start time is invalid" />
+                                <Setter Property="ToolTip" Value="Cannot refresh preview - start and/or time is invalid" />
                                 <Setter Property="Command" Value="{Binding Path=ViewModel.RefreshYoutubeVideoLink}" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>

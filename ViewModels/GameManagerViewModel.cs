@@ -26,6 +26,7 @@ namespace JeopardyKing.ViewModels
         #region Backing fields
         private Board? _gameBoard;
         private bool _allPlayersHasMapping;
+        private bool _settingBetAmountForPlayer;
         private bool _answersAllowed;
         private string _gameAnswerMode = string.Empty;
         private string _gameAnswerModeToolTip = string.Empty;
@@ -41,6 +42,12 @@ namespace JeopardyKing.ViewModels
         {
             get => _allPlayersHasMapping;
             private set => SetProperty(ref _allPlayersHasMapping, value);
+        }
+
+        public bool SettingBetAmountForPlayer
+        {
+            get => _settingBetAmountForPlayer;
+            set => SetProperty(ref _settingBetAmountForPlayer, value);
         }
 
         public bool AnswersAllowed
