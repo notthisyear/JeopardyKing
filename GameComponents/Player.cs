@@ -13,6 +13,7 @@ namespace JeopardyKing.GameComponents
         private decimal _currentBet = decimal.Zero;
         private bool _isPressingKey = false;
         private bool _isBetting = false;
+        private bool _hasAnsweredGambleQuestion = false;
         #endregion
 
         public int Id { get; }
@@ -46,6 +47,12 @@ namespace JeopardyKing.GameComponents
             get => _isBetting;
             set => SetProperty(ref _isBetting, value);
         }
+
+        public bool HasAnsweredGambleQuestion
+        {
+            get => _hasAnsweredGambleQuestion;
+            set => SetProperty(ref _hasAnsweredGambleQuestion, value);
+        }
         #endregion
 
         public Player(int id, string name)
@@ -53,7 +60,6 @@ namespace JeopardyKing.GameComponents
             Id = id;
             Name = name;
         }
-
 
         public void AddCashForQuestion(Question q)
         {
@@ -66,7 +72,7 @@ namespace JeopardyKing.GameComponents
                 valueToAdd = q.Value;
 
             Cash += valueToAdd;
-            CurrentBet = 0;
+            ResetBet();
         }
 
         public void SubtractCashForQuestion(Question q)
@@ -80,7 +86,14 @@ namespace JeopardyKing.GameComponents
                 valueToSubtract = q.Value;
 
             Cash -= valueToSubtract;
-            CurrentBet = 0;
+            ResetBet();
+
+        }
+
+        public void ResetBet()
+        {
+            CurrentBet = decimal.Zero;
+            HasAnsweredGambleQuestion = false;
         }
     }
 }

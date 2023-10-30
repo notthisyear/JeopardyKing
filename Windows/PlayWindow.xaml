@@ -305,6 +305,9 @@
                                             <DataTrigger Binding="{Binding Path=IsPressingKey}" Value="True">
                                                 <Setter Property="Background" Value="{StaticResource PrimaryColor}" />
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=HasAnsweredGambleQuestion}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource MainSuccessColorDisabled}" />
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding Path=IsBetting}" Value="True">
                                                 <Setter Property="Background" Value="{StaticResource PrimaryColorDisabled}" />
                                                 <DataTrigger.EnterActions>
@@ -506,6 +509,7 @@
                                 <TextBlock.Style>
                                     <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
                                         <Setter Property="Opacity" Value="0" />
+                                        <Setter Property="Visibility" Value="Visible" />
                                         <Setter Property="Grid.Row" Value="0" />
                                         <Setter Property="Grid.Column" Value="0" />
                                         <Setter Property="Grid.ColumnSpan" Value="2" />
@@ -526,6 +530,9 @@
                                             <DataTrigger Binding="{Binding Path=ViewModel.CurrentQuestion.Type}" Value="{x:Static game:QuestionType.Text}">
                                                 <Setter Property="Grid.ColumnSpan" Value="2" />
                                                 <Setter Property="Grid.RowSpan" Value="3" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -570,7 +577,6 @@
                                                 <Setter Property="Source" Value="{StaticResource emptyImage}" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Path=ViewModel.CurrentQuestion.Type}" Value="{x:Static game:QuestionType.Image}">
-                                                        <Setter Property="Visibility" Value="Visible" />
                                                         <Setter Property="Source">
                                                             <Setter.Value>
                                                                 <MultiBinding Converter="{StaticResource bitmapCreatorConverter}">
@@ -582,6 +588,15 @@
                                                             </Setter.Value>
                                                         </Setter>
                                                     </DataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=ViewModel.CurrentQuestion.Type}" Value="{x:Static game:QuestionType.Image}" />
+                                                            <Condition Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="False" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <MultiDataTrigger.Setters>
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </MultiDataTrigger.Setters>
+                                                    </MultiDataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Image.Style>
@@ -689,16 +704,20 @@
                                         </Setter.Value>
                                     </Setter>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True">
-                                            <DataTrigger.EnterActions>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True" />
+                                                <Condition Binding="{Binding Path=ViewModel.CurrentQuestion.IsGamble}" Value="False" />
+                                            </MultiDataTrigger.Conditions>
+                                            <MultiDataTrigger.EnterActions>
                                                 <BeginStoryboard Storyboard="{StaticResource animateOpacityToOne}" />
                                                 <BeginStoryboard Storyboard="{StaticResource animateScaleToOne}" />
-                                            </DataTrigger.EnterActions>
-                                            <DataTrigger.ExitActions>
+                                            </MultiDataTrigger.EnterActions>
+                                            <MultiDataTrigger.ExitActions>
                                                 <BeginStoryboard Storyboard="{StaticResource animateOpacityToZero}" />
                                                 <BeginStoryboard Storyboard="{StaticResource animateScaleToZero}" />
-                                            </DataTrigger.ExitActions>
-                                        </DataTrigger>
+                                            </MultiDataTrigger.ExitActions>
+                                        </MultiDataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
@@ -728,7 +747,7 @@
                                         </Setter.Value>
                                     </Setter>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=ViewModel.InShowPreQuestionContent}" Value="True">
+                                        <DataTrigger Binding="{Binding Path=ViewModel.InShowPreOrPostQuestionContent}" Value="True">
                                             <DataTrigger.EnterActions>
                                                 <BeginStoryboard Storyboard="{StaticResource animateOpacityToOne}" />
                                                 <BeginStoryboard Storyboard="{StaticResource animateScaleToOne}" />
@@ -755,7 +774,7 @@
                                                 <Setter Property="StrokeColor" Value="Transparent" />
                                                 <Setter Property="FillColor" Value="{StaticResource MainHighlightColor}" />
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayerCurrentlyBetting}" Value="{x:Null}">
+                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayerCurrentlyInGambleFocus}" Value="{x:Null}">
                                                 <Setter Property="Opacity" Value="0.8" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -767,29 +786,48 @@
                                 </components:IconBox.RenderTransform>
                             </components:IconBox>
 
-                            <!-- Current player betting -->
+                            <!-- Current player in focus -->
                             <StackPanel Orientation="Horizontal">
                                 <StackPanel.Style>
                                     <Style TargetType="{x:Type StackPanel}">
                                         <Setter Property="Visibility" Value="Visible" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayerCurrentlyBetting}" Value="{x:Null}">
+                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayerCurrentlyInGambleFocus}" Value="{x:Null}">
                                                 <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </StackPanel.Style>
 
-                                <TextBlock Text="Bet amount for '"
+                                <TextBlock FontSize="48">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                            <Setter Property="Text" Value="Bet amount for " />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True">
+                                                    <Setter Property="Text" Value="What did " />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="{Binding Path=ViewModel.PlayerCurrentlyInGambleFocus.Name}"
                                            Style="{StaticResource MainTextBlockStyle}"
-                                           FontSize="48"/>
-                                <TextBlock Text="{Binding Path=ViewModel.PlayerCurrentlyBetting.Name}"
-                                           Style="{StaticResource MainTextBlockStyle}"
+                                           Foreground="{StaticResource MainHighlightColor}"
                                            FontWeight="Bold"
                                            FontSize="48"/>
-                                <TextBlock Text="'?"
-                                           Style="{StaticResource MainTextBlockStyle}"
-                                           FontSize="48"/>
+                                <TextBlock FontSize="48">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                            <Setter Property="Text" Value="?" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.InPlayerAnswering}" Value="True">
+                                                    <Setter Property="Text" Value=" answer?" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </StackPanel>
 
                             <!-- Bonus or gamble question text-->
@@ -802,9 +840,15 @@
                                             <DataTrigger Binding="{Binding Path=ViewModel.CurrentQuestion.IsGamble}" Value="True">
                                                 <Setter Property="Text" Value="GAMBLE QUESTION" />
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=ViewModel.PlayerCurrentlyBetting}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
+                                            <MultiDataTrigger >
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Path=ViewModel.PlayerCurrentlyInGambleFocus}" Value="{x:Null}" />
+                                                    <Condition Binding="{Binding Path=ViewModel.InPlayerHasAnswered}" Value="False" />
+                                                </MultiDataTrigger.Conditions>
+                                                <MultiDataTrigger.Setters>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger.Setters>
+                                            </MultiDataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>

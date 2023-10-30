@@ -54,7 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RawInputDataSinkServer\WindowsNativeRawInputWrapper\WindowsNativeRawInputWrapper.csproj" />
+    <ProjectReference Include="WindowsNativeRawInputWrapper\WindowsNativeRawInputWrapper.csproj" />
   </ItemGroup>
 
   <ItemGroup>

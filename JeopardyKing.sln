@@ -5,7 +5,7 @@ VisualStudioVersion = 17.7.34018.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JeopardyKing", "JeopardyKing.csproj", "{40EAE105-7EDD-4F9E-BF7E-A21E3AE5918E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsNativeRawInputWrapper", "..\RawInputDataSinkServer\WindowsNativeRawInputWrapper\WindowsNativeRawInputWrapper.csproj", "{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsNativeRawInputWrapper", "WindowsNativeRawInputWrapper\WindowsNativeRawInputWrapper.csproj", "{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +23,14 @@ Global
 		{40EAE105-7EDD-4F9E-BF7E-A21E3AE5918E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{40EAE105-7EDD-4F9E-BF7E-A21E3AE5918E}.Release|x64.ActiveCfg = Release|x64
 		{40EAE105-7EDD-4F9E-BF7E-A21E3AE5918E}.Release|x64.Build.0 = Release|x64
-		{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}.Debug|x64.Build.0 = Debug|Any CPU
-		{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}.Release|x64.ActiveCfg = Release|Any CPU
-		{42FD441A-1875-4C1A-AF50-150C4FD4A2AC}.Release|x64.Build.0 = Release|Any CPU
+		{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}.Debug|x64.Build.0 = Debug|Any CPU
+		{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}.Release|Any CPU.Build.0 = Release|Any CPU
+		{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}.Release|x64.ActiveCfg = Release|Any CPU
+		{191B6DE3-0C9C-4E38-BE1E-93EE452D9404}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

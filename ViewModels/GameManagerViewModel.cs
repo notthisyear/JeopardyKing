@@ -28,6 +28,7 @@ namespace JeopardyKing.ViewModels
         private bool _allPlayersHasMapping;
         private bool _settingBetAmountForPlayer;
         private bool _answersAllowed;
+        private bool _allPlayersHaveAnsweredGambleQuestion = false;
         private string _gameAnswerMode = string.Empty;
         private string _gameAnswerModeToolTip = string.Empty;
         #endregion
@@ -48,6 +49,12 @@ namespace JeopardyKing.ViewModels
         {
             get => _settingBetAmountForPlayer;
             set => SetProperty(ref _settingBetAmountForPlayer, value);
+        }
+
+        public bool AllPlayersHaveAnsweredGambleQuestion
+        {
+            get => _allPlayersHaveAnsweredGambleQuestion;
+            private set => SetProperty(ref _allPlayersHaveAnsweredGambleQuestion, value);
         }
 
         public bool AnswersAllowed
@@ -98,7 +105,7 @@ namespace JeopardyKing.ViewModels
         private RelayCommand? _revealNextCategoryCommand;
         private RelayCommand? _startQuestionCommand;
         private RelayCommand? _setQuestionToUnansweredCommand;
-        private RelayCommand? _progressQuestionCommand;
+        private RelayCommand<PlayWindowViewModel.QuestionProgressType>? _progressQuestionCommand;
         private RelayCommand<bool>? _answerQuestionCommand;
         private RelayCommand? _abandonQuestionCommand;
         private RelayCommand? _playMediaAgainCommand;
@@ -267,8 +274,9 @@ namespace JeopardyKing.ViewModels
                     if (QuestionModeManager.CurrentlySelectedQuestion == default)
                         return;
 
+                    _isGambleQuestion = QuestionModeManager.CurrentlySelectedQuestion.IsGamble;
                     PlayWindowViewModel.StartQuestion(QuestionModeManager.CurrentlySelectedQuestion);
-                    AnswersAllowed = _gameAnswerModeSetting == GameComponents.GameAnswerMode.AllowImmediately;
+                    AnswersAllowed = !_isGambleQuestion && (_gameAnswerModeSetting == GameComponents.GameAnswerMode.AllowImmediately);
                 });
                 return _startQuestionCommand;
             }
@@ -292,15 +300,15 @@ namespace JeopardyKing.ViewModels
         {
             get
             {
-                _progressQuestionCommand ??= new RelayCommand(() =>
+                _progressQuestionCommand ??= new RelayCommand<PlayWindowViewModel.QuestionProgressType>(p =>
                 {
                     if (QuestionModeManager.CurrentlySelectedQuestion == default)
                         return;
-                    PlayWindowViewModel.ProgressQuestion(QuestionModeManager.CurrentlySelectedQuestion);
+
+                    PlayWindowViewModel.ProgressQuestion(QuestionModeManager.CurrentlySelectedQuestion, p);
                 });
                 return _progressQuestionCommand;
             }
-
         }
 
         public ICommand AnswerQuestionCommand
@@ -309,24 +317,39 @@ namespace JeopardyKing.ViewModels
             {
                 _answerQuestionCommand ??= new RelayCommand<bool>(isCorrect =>
                 {
-                    if (PlayWindowViewModel.CurrentlyAnsweringPlayer != default &&
-                        PlayWindowViewModel.CurrentQuestion != default)
-                    {
-                        if (isCorrect)
-                        {
-                            PlayWindowViewModel.CurrentlyAnsweringPlayer.AddCashForQuestion(PlayWindowViewModel.CurrentQuestion);
-                            SetQuestionAnswerStatus(PlayWindowViewModel.CurrentQuestion, true);
-                        }
-                        else
-                        {
-                            PlayWindowViewModel.CurrentlyAnsweringPlayer.SubtractCashForQuestion(PlayWindowViewModel.CurrentQuestion);
-                        }
-                    }
-                    PlayWindowViewModel.PlayerHasAnswered(isCorrect);
+                    if (PlayWindowViewModel.CurrentQuestion == default)
+                        return;
 
-                    // Automatically allow answers after failed attempt
-                    if (!isCorrect)
+                    var answeringPlayer = _isGambleQuestion ? PlayWindowViewModel.PlayerCurrentlyInGambleFocus : PlayWindowViewModel.CurrentlyAnsweringPlayer;
+                    if (answeringPlayer == default)
+                        return;
+
+                    if (isCorrect)
+                    {
+                        answeringPlayer.AddCashForQuestion(PlayWindowViewModel.CurrentQuestion);
+                        if (!_isGambleQuestion)
+                            SetQuestionAnswerStatus(PlayWindowViewModel.CurrentQuestion, true);
+                    }
+                    else
+                    {
+                        answeringPlayer.SubtractCashForQuestion(PlayWindowViewModel.CurrentQuestion);
+                    }
+
+                    PlayWindowViewModel.PlayerHasAnswered(PlayWindowViewModel.CurrentQuestion, isCorrect);
+
+                    // Automatically allow answers after failed attempt or progress to the next player for a gamble question
+                    if (!isCorrect && !_isGambleQuestion)
+                    {
                         PlayWindowViewModel.PropertyChanged += SetAllowAnswerOnStateChange;
+                    }
+                    else if (_isGambleQuestion)
+                    {
+                        PlayWindowViewModel.PropertyChanged += SetProgressAnsweringPlayerOnStateChange;
+                        _lastPlayerGambleQuestionAnswerChecked = !Players.Where(x => x.HasAnsweredGambleQuestion).Any();
+                        if (_lastPlayerGambleQuestionAnswerChecked)
+                            SetQuestionAnswerStatus(PlayWindowViewModel.CurrentQuestion, true);
+
+                    }
                 });
                 return _answerQuestionCommand;
             }
@@ -339,7 +362,18 @@ namespace JeopardyKing.ViewModels
                 _abandonQuestionCommand ??= new RelayCommand(() =>
                 {
                     if (PlayWindowViewModel.CurrentQuestion != default)
+                    {
                         SetQuestionAnswerStatus(PlayWindowViewModel.CurrentQuestion, true);
+                        if (PlayWindowViewModel.CurrentQuestion.IsGamble)
+                        {
+                            lock (_playersAccessLock)
+                            {
+                                foreach (var p in Players)
+                                    p.ResetBet();
+                            }
+                            AllPlayersHaveAnsweredGambleQuestion = false;
+                        }
+                    }
                     PlayWindowViewModel.AbandonQuestion();
                     AnswersAllowed = false;
                 });
@@ -387,6 +421,8 @@ namespace JeopardyKing.ViewModels
         private int _playerIdCounter = 0;
         private bool _shouldExit = false;
         private GameAnswerMode _gameAnswerModeSetting;
+        private bool _isGambleQuestion = false;
+        private bool _lastPlayerGambleQuestionAnswerChecked = false;
         #endregion
 
         public GameManagerViewModel(PlayWindowViewModel playWindowViewModel)
@@ -431,6 +467,21 @@ namespace JeopardyKing.ViewModels
             }
         }
 
+        private void SetProgressAnsweringPlayerOnStateChange(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PlayWindowViewModel.WindowState) && PlayWindowViewModel.WindowState == PlayWindowState.ShowQuestion)
+            {
+                PlayWindowViewModel.PropertyChanged -= SetProgressAnsweringPlayerOnStateChange;
+                ProgressQuestionCommand.Execute(PlayWindowViewModel.QuestionProgressType.GambleCheckAnswerPhase);
+                if (_lastPlayerGambleQuestionAnswerChecked)
+                {
+                    AllPlayersHaveAnsweredGambleQuestion = false;
+                    _isGambleQuestion = false;
+                    _lastPlayerGambleQuestionAnswerChecked = false;
+                }
+            }
+        }
+
         private void SetQuestionAnswerStatus(Question question, bool isAnswered)
         {
             question.IsAnswered = isAnswered;
@@ -441,12 +492,26 @@ namespace JeopardyKing.ViewModels
 
         private void MonitorInputThread(object? state)
         {
+            // Note: We probably should lock on the collection on players before accessing,
+            //       but let's skip that for now (it "feels" like it'd hurt performance,
+            //       but we really should measure before assuming).
             while (!_shouldExit)
             {
                 if (_eventQueue.TryDequeue(out var newKeyEvent))
                 {
                     if (_eventAction != default)
                         _eventAction(newKeyEvent);
+
+                    if (_isGambleQuestion && !PlayWindowViewModel.InShowPreOrPostQuestionContent)
+                    {
+                        var p = Players.FirstOrDefault(x => x.Id == newKeyEvent.PlayerId);
+                        if (p != default)
+                        {
+                            p.HasAnsweredGambleQuestion = true;
+                            AllPlayersHaveAnsweredGambleQuestion = !Players.Where(x => !x.HasAnsweredGambleQuestion).Any();
+                        }
+                        continue;
+                    }
 
                     if (PlayWindowViewModel.WindowState == PlayWindowState.ShowQuestion && !AnswersAllowed)
                         continue;

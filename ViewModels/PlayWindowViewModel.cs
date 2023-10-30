@@ -28,14 +28,21 @@ namespace JeopardyKing.ViewModels
             Playing
         }
 
+        public enum QuestionProgressType
+        {
+            MediaOrContent,
+            GambleBettingPhase,
+            GambleCheckAnswerPhase
+        }
+
         #region Public properties
 
         #region Private fields
         private PlayWindowState _windowState = PlayWindowState.None;
         private Category? _categoryBeingRevealed = default;
-        private Player? _playerCurrentlyBetting = default;
+        private Player? _playerCurrentlyInGambleFocus = default;
         private bool _categoryChanging = true;
-        private bool _inShowPreQuestionContent = false;
+        private bool _inShowPreOrPostQuestionContent = false;
         private bool _inShowContent = false;
         private bool _inShowMediaContent = false;
         private bool _inMediaContentPlaying = false;
@@ -60,22 +67,22 @@ namespace JeopardyKing.ViewModels
             private set => SetProperty(ref _categoryBeingRevealed, value);
         }
 
-        public Player? PlayerCurrentlyBetting
+        public Player? PlayerCurrentlyInGambleFocus
         {
-            get => _playerCurrentlyBetting;
-            private set => SetProperty(ref _playerCurrentlyBetting, value);
+            get => _playerCurrentlyInGambleFocus;
+            private set => SetProperty(ref _playerCurrentlyInGambleFocus, value);
         }
+
         public bool CategoryChanging
         {
             get => _categoryChanging;
             private set => SetProperty(ref _categoryChanging, value);
         }
 
-        public bool InShowPreQuestionContent
+        public bool InShowPreOrPostQuestionContent
         {
-            get => _inShowPreQuestionContent;
-            private set => SetProperty(ref _inShowPreQuestionContent, value);
-
+            get => _inShowPreOrPostQuestionContent;
+            private set => SetProperty(ref _inShowPreOrPostQuestionContent, value);
         }
 
         public bool InShowContent
@@ -199,10 +206,10 @@ namespace JeopardyKing.ViewModels
                     currentQuestion.MultimediaContentLink = string.Empty;
 
                 CurrentQuestion = currentQuestion;
-                InShowPreQuestionContent = CurrentQuestion.IsBonus || CurrentQuestion.IsGamble;
+                InShowPreOrPostQuestionContent = CurrentQuestion.IsBonus || CurrentQuestion.IsGamble;
                 WindowState = PlayWindowState.ShowQuestion;
 
-                if (InShowPreQuestionContent && CurrentQuestion.IsBonus)
+                if (InShowPreOrPostQuestionContent && CurrentQuestion.IsBonus)
                 {
                     Task.Run(async () =>
                     {
@@ -210,97 +217,122 @@ namespace JeopardyKing.ViewModels
                         SetStateToShowQuestion(currentQuestion);
                     });
                 }
-                else if (InShowPreQuestionContent && CurrentQuestion.IsGamble)
+                else if (InShowPreOrPostQuestionContent && CurrentQuestion.IsGamble)
                 {
                     _currentPlayerIdx = 0;
-                    PlayerCurrentlyBetting = default;
+                    PlayerCurrentlyInGambleFocus = default;
                     Task.Run(async () =>
                     {
                         await Task.Delay(2500);
-                        IncrementPlayerCurrentlyBetting();
+                        IncrementPlayerCurrentlyInFocus(true);
                     });
                 }
-                else if (!InShowPreQuestionContent)
+                else if (!InShowPreOrPostQuestionContent)
                 {
                     SetStateToShowQuestion(currentQuestion);
                 }
             }
         }
 
-        public void ProgressQuestion(Question currentQuestion)
+        public void ProgressQuestion(Question currentQuestion, QuestionProgressType progressType)
         {
-            if (WindowState == PlayWindowState.ShowQuestion)
+            // This method is when either
+            //  - progressing a media question 
+            //  - progressing the betting phase of a gamble question
+            //  - progressing the checking answer phase a gamble question
+
+            if (WindowState != PlayWindowState.ShowQuestion)
+                return;
+
+            switch (progressType)
             {
-                if (InShowPreQuestionContent)
-                {
-                    if (currentQuestion.IsGamble)
-                        IncrementPlayerCurrentlyBetting();
-                    else
-                        SetStateToShowQuestion(currentQuestion);
-                }
-                else if (InShowContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.TextThenMedia)
-                {
-                    InShowMediaContent = true;
-                    InMediaContentPlaying = true;
-                    if (currentQuestion.Type == QuestionType.YoutubeVideo)
-                        currentQuestion.RefreshYoutubeVideoUrl(true, false);
-                }
-                else if (InShowMediaContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText)
-                {
-                    InShowContent = true;
-                }
+                case QuestionProgressType.MediaOrContent:
+                    if (InShowContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.TextThenMedia)
+                    {
+                        InShowMediaContent = true;
+                        InMediaContentPlaying = true;
+                        if (currentQuestion.Type == QuestionType.YoutubeVideo)
+                            currentQuestion.RefreshYoutubeVideoUrl(true, false);
+                    }
+                    else if (InShowMediaContent && currentQuestion.HasMediaLink && currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText)
+                    {
+                        InShowContent = true;
+                    }
+                    return;
+
+                case QuestionProgressType.GambleCheckAnswerPhase:
+                    InPlayerAnswering = true;
+                    InShowContent = false;
+                    InShowMediaContent = false;
+                    InMediaContentPlaying = false;
+                    InShowPreOrPostQuestionContent = true;
+
+                    if (CurrentQuestion != default && CurrentQuestion.Type == QuestionType.YoutubeVideo)
+                        CurrentQuestion.RefreshYoutubeVideoUrl(false, false);
+
+                    IncrementPlayerCurrentlyInFocus(false);
+                    break;
+
+                case QuestionProgressType.GambleBettingPhase:
+                    InShowPreOrPostQuestionContent = true;
+                    IncrementPlayerCurrentlyInFocus(true);
+                    break;
             }
         }
 
         public void PlayerHasPressed(Player player)
         {
-            if (!InPlayerAnswering)
-            {
-                CurrentlyAnsweringPlayer = player;
-                InPlayerAnswering = true;
+            if (CurrentQuestion == default)
+                return;
 
-                if (CurrentQuestion != default && CurrentQuestion.Type == QuestionType.YoutubeVideo)
-                    CurrentQuestion.RefreshYoutubeVideoUrl(false, false);
-            }
+            CurrentlyAnsweringPlayer = player;
+            InPlayerAnswering = true;
+
+            if (CurrentQuestion.Type == QuestionType.YoutubeVideo)
+                CurrentQuestion.RefreshYoutubeVideoUrl(false, false);
         }
 
-        public void PlayerHasAnswered(bool isCorrect)
+        public void PlayerHasAnswered(Question q, bool isCorrect)
         {
-            if (InPlayerAnswering)
+            if (!InPlayerAnswering)
+                return;
+
+            InPlayerHasAnswered = true;
+            WindowState = isCorrect ? PlayWindowState.AnswerCorrect : PlayWindowState.AnswerIncorrect;
+            PlayerCurrentlyInGambleFocus = default;
+            InPlayerAnswering = false;
+
+            Task.Run(async () =>
             {
-                InPlayerHasAnswered = true;
-                WindowState = isCorrect ? PlayWindowState.AnswerCorrect : PlayWindowState.AnswerIncorrect;
-                InPlayerAnswering = false;
-                Task.Run(async () =>
+                // Give eventual animations some time to run
+                await Task.Delay(1500);
+                InPlayerHasAnswered = false;
+                if (q.IsGamble)
                 {
-                    // Give eventual animations some time to run
-                    await Task.Delay(1500);
-                    InPlayerHasAnswered = false;
-                    if (isCorrect)
+                    WindowState = PlayWindowState.ShowQuestion;
+                    return;
+                }
+
+                if (isCorrect)
+                {
+                    ResetGameBoardAfterAnswer();
+                    return;
+                }
+
+                WindowState = PlayWindowState.ShowQuestion;
+                var isYoutubeQuestion = q.Type == QuestionType.YoutubeVideo;
+                var audioOrVideoMedia = q.Type == QuestionType.Audio || q.Type == QuestionType.Video || isYoutubeQuestion;
+                if (InShowMediaContent && audioOrVideoMedia)
+                {
+                    if (_mediaPlaybackStatus == MediaPlaybackStatus.Paused || isYoutubeQuestion)
                     {
-                        ResetGameBoardAfterAnswer();
+                        InMediaContentPlaying = true;
+                        if (isYoutubeQuestion)
+                            q.RefreshYoutubeVideoUrl(true, false);
+                        _mediaPlaybackStatus = MediaPlaybackStatus.Playing;
                     }
-                    else
-                    {
-                        WindowState = PlayWindowState.ShowQuestion;
-                        if (CurrentQuestion != default)
-                        {
-                            var isYoutubeQuestion = CurrentQuestion.Type == QuestionType.YoutubeVideo;
-                            var audioOrVideoMedia = CurrentQuestion.Type == QuestionType.Audio || CurrentQuestion.Type == QuestionType.Video || isYoutubeQuestion;
-                            if (InShowMediaContent && audioOrVideoMedia)
-                            {
-                                if (_mediaPlaybackStatus == MediaPlaybackStatus.Paused || isYoutubeQuestion)
-                                {
-                                    InMediaContentPlaying = true;
-                                    if (isYoutubeQuestion)
-                                        CurrentQuestion.RefreshYoutubeVideoUrl(true, false);
-                                    _mediaPlaybackStatus = MediaPlaybackStatus.Playing;
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+                }
+            });
         }
 
         public void AbandonQuestion()
@@ -322,7 +354,7 @@ namespace JeopardyKing.ViewModels
 
         private void SetStateToShowQuestion(Question currentQuestion)
         {
-            InShowPreQuestionContent = false;
+            InShowPreOrPostQuestionContent = false;
             switch (currentQuestion.Type)
             {
                 case QuestionType.Text:
@@ -345,24 +377,28 @@ namespace JeopardyKing.ViewModels
             }
         }
 
-        private void IncrementPlayerCurrentlyBetting()
+        private void IncrementPlayerCurrentlyInFocus(bool isInBettingPhase)
         {
             if (Players == default || CurrentQuestion == default)
                 return;
 
-            if (PlayerCurrentlyBetting != default)
-                PlayerCurrentlyBetting.IsBetting = false;
+            if (PlayerCurrentlyInGambleFocus != default && isInBettingPhase)
+                PlayerCurrentlyInGambleFocus.IsBetting = false;
 
             if (_currentPlayerIdx == Players.Count)
             {
                 _currentPlayerIdx = 0;
-                PlayerCurrentlyBetting = default;
-                SetStateToShowQuestion(CurrentQuestion);
+                PlayerCurrentlyInGambleFocus = default;
+                if (isInBettingPhase)
+                    SetStateToShowQuestion(CurrentQuestion);
+                else
+                    ResetGameBoardAfterAnswer();
                 return;
             }
 
-            PlayerCurrentlyBetting = Players[_currentPlayerIdx++];
-            PlayerCurrentlyBetting.IsBetting = true;
+            PlayerCurrentlyInGambleFocus = Players[_currentPlayerIdx++];
+            if (isInBettingPhase)
+                PlayerCurrentlyInGambleFocus.IsBetting = true;
         }
 
         private void ResetGameBoardAfterAnswer()
@@ -370,6 +406,9 @@ namespace JeopardyKing.ViewModels
             InShowContent = false;
             InShowMediaContent = false;
             InMediaContentPlaying = false;
+            InPlayerAnswering = false;
+            InShowPreOrPostQuestionContent = false;
+
             CurrentQuestion = default;
             CurrentlyAnsweringPlayer = default;
             WindowState = PlayWindowState.ShowBoard;

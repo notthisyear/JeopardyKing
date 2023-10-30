@@ -206,7 +206,8 @@
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
-                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowPreQuestionContent}" Value="False" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowPreOrPostQuestionContent}" Value="False" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.IsGamble}" Value="False" />
                                                     </MultiDataTrigger.Conditions>
                                                     <MultiDataTrigger.Setters>
                                                         <Setter Property="Visibility" Value="Visible" />
@@ -239,7 +240,7 @@
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
-                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowPreQuestionContent}" Value="False" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowPreOrPostQuestionContent}" Value="False" />
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="False" />
                                                         <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerHasAnswered}" Value="False" />
                                                     </MultiDataTrigger.Conditions>
@@ -261,6 +262,8 @@
                                             <Setter Property="Content" Value="Start game" />
                                             <Setter Property="IsEnabled" Value="True" />
                                             <Setter Property="Command" Value="{Binding Path=ViewModel.StartGameCommand}" />
+                                            <Setter Property="Margin" Value="0" />
+                                            <Setter Property="CommandParameter" Value="{x:Null}" />
                                             <Style.Triggers>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
@@ -333,6 +336,7 @@
                                                         <Setter Property="ToolTip" Value="Click to show or play the question media" />
                                                         <Setter Property="Visibility" Value="Visible" />
                                                         <Setter Property="Command" Value="{Binding Path=ViewModel.ProgressQuestionCommand}" />
+                                                        <Setter Property="CommandParameter" Value="{x:Static viewmodels:PlayWindowViewModel+QuestionProgressType.MediaOrContent}" />
                                                     </MultiDataTrigger.Setters>
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
@@ -348,6 +352,7 @@
                                                         <Setter Property="ToolTip" Value="Click to show content" />
                                                         <Setter Property="Visibility" Value="Visible" />
                                                         <Setter Property="Command" Value="{Binding Path=ViewModel.ProgressQuestionCommand}" />
+                                                        <Setter Property="CommandParameter" Value="{x:Static viewmodels:PlayWindowViewModel+QuestionProgressType.MediaOrContent}" />
                                                     </MultiDataTrigger.Setters>
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
@@ -395,38 +400,101 @@
                                                         <Setter Property="Command" Value="{Binding Path=ViewModel.PlayMediaAgainCommand}" />
                                                     </MultiDataTrigger.Setters>
                                                 </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.ShowQuestion}" />
+                                                        <Condition Binding="{Binding Path=ViewModel.QuestionModeManager.CurrentlySelectedQuestion.IsGamble}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.AllPlayersHaveAnsweredGambleQuestion}" Value="True" />
+                                                        <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Content" Value="Check answers" />
+                                                        <Setter Property="ToolTip" Value="Click to go through the players and check their answer" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Setter Property="Command" Value="{Binding Path=ViewModel.ProgressQuestionCommand}" />
+                                                        <Setter Property="CommandParameter" Value="{x:Static viewmodels:PlayWindowViewModel+QuestionProgressType.GambleCheckAnswerPhase}" />
+                                                        <Setter Property="Margin" Value="0,0,0,10" />
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Button.Style>
                                 </Button>
 
-                                <!-- Gamble question betting window -->
+                                <!-- Gamble question betting or checking answers window -->
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel.Style>
                                         <Style TargetType="{x:Type StackPanel}">
                                             <Setter Property="Visibility" Value="Visible" />
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyBetting}" Value="{x:Null}">
+                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyInGambleFocus}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.AnswerCorrect}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.WindowState}" Value="{x:Static viewmodels:PlayWindowState.AnswerIncorrect}">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
+
                                     <StackPanel Orientation="Horizontal"
-                                                Margin="0,0,0,10"
                                                 HorizontalAlignment="Center">
-                                        <TextBlock Style="{StaticResource MainTextBlockStyle}"
-                                                   Text="Enter bet amount for " />
+                                        <TextBlock>
+                                            <TextBlock.Style>
+                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                                    <Setter Property="Text" Value="Enter bet amount for " />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="True">
+                                                            <Setter Property="Text" Value="Answer correct or incorrect for " />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                         <TextBlock Style="{StaticResource MainTextBlockStyle}"
                                                    FontWeight="Bold"
-                                                   Text="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyBetting.Name}" />
+                                                   Foreground="{StaticResource MainHighlightColor}"
+                                                   Text="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyInGambleFocus.Name}" />
+                                        <TextBlock>
+                                            <TextBlock.Style>
+                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MainTextBlockStyle}">
+                                                    <Setter Property="Text" Value="?" />
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal"
+                                                Margin="0,10,0,0">
+                                        <StackPanel.Style>
+                                            <Style TargetType="{x:Type StackPanel}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=ViewModel.PlayWindowViewModel.InShowPreOrPostQuestionContent}" Value="True" />
+                                                            <Condition Binding="{Binding Path=ViewModel.AllPlayersHaveAnsweredGambleQuestion}" Value="False" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <MultiDataTrigger.Setters>
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </MultiDataTrigger.Setters>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
                                         <Slider Minimum="0"
-                                                Maximum="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyBetting.Cash}"
+                                                Maximum="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyInGambleFocus.Cash}"
                                                 Width="100"
-                                                Value="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyBetting.CurrentBet}"
+                                                Value="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyInGambleFocus.CurrentBet}"
                                                 Margin="0,10,10,10"
                                                 ToolTip="Select bet amount" />
 
@@ -440,7 +508,7 @@
                                                            VerticalAlignment="Center">
                                                     <TextBlock.Text>
                                                         <MultiBinding Converter="{StaticResource valueDisplayConverter}">
-                                                            <Binding Path="ViewModel.PlayWindowViewModel.PlayerCurrentlyBetting.CurrentBet" />
+                                                            <Binding Path="ViewModel.PlayWindowViewModel.PlayerCurrentlyInGambleFocus.CurrentBet" />
                                                             <Binding Path="ViewModel.GameBoard.Currency" />
                                                         </MultiBinding>
                                                     </TextBlock.Text>
@@ -489,13 +557,13 @@
                                             </TextBox.Style>
 
                                             <TextBox.Text>
-                                                <Binding Path="ViewModel.PlayWindowViewModel.PlayerCurrentlyBetting.CurrentBet"
+                                                <Binding Path="ViewModel.PlayWindowViewModel.PlayerCurrentlyInGambleFocus.CurrentBet"
                                                          Mode="TwoWay"
                                                          UpdateSourceTrigger="PropertyChanged">
                                                     <Binding.ValidationRules>
                                                         <validation:BettingAmountValidationRule>
                                                             <validation:BettingAmountValidationRule.Wrapper>
-                                                                <validation:Wrapper MaxInclusive="{Binding Path=Data.ViewModel.PlayWindowViewModel.PlayerCurrentlyBetting.Cash, Source={StaticResource proxy}}"/>
+                                                                <validation:Wrapper MaxInclusive="{Binding Path=Data.ViewModel.PlayWindowViewModel.PlayerCurrentlyInGambleFocus.Cash, Source={StaticResource proxy}}"/>
                                                             </validation:BettingAmountValidationRule.Wrapper>
                                                         </validation:BettingAmountValidationRule>
                                                     </Binding.ValidationRules>
@@ -506,7 +574,8 @@
 
                                     <Button Content="Set amount"
                                             Margin="0,10,0,0"
-                                            Command="{Binding Path=ViewModel.ProgressQuestionCommand}">
+                                            Command="{Binding Path=ViewModel.ProgressQuestionCommand}"
+                                            CommandParameter="{x:Static viewmodels:PlayWindowViewModel+QuestionProgressType.GambleBettingPhase}">
                                         <Button.Style>
                                             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonPrimaryStyle}">
                                                 <Setter Property="ToolTip">
@@ -514,16 +583,20 @@
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBlock Text="Click to set bet amount for " />
                                                             <TextBlock FontWeight="Bold"
-                                                                       Text="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyBetting.Name}" />
+                                                                       Text="{Binding Path=ViewModel.PlayWindowViewModel.PlayerCurrentlyInGambleFocus.Name}" />
                                                         </StackPanel>
                                                     </Setter.Value>
                                                 </Setter>
                                                 <Setter Property="IsEnabled" Value="True" />
                                                 <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+                                                <Setter Property="Visibility" Value="Visible" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding ElementName=betAmountBox, Path=(Validation.HasError)}" Value="True">
                                                         <Setter Property="IsEnabled" Value="False" />
-                                                        <Setter Property="ToolTip" Value="Cannot set bet amout - invalid" />
+                                                        <Setter Property="ToolTip" Value="Cannot set bet amount - invalid" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.InPlayerAnswering}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -605,7 +678,8 @@
 
                                 <!-- Correct / incorrect buttons -->
                                 <StackPanel Orientation="Horizontal"
-                                            Margin="0,10,0,0">
+                                            Margin="0,10,0,0"
+                                            HorizontalAlignment="Center">
                                     <StackPanel.Style>
                                         <Style TargetType="{x:Type StackPanel}">
                                             <Setter Property="Visibility" Value="Collapsed" />

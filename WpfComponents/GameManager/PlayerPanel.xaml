@@ -67,6 +67,10 @@
                             <Setter Property="IsEnabled" Value="False"/>
                             <Setter Property="ToolTip" Value="Cannot add more players - maximum reached" />
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=ViewModel.PlayWindowViewModel.CurrentQuestion.IsGamble}" Value="True">
+                            <Setter Property="IsEnabled" Value="False"/>
+                            <Setter Property="ToolTip" Value="Cannot add more players while in a gamble question" />
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </Button.Style>
