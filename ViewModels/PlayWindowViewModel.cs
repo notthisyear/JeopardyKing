@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Media;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using JeopardyKing.GameComponents;
@@ -33,6 +36,14 @@ namespace JeopardyKing.ViewModels
             MediaOrContent,
             GambleBettingPhase,
             GambleCheckAnswerPhase
+        }
+
+        private enum SoundType
+        {
+            Intro,
+            PlayerPressed,
+            PlayerCorrect,
+            PlayerIncorrect
         }
 
         #region Public properties
@@ -164,7 +175,35 @@ namespace JeopardyKing.ViewModels
         private int _currentPlayerIdx = 0;
         private MediaPlaybackStatus _mediaPlaybackStatus = MediaPlaybackStatus.Stopped;
         private bool _boardDone = false;
+        private readonly Dictionary<SoundType, SoundPlayer?> _soundPlayers = new();
         #endregion
+
+        public PlayWindowViewModel(string pathToIntroSound, string pathToPressedSound, string pathToCorrectAnswerSound, string pathToIncorrectAnswerOrAbandonSound)
+        {
+            TryLoadSound(SoundType.Intro, pathToIntroSound);
+            TryLoadSound(SoundType.PlayerPressed, pathToPressedSound);
+            TryLoadSound(SoundType.PlayerCorrect, pathToCorrectAnswerSound);
+            TryLoadSound(SoundType.PlayerIncorrect, pathToIncorrectAnswerOrAbandonSound);
+        }
+
+        private void TryLoadSound(SoundType type, string pathToSound)
+        {
+            SoundPlayer? player = default;
+            try
+            {
+                player = new SoundPlayer(pathToSound);
+                player.LoadCompleted += (s, e) =>
+                {
+                    if (e.Error == default && s is SoundPlayer sp)
+                        _soundPlayers.Add(type, sp);
+                };
+                player.Load();
+            }
+            catch (Exception e) when (e is ArgumentException || e is FileNotFoundException)
+            {
+                return;
+            }
+        }
 
         #region Public methods
         public void StartGame(Board board, ReadOnlyObservableCollection<Player> players)
@@ -174,6 +213,7 @@ namespace JeopardyKing.ViewModels
                 GameBoard = board;
                 Players = players;
                 WindowState = PlayWindowState.GameStarting;
+                TryPlaySound(SoundType.Intro);
             }
         }
 
@@ -301,6 +341,7 @@ namespace JeopardyKing.ViewModels
 
             CurrentlyAnsweringPlayer = player;
             InPlayerAnswering = true;
+            TryPlaySound(SoundType.PlayerPressed);
 
             if (CurrentQuestion.Type == QuestionType.YoutubeVideo)
                 CurrentQuestion.RefreshYoutubeVideoUrl(false, false);
@@ -315,6 +356,8 @@ namespace JeopardyKing.ViewModels
             WindowState = isCorrect ? PlayWindowState.AnswerCorrect : PlayWindowState.AnswerIncorrect;
             PlayerCurrentlyInGambleFocus = default;
             InPlayerAnswering = false;
+
+            TryPlaySound(isCorrect ? SoundType.PlayerCorrect : SoundType.PlayerIncorrect);
 
             Task.Run(async () =>
             {
@@ -351,6 +394,7 @@ namespace JeopardyKing.ViewModels
 
         public void AbandonQuestion()
         {
+            TryPlaySound(SoundType.PlayerIncorrect);
             ResetGameBoardAfterAnswer();
         }
 
@@ -369,7 +413,11 @@ namespace JeopardyKing.ViewModels
 
         public void NotifyWindowClosed()
         {
-
+            foreach (var player in _soundPlayers.Values)
+            {
+                if (player != default)
+                    player.Dispose();
+            }
         }
         #endregion
 
@@ -433,6 +481,12 @@ namespace JeopardyKing.ViewModels
             CurrentQuestion = default;
             CurrentlyAnsweringPlayer = default;
             WindowState = _boardDone ? PlayWindowState.Done : PlayWindowState.ShowBoard;
+        }
+
+        private void TryPlaySound(SoundType type)
+        {
+            if (_soundPlayers.TryGetValue(type, out var player) && player != null)
+                player.Play();
         }
     }
 }

@@ -455,6 +455,7 @@ namespace JeopardyKing.ViewModels
         public void NotifyWindowClosed()
         {
             _shouldExit = true;
+            PlayWindowViewModel.NotifyWindowClosed();
         }
 
         #region Private methods
