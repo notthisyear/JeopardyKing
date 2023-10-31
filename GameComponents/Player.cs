@@ -11,9 +11,11 @@ namespace JeopardyKing.GameComponents
         private string _name = string.Empty;
         private decimal _cash = decimal.Zero;
         private decimal _currentBet = decimal.Zero;
+        public int _finishingPlace = 0;
         private bool _isPressingKey = false;
         private bool _isBetting = false;
         private bool _hasAnsweredGambleQuestion = false;
+        private bool _negativeResult = false;
         #endregion
 
         public int Id { get; }
@@ -53,6 +55,18 @@ namespace JeopardyKing.GameComponents
             get => _hasAnsweredGambleQuestion;
             set => SetProperty(ref _hasAnsweredGambleQuestion, value);
         }
+
+        public int FinishingPlace
+        {
+            get => _finishingPlace;
+            set => SetProperty(ref _finishingPlace, value);
+        }
+
+        public bool NegativeResult
+        {
+            get => _negativeResult;
+            private set => SetProperty(ref _negativeResult, value);
+        }
         #endregion
 
         public Player(int id, string name)
@@ -73,6 +87,7 @@ namespace JeopardyKing.GameComponents
 
             Cash += valueToAdd;
             ResetBet();
+            NegativeResult = Cash < 0;
         }
 
         public void SubtractCashForQuestion(Question q)
@@ -86,8 +101,8 @@ namespace JeopardyKing.GameComponents
                 valueToSubtract = q.Value;
 
             Cash -= valueToSubtract;
+            NegativeResult = Cash < 0;
             ResetBet();
-
         }
 
         public void ResetBet()

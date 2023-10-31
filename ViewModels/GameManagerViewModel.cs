@@ -482,12 +482,35 @@ namespace JeopardyKing.ViewModels
             }
         }
 
+        private class CompareCash : IComparer<(decimal cash, int id)>
+        {
+            public int Compare((decimal cash, int id) x, (decimal cash, int id) y)
+                => (x.cash > y.cash) ? 1 : ((x.cash < y.cash) ? -1 : 0);
+        }
+
         private void SetQuestionAnswerStatus(Question question, bool isAnswered)
         {
             question.IsAnswered = isAnswered;
             var matchingCategory = GameBoard?.Categories.FirstOrDefault(x => x.Id == question.CategoryId);
             if (matchingCategory != default)
                 matchingCategory.CheckIfAllQuestionsAnswered();
+
+            if (GameBoard != default && isAnswered && GameBoard.AllQuestionsAnswered())
+            {
+                var winningPlayersId = new List<int>();
+                ObservableCollection<Player> playersOrdered = new();
+                lock (_playersAccessLock)
+                {
+                    List<(decimal cash, int id)> playersOrderedByCash = Players.Select(x => (x.Cash, x.Id)).OrderDescending(new CompareCash()).ToList();
+                    for (var i = 0; i < playersOrderedByCash.Count; i++)
+                    {
+                        var p = Players.First(x => x.Id == playersOrderedByCash[i].id);
+                        p.FinishingPlace = i + 1;
+                        playersOrdered.Add(p);
+                    }
+                }
+                PlayWindowViewModel.BoardDone(new(playersOrdered));
+            }
         }
 
         private void MonitorInputThread(object? state)

@@ -51,8 +51,10 @@ namespace JeopardyKing.ViewModels
         private bool _inPlayerHasAnswered = false;
         private Board? _gameBoard = default;
         private ReadOnlyObservableCollection<Player>? _players = default;
+        private ReadOnlyObservableCollection<Player>? _playersOrderedByCash = default;
         private Question? _currentQuestion = default;
         private Player? _currentlyAnsweringPlayer = default;
+        private string _winnerName = string.Empty;
         #endregion
 
         public PlayWindowState WindowState
@@ -133,6 +135,17 @@ namespace JeopardyKing.ViewModels
             private set => SetProperty(ref _players, value);
         }
 
+        public ReadOnlyObservableCollection<Player>? PlayersOrderedByCash
+        {
+            get => _playersOrderedByCash;
+            private set => SetProperty(ref _playersOrderedByCash, value);
+        }
+
+        public string WinnerName
+        {
+            get => _winnerName;
+            private set => SetProperty(ref _winnerName, value);
+        }
         public Question? CurrentQuestion
         {
             get => _currentQuestion;
@@ -150,6 +163,7 @@ namespace JeopardyKing.ViewModels
         private int _currentCategoryIdx = 0;
         private int _currentPlayerIdx = 0;
         private MediaPlaybackStatus _mediaPlaybackStatus = MediaPlaybackStatus.Stopped;
+        private bool _boardDone = false;
         #endregion
 
         #region Public methods
@@ -346,6 +360,13 @@ namespace JeopardyKing.ViewModels
             InMediaContentPlaying = _mediaPlaybackStatus == MediaPlaybackStatus.Playing;
         }
 
+        public void BoardDone(ReadOnlyObservableCollection<Player> result)
+        {
+            PlayersOrderedByCash = result;
+            _boardDone = true;
+            WinnerName = PlayersOrderedByCash.First().Name;
+        }
+
         public void NotifyWindowClosed()
         {
 
@@ -411,7 +432,7 @@ namespace JeopardyKing.ViewModels
 
             CurrentQuestion = default;
             CurrentlyAnsweringPlayer = default;
-            WindowState = PlayWindowState.ShowBoard;
+            WindowState = _boardDone ? PlayWindowState.Done : PlayWindowState.ShowBoard;
         }
     }
 }

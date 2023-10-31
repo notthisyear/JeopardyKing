@@ -91,6 +91,13 @@ namespace JeopardyKing.GameComponents
             }
         }
 
+        public bool AllQuestionsAnswered()
+        {
+            bool result;
+            lock (_categoriesLock)
+                result = !Categories.Where(x => !x.AllQuestionsAnswered).Any();
+            return result;
+        }
         public void CopyFromExisting(Board existingBoard)
         {
             lock (_categoriesLock)
