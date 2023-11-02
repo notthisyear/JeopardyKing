@@ -48,9 +48,19 @@ namespace JeopardyKing.WpfComponents.ValidationRules
             if (value is not string s || !int.TryParse(s, out var i))
                 return new(false, "Could not parse input as integer");
 
-            if (i > Wrapper.MaxInclusive)
-                return new ValidationResult(false, $"Bet amount must be in the range 0 - {Wrapper.MaxInclusive}");
-            return ValidationResult.ValidResult;
+            if (Wrapper.MaxInclusive < 0)
+            {
+                if (i == 0)
+                    return ValidationResult.ValidResult;
+                else
+                    return new ValidationResult(false, "Player cannot bet - has no money");
+            }
+            else
+            {
+                if (i < 0 || i > Wrapper.MaxInclusive)
+                    return new ValidationResult(false, $"Bet amount must be in the range 0 - {Wrapper.MaxInclusive}");
+                return ValidationResult.ValidResult;
+            }
         }
     }
 }

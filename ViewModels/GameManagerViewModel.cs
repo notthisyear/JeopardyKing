@@ -369,7 +369,7 @@ namespace JeopardyKing.ViewModels
                             lock (_playersAccessLock)
                             {
                                 foreach (var p in Players)
-                                    p.ResetBet();
+                                    p.SubtractCashForQuestion(PlayWindowViewModel.CurrentQuestion);
                             }
                             AllPlayersHaveAnsweredGambleQuestion = false;
                         }
