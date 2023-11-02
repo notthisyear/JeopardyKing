@@ -44,7 +44,7 @@ namespace JeopardyKing.ViewModels
             get => _startYoutubeVideoAtMinutes;
             set
             {
-                if (ModeManager.CurrentlySelectedQuestion != default)
+                if (!_inPropertyChangedCallback && ModeManager.CurrentlySelectedQuestion != default)
                     ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds = UseStartAtForYoutubeVideo ? value * 60 + StartYoutubeVideoAtSeconds : 0;
                 SetProperty(ref _startYoutubeVideoAtMinutes, value);
             }
@@ -55,7 +55,7 @@ namespace JeopardyKing.ViewModels
             get => _startYoutubeVideoAtSeconds;
             set
             {
-                if (ModeManager.CurrentlySelectedQuestion != default)
+                if (!_inPropertyChangedCallback && ModeManager.CurrentlySelectedQuestion != default)
                     ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds = UseStartAtForYoutubeVideo ? StartYoutubeVideoAtMinutes * 60 + value : 0;
                 SetProperty(ref _startYoutubeVideoAtSeconds, value);
             }
@@ -66,7 +66,7 @@ namespace JeopardyKing.ViewModels
             get => _endYoutubeVideoAtMinutes;
             set
             {
-                if (ModeManager.CurrentlySelectedQuestion != default)
+                if (!_inPropertyChangedCallback && ModeManager.CurrentlySelectedQuestion != default)
                     ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds = UseEndAtForYoutubeVideo ? value * 60 + EndYoutubeVideoAtSeconds : 0;
                 SetProperty(ref _endYoutubeVideoAtMinutes, value);
             }
@@ -77,7 +77,7 @@ namespace JeopardyKing.ViewModels
             get => _endYoutubeVideoAtSeconds;
             set
             {
-                if (ModeManager.CurrentlySelectedQuestion != default)
+                if (!_inPropertyChangedCallback && ModeManager.CurrentlySelectedQuestion != default)
                     ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds = UseEndAtForYoutubeVideo ? EndYoutubeVideoAtMinutes * 60 + value : 0;
                 SetProperty(ref _endYoutubeVideoAtSeconds, value);
             }
@@ -211,6 +211,7 @@ namespace JeopardyKing.ViewModels
         private readonly Dictionary<string, MediaQuestionFlow> _mediaFlowMap = new();
         private readonly Dictionary<MediaQuestionFlow, string> _mediaFlowNameMap = new();
         private readonly CreateWindowViewModel _createWindowViewModel;
+        private bool _inPropertyChangedCallback = false;
         #endregion
 
         public EditQuestionBoxViewModel(CreateWindowViewModel createWindowViewModel)
@@ -237,17 +238,32 @@ namespace JeopardyKing.ViewModels
             {
                 if (e.PropertyName == nameof(ModeManager.CurrentlySelectedQuestion) && ModeManager.CurrentlySelectedQuestion != default)
                 {
+                    _inPropertyChangedCallback = true;
                     if (ModeManager.CurrentlySelectedQuestion.Type != QuestionType.Text)
                         SetMediaFlowForQuestion(ModeManager.CurrentlySelectedQuestion);
 
                     if (ModeManager.CurrentlySelectedQuestion.Type == QuestionType.YoutubeVideo)
                     {
+                        UseStartAtForYoutubeVideo = ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds != 0;
+                        UseEndAtForYoutubeVideo = ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds != 0;
+
                         StartYoutubeVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) / 60;
                         StartYoutubeVideoAtSeconds = (int)(ModeManager.CurrentlySelectedQuestion.StartVideoOrAudioAtSeconds) - (StartYoutubeVideoAtMinutes * 60);
                         EndYoutubeVideoAtMinutes = (int)(ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds) / 60;
                         EndYoutubeVideoAtSeconds = (int)(ModeManager.CurrentlySelectedQuestion.EndVideoOrAudioAtSeconds) - (EndYoutubeVideoAtMinutes * 60);
                     }
+                    else
+                    {
+                        UseStartAtForYoutubeVideo = false;
+                        UseEndAtForYoutubeVideo = false;
+                        StartYoutubeVideoAtMinutes = 0;
+                        StartYoutubeVideoAtSeconds = 0;
+                        EndYoutubeVideoAtMinutes = 0;
+                        EndYoutubeVideoAtSeconds = 0;
+                    }
+
                     ModeManager.CurrentlySelectedQuestion.PropertyChanged += CurrentlySelectedQuestionPropertyChanged;
+                    _inPropertyChangedCallback = false;
                 }
             };
 
