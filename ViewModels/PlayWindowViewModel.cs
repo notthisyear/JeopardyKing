@@ -438,8 +438,18 @@ namespace JeopardyKing.ViewModels
                     InShowMediaContent = currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaThenText
                         || currentQuestion.MediaQuestionFlow == MediaQuestionFlow.MediaAndText;
 
-                    if (InShowMediaContent && (currentQuestion.Type == QuestionType.Audio || currentQuestion.Type == QuestionType.Video))
-                        SetMediaContentPlaybackStatus(MediaPlaybackStatus.Playing);
+                    if (InShowMediaContent)
+                    {
+                        if (currentQuestion.Type == QuestionType.Audio || currentQuestion.Type == QuestionType.Video)
+                        {
+                            SetMediaContentPlaybackStatus(MediaPlaybackStatus.Playing);
+                        }
+                        else if (currentQuestion.Type == QuestionType.YoutubeVideo)
+                        {
+                            InMediaContentPlaying = true;
+                            currentQuestion.RefreshYoutubeVideoUrl(true, false);
+                        }
+                    }
                     break;
                 default:
                     throw new NotSupportedException();
@@ -472,6 +482,9 @@ namespace JeopardyKing.ViewModels
 
         private void ResetGameBoardAfterAnswer()
         {
+            if (CurrentQuestion != default && CurrentQuestion.Type == QuestionType.YoutubeVideo)
+                CurrentQuestion.RefreshYoutubeVideoUrl(false, false);
+
             InShowContent = false;
             InShowMediaContent = false;
             InMediaContentPlaying = false;
